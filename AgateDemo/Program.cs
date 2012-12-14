@@ -17,7 +17,7 @@ namespace AgateDemo
             public int x, y;
         }
         static Surface tileset;
-        static int[,] map, map2, map3;
+        static int[,] map, map2;
         static List<Entity> entities, fixtures;
 
         static int tileWidth = 48;
@@ -32,7 +32,22 @@ namespace AgateDemo
         static Random rnd = new Random();
 
         static DisplayWindow wind;
-
+        static Entity Spawn(int tileNo, int width, int height)
+        {
+            int rx = 1, ry = 4;
+            switch (rnd.Next(2))
+            {
+                case 0: rx = rnd.Next(width / 20) * 20 + 1;
+                    ry = rnd.Next(height / 20) * 20;
+                    ry += (rnd.Next(2) == 0) ? 5 : 15;
+                    break;
+                case 1: ry = rnd.Next(height / 20) * 20 + 1;
+                    rx = rnd.Next(width / 20) * 20;
+                    rx += (rnd.Next(2) == 0) ? 5 : 15;
+                    break;
+            }
+            return new Entity(){tile = tileNo, x = rx, y = ry};
+        }
         static void Init()
         {
             map = new[,]
@@ -66,11 +81,38 @@ namespace AgateDemo
 				{ 1180, 1177,1177,1194,1177,1177,1181, 1175,1175 },
 				{ 1175,1175,1175,1194,1175,1175,1175,  1175,1175 },*/
 			};
+            /*
             map = DungeonMap.merge(DungeonMap.geomorphs[1], DungeonMap.geomorphs[2], false);
+            map = DungeonMap.merge(map, DungeonMap.geomorphs[rand.Next(3)], false);
             map2 = DungeonMap.merge(DungeonMap.rotateCW(DungeonMap.geomorphs[2]), DungeonMap.geomorphs[2], false);
-            map3 = DungeonMap.merge(DungeonMap.rotateCW(DungeonMap.geomorphs[2]), DungeonMap.rotateCW(DungeonMap.geomorphs[2]), false);
+            map2 = DungeonMap.merge(map2, DungeonMap.geomorphs[rand.Next(3)], false);
+            map3 = DungeonMap.merge(DungeonMap.rotateCW(DungeonMap.geomorphs[rand.Next(3)]), DungeonMap.rotateCW(DungeonMap.geomorphs[rand.Next(3)]), false);
+            map3 = DungeonMap.merge(map3, DungeonMap.geomorphs[rand.Next(3)], false);
             map = DungeonMap.merge(map, map2, true);
-            map = DungeonMap.cleanUp (DungeonMap.merge(map, map3, true));
+            map = DungeonMap.merge(map, map3, true);
+            */
+            map = DungeonMap.merge(DungeonMap.geomorphs[1], DungeonMap.geomorphs[rnd.Next(3)], false);
+            for (int eh = 0; eh < 10; eh++)
+            {
+                if (rnd.Next(2) == 0)
+                    map = DungeonMap.merge(map, DungeonMap.geomorphs[rnd.Next(3)], false);
+                else
+                    map = DungeonMap.merge(map, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(3)]), false);
+            }
+            for (int ah = 1; ah < 10; ah++)
+            {
+                map2 = DungeonMap.merge(DungeonMap.geomorphs[rnd.Next(3)], DungeonMap.geomorphs[rnd.Next(3)], false);
+                for (int eh = 0; eh < 10; eh++)
+                {
+                    if (rnd.Next(2) == 0)
+                        map2 = DungeonMap.merge(map2, DungeonMap.geomorphs[rnd.Next(3)], false);
+                    else
+                        map2 = DungeonMap.merge(map2, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(3)]), false);
+                }
+                map = DungeonMap.merge(map, map2, true);
+            }
+
+                map = DungeonMap.cleanUp(map);
            // map = DungeonMap.geomorph;
             fixtures = new List<Entity>()
 			{
@@ -82,6 +124,7 @@ namespace AgateDemo
                 new Entity() { tile = 1188, x = 6, y = 15},
                 new Entity() { tile = 1188, x = 11, y = 17},*/
 			};
+            int mw = map.GetLength(1), mh = map.GetLength(0);
             entities = new List<Entity>()
             {
 				new Entity() { tile = 541 , x = 6, y = 7 },
@@ -96,6 +139,11 @@ namespace AgateDemo
 				new Entity() { tile = 14, x = 12, y = 6 },
 				new Entity() { tile = 3, x = 12, y = 8 }
             };
+            for (int i = 0; i < 222; i++)
+            {
+                entities.Add(Spawn(i, mw, mh));
+            }
+            
             tileWidth = 48;
             tileHeight = 64;
             tileHIncrease = 16;
