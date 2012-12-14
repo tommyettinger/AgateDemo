@@ -96,10 +96,11 @@
     <Compile Include="DungeonMap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Content Include="slashem-revised-transparent-png24.png">
+    <Content Include="LICENSE.txt" />
+    <Content Include="slashem-revised.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="slashem-revised.png" />
+    <Content Include="slashem-revised-opaque.png" />
     <Content Include="Tests.exe" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -129,6 +130,7 @@
     </Compile>
     <Content Include="agate-debuglog.txt" />
     <Content Include="AgateLib-mono.ico" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="AgateDrawing.dll" />

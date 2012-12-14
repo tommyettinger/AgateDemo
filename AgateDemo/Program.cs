@@ -112,7 +112,7 @@ namespace AgateDemo
             //wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", ((mapWidth + 1) * 32) + (tileHIncrease * (1 + mapHeight)), (mapHeight * tileVIncrease) + tileHeight);
             wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", ((20 ) * 32) + (tileHIncrease * (20)), (19 * tileVIncrease) + tileHeight);
 
-            tileset = new Surface("slashem-revised-transparent-png24.png");
+            tileset = new Surface("slashem-revised.png");
             
             mandrillFont = FontSurface.AgateMono10;
             
