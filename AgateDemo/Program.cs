@@ -70,7 +70,7 @@ namespace AgateDemo
             map2 = DungeonMap.merge(DungeonMap.rotateCW(DungeonMap.geomorphs[2]), DungeonMap.geomorphs[2], false);
             map3 = DungeonMap.merge(DungeonMap.rotateCW(DungeonMap.geomorphs[2]), DungeonMap.rotateCW(DungeonMap.geomorphs[2]), false);
             map = DungeonMap.merge(map, map2, true);
-            map = DungeonMap.merge(map, map3, true);
+            map = DungeonMap.cleanUp (DungeonMap.merge(map, map3, true));
            // map = DungeonMap.geomorph;
             fixtures = new List<Entity>()
 			{
@@ -141,7 +141,7 @@ namespace AgateDemo
         {
             Display.Clear(Color.FromArgb(32, 32, 32));
 
-            for (int row = (cursorY <= 19) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20; row <= mapHeight && row <= cursorY + 20; row++)
+            for (int row = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20; row <= mapHeight && row <= cursorY + 20; row++)
             {
                 var pY = tileVIncrease * ((cursorY <= 10) ? row : (cursorY > mapHeight - 10) ? row - ( mapHeight - 19 ): row - (cursorY - 10)); //   //(cursorY > mapHeight - 10) ? mapHeight - (cursorY - 10) : cursorY - 10)
                 var pX = tileHIncrease * (20 - 1 - ((cursorY <= 10) ? row : (cursorY > mapHeight - 10) ? row  - ( mapHeight - 19 ): row - (cursorY - 10)));// +tileHIncrease; //row - (cursorY - 10)

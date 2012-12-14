@@ -107,13 +107,25 @@ new int[,] {
         public static int[,] cleanUp(int[,] geo)
         {
             int[,] geolocal = (int[,])geo.Clone();
-            for (int i = 0; i < geolocal.GetLength(0); i++ )
+
+            for (int i = 0; i < geolocal.GetLength(0); i++)
+            {
+                for (int j = 0; j < geolocal.GetLength(1); j++)
+                {
+                    if ((i == 0 || i == geolocal.GetUpperBound(0) ||
+                        j == 0 || j == geolocal.GetUpperBound(1)) && geolocal[i, j] == gr)
+                    {
+                        geolocal[i, j] = cw;
+                    }
+                }
+            }
+            for (int i = 0; i < geolocal.GetLength(0); i++)
             {
                 for (int j = 0; j < geolocal.GetLength(1); j++)
                 {
                     if (geolocal[i, j] == cw)
                     {
-                        bool left = true, right = true, top = true, bottom = true;
+                        bool left = false, right = false, top = false, bottom = false;
                         if (i > 0)
                             top = (geolocal[i - 1, j] != da) && (geolocal[i - 1, j] != gr);
                         if (j > 0)
@@ -202,7 +214,7 @@ new int[,] {
 
             for (int i = geo.GetUpperBound(0); i >= 0 ; --i)
             {
-                for (int j = 0; j <= geo.GetUpperBound(1); ++j)
+                for (int j = 0; j < geo.GetLength(1); ++j)
                     geolocal[j, geo.GetUpperBound(0) - i] = geo[i, j];
             }
 
@@ -214,47 +226,47 @@ new int[,] {
             {
                 if (fst.GetUpperBound(1) != snd.GetUpperBound(1))
                 {
-                    return cleanUp( fst);
+                    return fst;
                 }
                 else
                 {
-                    int[,] merged = new int[fst.GetUpperBound(0) + snd.GetUpperBound(0) + 2, fst.GetUpperBound(1) + 1];
+                    int[,] merged = new int[fst.GetLength(0) + snd.GetLength(0), fst.GetLength(1)];
 
-                    for (int i = 0; i <= fst.GetUpperBound(0); i++)
+                    for (int i = 0; i < fst.GetLength(0); i++)
                     {
-                        for (int j = 0; j <= fst.GetUpperBound(1); j++)
+                        for (int j = 0; j < fst.GetLength(1); j++)
                             merged[i, j] = fst[i, j];
                     }
-                    for (int i = 0; i <= snd.GetUpperBound(0); i++)
+                    for (int i = 0; i < snd.GetLength(0); i++)
                     {
-                        for (int j = 0; j <= snd.GetUpperBound(1); j++)
-                            merged[fst.GetUpperBound(0) + 1 + i, j] = snd[i, j];
+                        for (int j = 0; j < snd.GetLength(1); j++)
+                            merged[fst.GetLength(0) + i, j] = snd[i, j];
                     }
-                    return cleanUp(merged);
+                    return merged;
                 }
             }
             else
             {
-                if (fst.GetUpperBound(0) != snd.GetUpperBound(0))
+                if (fst.GetLength(0) != snd.GetLength(0))
                 {
-                    return cleanUp(fst);
+                    return fst;
                 }
                 else
                 {
-                    int[,] merged = new int[fst.GetUpperBound(0) + 1, fst.GetUpperBound(1) + snd.GetUpperBound(1) + 2];
+                    int[,] merged = new int[fst.GetLength(0), fst.GetLength(1) + snd.GetLength(1)];
 
-                    for (int i = 0; i <= fst.GetUpperBound(0); i++)
+                    for (int i = 0; i < fst.GetLength(0); i++)
                     {
-                        for (int j = 0; j <= fst.GetUpperBound(1); j++)
+                        for (int j = 0; j < fst.GetLength(1); j++)
                         {
                             merged[i, j] = fst[i, j];
                         }
-                        for (int j = 0; j <= snd.GetUpperBound(1); j++)
+                        for (int j = 0; j < snd.GetLength(1); j++)
                         {
-                            merged[i, fst.GetUpperBound(1) + 1 + j] = snd[i, j];
+                            merged[i, fst.GetLength(1) + j] = snd[i, j];
                         }
                     }
-                    return cleanUp( merged);
+                    return merged;
                 }
             }
         }
