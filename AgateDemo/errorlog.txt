@@ -1,0 +1,6 @@
+Error Log started 12/10/2012 10:15:01 AM
+
+WARNING: A BadImageFormatException was thrown when attempting to load SDL binaries.
+This is likely due to running a 64-bit executable with 32-bit SDL binaries.
+BadImageFormatException: An attempt was made to load a program with an incorrect format. (Exception from HRESULT: 0x8007000B)
+

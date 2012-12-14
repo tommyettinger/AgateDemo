@@ -1,0 +1,351 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AgateLib.WinForms</name>
+    </assembly>
+    <members>
+        <member name="T:AgateLib.WinForms.SetSystemsForm">
+            <summary>
+            Form which allos the user to choose what drivers should be used.
+            </summary>
+            <summary>
+            A form which is used to ask the user which subsystems to use.
+            </summary>
+            <remarks>
+            [Experimental - This class will be moved to into a different assembly
+            in the future.]
+            </remarks>
+        </member>
+        <member name="F:AgateLib.WinForms.SetSystemsForm.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:AgateLib.WinForms.SetSystemsForm.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:AgateLib.WinForms.SetSystemsForm.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="M:AgateLib.WinForms.SetSystemsForm.#ctor">
+            <summary>
+            Constructs a SetSystemsForm object.
+            </summary>
+        </member>
+        <member name="M:AgateLib.WinForms.SetSystemsForm.AddDisplayType(AgateLib.Drivers.AgateDriverInfo)">
+            <summary>
+            Adds.
+            </summary>
+            <param name="info"></param>
+        </member>
+        <member name="M:AgateLib.WinForms.SetSystemsForm.AddAudioType(AgateLib.Drivers.AgateDriverInfo)">
+            <summary>
+            Adds.
+            </summary>
+            <param name="info"></param>
+        </member>
+        <member name="M:AgateLib.WinForms.SetSystemsForm.AddInputType(AgateLib.Drivers.AgateDriverInfo)">
+            <summary>
+            Adds.
+            </summary>
+            <param name="info"></param>
+        </member>
+        <member name="P:AgateLib.WinForms.SetSystemsForm.DisplayType">
+            <summary>
+            DisplayTypeID chosen by user.
+            </summary>
+        </member>
+        <member name="P:AgateLib.WinForms.SetSystemsForm.AudioType">
+            <summary>
+            AudioTypeID chosen by user.
+            </summary>
+        </member>
+        <member name="P:AgateLib.WinForms.SetSystemsForm.InputType">
+            <summary>
+            InputTypeID chosen by user.
+            </summary>
+        </member>
+        <member name="T:AgateLib.WinForms.BitmapFontUtil">
+            <summary>
+            Utility class for constructing a bitmap font image.
+            </summary>
+        </member>
+        <member name="M:AgateLib.WinForms.BitmapFontUtil.ConstructFromOSFont(AgateLib.BitmapFont.BitmapFontOptions)">
+            <summary>
+            Creates a bitmap font by loading an OS font, and drawing it to 
+            a bitmap to use as a Surface object.  You should only use this method
+            if writing a driver.
+            </summary>
+            <param name="options"></param>
+            <returns></returns>
+        </member>
+        <member name="T:AgateLib.WinForms.AgateRenderTarget">
+            <summary>
+            A generic render target control for AgateLib to render to.
+            </summary>
+        </member>
+        <member name="M:AgateLib.WinForms.AgateRenderTarget.#ctor">
+            <summary>
+            Constructs an AgateRenderTarget.
+            </summary>
+        </member>
+        <member name="M:AgateLib.WinForms.AgateRenderTarget.OnPaint(System.Windows.Forms.PaintEventArgs)">
+            <summary>
+            Overrides the base class OnPaint method, to clear the
+            client area in the Visual Studio designer.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:AgateLib.WinForms.AgateRenderTarget.OnClick(System.EventArgs)">
+            <summary>
+            Overrides the base class OnClick method, to give focus to the AgateRenderTarget when it is clicked.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="F:AgateLib.WinForms.AgateRenderTarget.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:AgateLib.WinForms.AgateRenderTarget.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:AgateLib.WinForms.AgateRenderTarget.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="P:AgateLib.WinForms.AgateRenderTarget.CreateParams">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:AgateLib.WinForms.FormUtil">
+            <summary>
+            Utility class for various windows forms methods that are common to different drivers.
+            </summary>
+        </member>
+        <member name="M:AgateLib.WinForms.FormUtil.InitializeWindowsForm(System.Windows.Forms.Form@,System.Windows.Forms.Control@,AgateLib.DisplayLib.WindowPosition,System.String,System.Int32,System.Int32,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Creates a System.Windows.Forms.Form object for rendering to.
+            </summary>
+            <param name="frm">Returns the created form.</param>
+            <param name="renderTarget">Returns the control which is rendered into.</param>
+            <param name="position">Position of the window.</param>
+            <param name="title">Title of the window.</param>
+            <param name="clientWidth">Width of client area, in pixels.</param>
+            <param name="clientHeight">Height of client area, in pixels.</param>
+            <param name="startFullscreen">True if we should start with a full-screen window.</param>
+            <param name="allowResize">True if we should allow the user to resize the window.</param>
+            <param name="hasFrame">True if a frame and title bar should be present.</param>
+        </member>
+        <member name="M:AgateLib.WinForms.FormUtil.TransformWinFormsKey(System.Windows.Forms.Keys)">
+            <summary>
+            Converts a System.Windows.Forms.Keys value to a KeyCode value.
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.FormUtil.SavePixelBuffer(AgateLib.DisplayLib.PixelBuffer,System.String,AgateLib.DisplayLib.ImageFileFormat)">
+            <summary>
+            Saves a pixel buffer to an image file using a System.Drawing.Bitmap object.
+            </summary>
+            <param name="buffer"></param>
+            <param name="filename"></param>
+            <param name="format"></param>
+        </member>
+        <member name="P:AgateLib.WinForms.FormUtil.AgateLibIcon">
+            <summary>
+            Gets the official icon for AgateLib.
+            </summary>
+        </member>
+        <member name="P:AgateLib.WinForms.FormUtil.BlankCursor">
+            <summary>
+            Gets a System.Windows.Forms.Cursor object which is completely transparent.
+            </summary>
+        </member>
+        <member name="T:AgateLib.WinForms.DisplayWindowForm">
+            <summary>
+            Form which is used fora generic Display.
+            </summary>
+            <remarks>
+            [Experimental - This class will be moved to into a different assembly
+            in the future.]
+            </remarks>
+            <summary>
+            A basic form used for rendering into.
+            </summary>
+        </member>
+        <member name="M:AgateLib.WinForms.DisplayWindowForm.#ctor">
+            <summary>
+            Constructs a DisplayWindowForm object.
+            </summary>
+        </member>
+        <member name="F:AgateLib.WinForms.DisplayWindowForm.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:AgateLib.WinForms.DisplayWindowForm.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:AgateLib.WinForms.DisplayWindowForm.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="P:AgateLib.WinForms.DisplayWindowForm.RenderTarget">
+            <summary>
+            The control which is rendered into.
+            </summary>
+        </member>
+        <member name="T:AgateLib.WinForms.Icons">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:AgateLib.WinForms.Icons.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:AgateLib.WinForms.Icons.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="T:AgateLib.WinForms.Interop">
+            <summary>
+            Class for System.Drawing interoperation.  This converts members of
+            AgateLib.Geometry into System.Drawing types, and vice versa.  
+            </summary>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.ToBitmap(AgateLib.DisplayLib.Surface)">
+            <summary>
+            Converts surface data to a bitmap for saving.
+            </summary>
+            <param name="surf"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(AgateLib.Geometry.Color)">
+            <summary>
+            Converts color structures.
+            </summary>
+            <param name="clr"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(System.Drawing.Color)">
+            <summary>
+            Converts color structures.
+            </summary>
+            <param name="clr"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(AgateLib.Geometry.Rectangle)">
+            <summary>
+            Converts rectangle structures.
+            </summary>
+            <param name="rect"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(System.Drawing.Rectangle)">
+            <summary>
+            Converts rectangle structures.
+            </summary>
+            <param name="rect"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(AgateLib.Geometry.RectangleF)">
+            <summary>
+            Converts rectangle structures.
+            </summary>
+            <param name="rect"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(System.Drawing.RectangleF)">
+            <summary>
+            Converts rectangle structures.
+            </summary>
+            <param name="rect"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(System.Drawing.Point)">
+            <summary>
+            Converts point structures.
+            </summary>
+            <param name="pt"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(AgateLib.Geometry.Point)">
+            <summary>
+            Converts point structures.
+            </summary>
+            <param name="pt"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(System.Drawing.PointF)">
+            <summary>
+            Converts point structures.
+            </summary>
+            <param name="pt"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(AgateLib.Geometry.PointF)">
+            <summary>
+            Converts point structures.
+            </summary>
+            <param name="pt"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(System.Drawing.Size)">
+            <summary>
+            Converts size structures.
+            </summary>
+            <param name="sz"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(AgateLib.Geometry.Size)">
+            <summary>
+            Converts size structures.
+            </summary>
+            <param name="sz"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(System.Drawing.SizeF)">
+            <summary>
+            Converts size structures.
+            </summary>
+            <param name="sz"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.Convert(AgateLib.Geometry.SizeF)">
+            <summary>
+            Converts size structures.
+            </summary>
+            <param name="sz"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgateLib.WinForms.Interop.BitmapFromPixelBuffer(AgateLib.DisplayLib.PixelBuffer)">
+            <summary>
+            Converts an AgateLib.DisplayLib.PixelBuffer object into a System.Drawing.Bitmap object.
+            </summary>
+            <param name="buffer">The PixelBuffer object containing the pixel data.</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
