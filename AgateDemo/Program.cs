@@ -91,23 +91,23 @@ namespace AgateDemo
             map = DungeonMap.merge(map, map2, true);
             map = DungeonMap.merge(map, map3, true);
             */
-            map = DungeonMap.merge(DungeonMap.geomorphs[1], DungeonMap.geomorphs[rnd.Next(3)], false);
-            for (int eh = 0; eh < 10; eh++)
+            map = DungeonMap.merge(DungeonMap.geomorphs[1], DungeonMap.geomorphs[rnd.Next(4)], false);
+            for (int eh = 0; eh < 5; eh++)
             {
                 if (rnd.Next(2) == 0)
-                    map = DungeonMap.merge(map, DungeonMap.geomorphs[rnd.Next(3)], false);
+                    map = DungeonMap.merge(map, DungeonMap.geomorphs[rnd.Next(4)], false);
                 else
-                    map = DungeonMap.merge(map, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(3)]), false);
+                    map = DungeonMap.merge(map, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(4)]), false);
             }
-            for (int ah = 1; ah < 10; ah++)
+            for (int ah = 1; ah < 5; ah++)
             {
-                map2 = DungeonMap.merge(DungeonMap.geomorphs[rnd.Next(3)], DungeonMap.geomorphs[rnd.Next(3)], false);
-                for (int eh = 0; eh < 10; eh++)
+                map2 = DungeonMap.merge(DungeonMap.geomorphs[rnd.Next(4)], DungeonMap.geomorphs[rnd.Next(4)], false);
+                for (int eh = 0; eh < 5; eh++)
                 {
                     if (rnd.Next(2) == 0)
-                        map2 = DungeonMap.merge(map2, DungeonMap.geomorphs[rnd.Next(3)], false);
+                        map2 = DungeonMap.merge(map2, DungeonMap.geomorphs[rnd.Next(4)], false);
                     else
-                        map2 = DungeonMap.merge(map2, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(3)]), false);
+                        map2 = DungeonMap.merge(map2, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(4)]), false);
                 }
                 map = DungeonMap.merge(map, map2, true);
             }
@@ -140,6 +140,10 @@ namespace AgateDemo
 				new Entity() { tile = 3, x = 12, y = 8 }
             };
             for (int i = 0; i < 222; i++)
+            {
+                entities.Add(Spawn(i, mw, mh));
+            }
+            for (int i = 226; i < 434; i++)
             {
                 entities.Add(Spawn(i, mw, mh));
             }

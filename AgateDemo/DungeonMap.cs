@@ -102,7 +102,29 @@ new int[,] {
 {da, da, cw, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
 {da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
 {da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da} 
-}
+},
+new int[,] {
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, cw, cw, gr, gr, cw, da, cw, cw, cw, cw, da, cw, gr, gr, cw, da, da, da}, 
+{cw, cw, cw, gr, gr, gr, cw, cw, cw, gr, gr, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{cw, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, gr, gr, gr, gr, gr, cw, cw, cw, cw}, 
+{da, da, da, cw, gr, gr, cw, da, cw, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
+{da, da, cw, cw, gr, gr, cw, da, cw, gr, gr, gr, gr, gr, gr, cw, cw, da, da, da}, 
+{da, da, cw, gr, gr, gr, cw, cw, cw, gr, gr, gr, gr, gr, gr, cw, da, da, da, da}, 
+{da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da, da}, 
+{da, da, cw, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
+{cw, cw, cw, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, cw, cw, cw}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{cw, cw, cw, cw, gr, gr, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, cw, cw, cw}, 
+{da, da, da, cw, gr, gr, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}
+        }
 };
         public static int[,] cleanUp(int[,] geo)
         {
