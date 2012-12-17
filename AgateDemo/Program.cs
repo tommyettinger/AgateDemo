@@ -11,14 +11,14 @@ namespace AgateDemo
 {
     static class Program
     {
-        private class Entity
+        public class Entity
         {
             public int tile;
             public int x, y;
         }
         static Surface tileset;
         static int[,] map, map2;
-        static List<Entity> entities, fixtures;
+        public static List<Entity> entities, fixtures;
 
         static int tileWidth = 48;
         static int tileHeight = 64;
@@ -32,21 +32,99 @@ namespace AgateDemo
         static Random rnd = new Random();
 
         static DisplayWindow wind;
+
+        static void MoveRandom(Entity ent)
+        {
+            var randVal = rnd.Next(4);
+            switch (randVal)
+            {
+                case 0: if (ent.x > 0 && (map[ent.y, ent.x - 1] == 1194) && entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y) == null)
+                    {
+                        ent.x--;
+                    }
+                    else if (ent.x > 0 && (map[ent.y, ent.x - 1] == 1187) && fixtures.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y && e.tile == 1190) != null)
+                    {
+                        map[ent.y, ent.x - 1] = 1194;
+                        fixtures.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y && e.tile == 1190).tile = 1188;
+                    }
+                    break;
+                case 1: if (ent.y > 0 && (map[ent.y - 1, ent.x] == 1194) && entities.FirstOrDefault(e => e.x == ent.x && e.y == ent.y - 1) == null)
+                    {
+                        ent.y--;
+                    }
+                    else if (ent.y > 0 && (map[ent.y - 1, ent.x] == 1187) && fixtures.FirstOrDefault(e => e.x == ent.x && e.y == ent.y - 1 && e.tile == 1191) != null)
+                    {
+                        map[ent.y - 1, ent.x] = 1194;
+                        fixtures.FirstOrDefault(e => e.x == ent.x && e.y == ent.y - 1 && e.tile == 1191).tile = 1189;
+                    }
+                    break;
+                case 2: if (ent.x + 1 < mapWidth && (map[ent.y, ent.x + 1] == 1194) && entities.FirstOrDefault(e => e.x == ent.x + 1 && e.y == ent.y) == null)
+                    {
+                        ent.x++;
+                    }
+                    else if (ent.x + 1 < mapWidth && (map[ent.y, ent.x + 1] == 1187) && fixtures.FirstOrDefault(e => e.x == ent.x + 1 && e.y == ent.y && e.tile == 1190) != null)
+                    {
+                        map[ent.y, ent.x + 1] = 1194;
+                        fixtures.FirstOrDefault(e => e.x == ent.x + 1 && e.y == ent.y && e.tile == 1190).tile = 1188;
+                    }
+                    break;
+                case 3: if (ent.y + 1 < mapHeight && (map[ent.y + 1, ent.x] == 1194) && entities.FirstOrDefault(e => e.x == ent.x && e.y == ent.y + 1) == null)
+                    {
+                        ent.y++;
+                    }
+                    else if (ent.y + 1 < mapHeight && (map[ent.y + 1, ent.x] == 1187) && fixtures.FirstOrDefault(e => e.x == ent.x && e.y == ent.y + 1 && e.tile == 1191) != null)
+                    {
+                        map[ent.y + 1, ent.x] = 1194;
+                        fixtures.FirstOrDefault(e => e.x == ent.x && e.y == ent.y + 1 && e.tile == 1191).tile = 1189;
+                    }
+                    break;
+            }
+        }
+        
         static Entity Spawn(int tileNo, int width, int height)
         {
             int rx = 1, ry = 4;
-            switch (rnd.Next(2))
+            switch (rnd.Next(4))
             {
                 case 0: rx = rnd.Next(width / 20) * 20 + 1;
                     ry = rnd.Next(height / 20) * 20;
-                    ry += (rnd.Next(2) == 0) ? 5 : 15;
+                    ry += (rnd.Next(2) == 0) ? 4 : 14;
                     break;
                 case 1: ry = rnd.Next(height / 20) * 20 + 1;
+                    rx = rnd.Next(width / 20) * 20;
+                    rx += (rnd.Next(2) == 0) ? 4 : 14;
+                    break;
+                case 2: rx = rnd.Next(width / 20) * 20 + 1;
+                    ry = rnd.Next(height / 20) * 20;
+                    ry += (rnd.Next(2) == 0) ? 5 : 15;
+                    break;
+                case 3: ry = rnd.Next(height / 20) * 20 + 1;
+                    rx = rnd.Next(width / 20) * 20;
+                    rx += (rnd.Next(2) == 0) ? 5 : 15;
+                    break;
+
+                case 4: rx = rnd.Next(1, width / 20) * 20 - 1;
+                    ry = rnd.Next(height / 20) * 20;
+                    ry += (rnd.Next(2) == 0) ? 4 : 14;
+                    break;
+                case 5: ry = rnd.Next(1, height / 20) * 20 - 1;
+                    rx = rnd.Next(width / 20) * 20;
+                    rx += (rnd.Next(2) == 0) ? 4 : 14;
+                    break;
+                case 6: rx = rnd.Next(1, width / 20) * 20 - 1;
+                    ry = rnd.Next(height / 20) * 20;
+                    ry += (rnd.Next(2) == 0) ? 5 : 15;
+                    break;
+                case 7: ry = rnd.Next(1, height / 20) * 20 - 1;
                     rx = rnd.Next(width / 20) * 20;
                     rx += (rnd.Next(2) == 0) ? 5 : 15;
                     break;
             }
-            return new Entity(){tile = tileNo, x = rx, y = ry};
+            Entity nt = new Entity() { tile = tileNo, x = rx, y = ry };
+            MoveRandom(nt);
+            if (entities.FirstOrDefault(e => e.x == nt.x && e.y == nt.y) != null)
+                return Spawn(tileNo, width, height);
+            return nt;
         }
         static void Init()
         {
@@ -92,17 +170,17 @@ namespace AgateDemo
             map = DungeonMap.merge(map, map3, true);
             */
             map = DungeonMap.merge(DungeonMap.geomorphs[1], DungeonMap.geomorphs[rnd.Next(4)], false);
-            for (int eh = 0; eh < 5; eh++)
+            for (int eh = 0; eh < 4; eh++)
             {
                 if (rnd.Next(2) == 0)
                     map = DungeonMap.merge(map, DungeonMap.geomorphs[rnd.Next(4)], false);
                 else
                     map = DungeonMap.merge(map, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(4)]), false);
             }
-            for (int ah = 1; ah < 5; ah++)
+            for (int ah = 1; ah < 4; ah++)
             {
                 map2 = DungeonMap.merge(DungeonMap.geomorphs[rnd.Next(4)], DungeonMap.geomorphs[rnd.Next(4)], false);
-                for (int eh = 0; eh < 5; eh++)
+                for (int eh = 0; eh < 4; eh++)
                 {
                     if (rnd.Next(2) == 0)
                         map2 = DungeonMap.merge(map2, DungeonMap.geomorphs[rnd.Next(4)], false);
@@ -112,8 +190,6 @@ namespace AgateDemo
                 map = DungeonMap.merge(map, map2, true);
             }
 
-                map = DungeonMap.cleanUp(map);
-           // map = DungeonMap.geomorph;
             fixtures = new List<Entity>()
 			{
 				new Entity() { tile = 1203, x = 10, y = 10 },
@@ -124,6 +200,10 @@ namespace AgateDemo
                 new Entity() { tile = 1188, x = 6, y = 15},
                 new Entity() { tile = 1188, x = 11, y = 17},*/
 			};
+          
+            map = DungeonMap.cleanUp(map);
+           
+            // map = DungeonMap.geomorph;
             int mw = map.GetLength(1), mh = map.GetLength(0);
             entities = new List<Entity>()
             {
@@ -139,15 +219,15 @@ namespace AgateDemo
 				new Entity() { tile = 14, x = 12, y = 6 },
 				new Entity() { tile = 3, x = 12, y = 8 }
             };
-            for (int i = 0; i < 222; i++)
+            for (int i = 0, c = 0; i < 222 && c < 50; c++, i+= rnd.Next(2, 7))
             {
                 entities.Add(Spawn(i, mw, mh));
-            }
+            }/*
             for (int i = 226; i < 434; i++)
             {
                 entities.Add(Spawn(i, mw, mh));
             }
-            
+            */
             tileWidth = 48;
             tileHeight = 64;
             tileHIncrease = 16;
@@ -162,31 +242,22 @@ namespace AgateDemo
             cursorY = 5;
 
             //wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", ((mapWidth + 1) * 32) + (tileHIncrease * (1 + mapHeight)), (mapHeight * tileVIncrease) + tileHeight);
-            wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", ((20 ) * 32) + (tileHIncrease * (20)), (19 * tileVIncrease) + tileHeight);
 
+            Display.RenderState.WaitForVerticalBlank = true;
+            wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", ((20 ) * 32) + (tileHIncrease * (20)), (19 * tileVIncrease) + tileHeight);
+            
             tileset = new Surface("slashem-revised.png");
             
             mandrillFont = FontSurface.AgateMono10;
             
         }
-
+        
         public static void Update()
         {
             
             foreach (Entity ent in entities)
             {
-                var randVal = rnd.Next(4);
-                switch (randVal)
-                {
-                    case 0: if (ent.x > 0 && (map[ent.y, ent.x - 1] == 1194) && entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y) == null) ent.x--;
-                        break;
-                    case 1: if (ent.y > 0 && (map[ent.y - 1, ent.x] == 1194) && entities.FirstOrDefault(e => e.x == ent.x && e.y == ent.y - 1) == null) ent.y--;
-                        break;
-                    case 2: if (ent.x + 1 < mapWidth && (map[ent.y, ent.x + 1] == 1194) && entities.FirstOrDefault(e => e.x == ent.x + 1 && e.y == ent.y) == null) ent.x++;
-                        break;
-                    case 3: if (ent.y + 1 < mapHeight && (map[ent.y + 1, ent.x] == 1194) && entities.FirstOrDefault(e => e.x == ent.x && e.y == ent.y + 1) == null) ent.y++;
-                        break;
-                }
+                MoveRandom(ent);
             }
         }
         static void Show()
@@ -267,12 +338,32 @@ namespace AgateDemo
                 Update();
             else if (e.KeyCode == KeyCode.Left && cursorX > 0 && map[cursorY, cursorX - 1] == 1194)
                 cursorX--;
+            else if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1187) && fixtures.FirstOrDefault(eh => eh.x == cursorX - 1 && eh.y == cursorY && eh.tile == 1190) != null)
+            {
+                map[cursorY, cursorX - 1] = 1194;
+                fixtures.FirstOrDefault(eh => eh.x == cursorX - 1 && eh.y == cursorY && eh.tile == 1190).tile = 1188;
+            }
             else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && map[cursorY, cursorX + 1] == 1194)
                 cursorX++;
+            else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1187) && fixtures.FirstOrDefault(eh => eh.x == cursorX + 1 && eh.y == cursorY && eh.tile == 1190) != null)
+            {
+                map[cursorY, cursorX + 1] = 1194;
+                fixtures.FirstOrDefault(eh => eh.x == cursorX + 1 && eh.y == cursorY && eh.tile == 1190).tile = 1188;
+            }
             else if (e.KeyCode == KeyCode.Up && cursorY > 0 && map[cursorY - 1, cursorX] == 1194)
                 cursorY--;
+            else if (e.KeyCode == KeyCode.Up && cursorY > 0 && (map[cursorY - 1, cursorX] == 1187) && fixtures.FirstOrDefault(eh => eh.x == cursorX && eh.y == cursorY - 1 && eh.tile == 1191) != null)
+            {
+                map[cursorY - 1, cursorX] = 1194;
+                fixtures.FirstOrDefault(eh => eh.x == cursorX && eh.y == cursorY - 1 && eh.tile == 1191).tile = 1189;
+            }
             else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && map[cursorY + 1, cursorX] == 1194)
                 cursorY++;
+            else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1187) && fixtures.FirstOrDefault(eh => eh.x == cursorX && eh.y == cursorY + 1 && eh.tile == 1191) != null)
+            {
+                map[cursorY + 1, cursorX] = 1194;
+                fixtures.FirstOrDefault(eh => eh.x == cursorX && eh.y == cursorY + 1 && eh.tile == 1191).tile = 1189;
+            }
             else if (e.KeyCode == KeyCode.Q)
                 Display.CurrentWindow.Dispose();
         }

@@ -141,6 +141,39 @@ new int[,] {
                     }
                 }
             }
+
+            //DOOR CODE
+            for (int i = 0; i < geolocal.GetLength(0); i++)
+            {
+                for (int j = 0; j < geolocal.GetLength(1); j++)
+                {
+                    if (geolocal[i, j] == gr)
+                    {
+                        bool left = false, right = false, top = false, bottom = false;
+                        if (i > 0)
+                            top = (geolocal[i - 1, j] == cw);
+                        if (j > 0)
+                            left = (geolocal[i, j - 1] == cw);
+                        if (i < geolocal.GetLength(0) - 1)
+                            bottom = (geolocal[i + 1, j] == cw);
+                        if (j < geolocal.GetLength(1) - 1)
+                            right = (geolocal[i, j + 1] == cw);
+
+                        if (left && right && !top && !bottom)
+                        {
+                            geolocal[i, j] = 1187;
+                            Program.fixtures.Add(new Program.Entity() { x = j, y = i, tile = 1191 });
+                        }
+                        else if (!left && !right && top && bottom)
+                        {
+                            geolocal[i, j] = 1187;
+                            Program.fixtures.Add(new Program.Entity() { x = j, y = i, tile = 1190 });
+                        }
+
+                    }
+                }
+            }
+
             for (int i = 0; i < geolocal.GetLength(0); i++)
             {
                 for (int j = 0; j < geolocal.GetLength(1); j++)
@@ -224,10 +257,11 @@ new int[,] {
                         {
                             geolocal[i, j] = sv;
                         }
-                            
+
                     }
                 }
             }
+
             return geolocal;
         }
         public static int[,] rotateCW(int[,] geo)
