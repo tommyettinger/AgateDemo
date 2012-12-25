@@ -169,23 +169,24 @@ namespace AgateDemo
             map = DungeonMap.merge(map, map2, true);
             map = DungeonMap.merge(map, map3, true);
             */
-            map = DungeonMap.merge(DungeonMap.geomorphs[1], DungeonMap.geomorphs[rnd.Next(4)], false);
+            int numMorphs = DungeonMap.geomorphs.Count;
+            map = DungeonMap.merge(DungeonMap.geomorphs[0], DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
             for (int eh = 0; eh < 4; eh++)
             {
                 if (rnd.Next(2) == 0)
-                    map = DungeonMap.merge(map, DungeonMap.geomorphs[rnd.Next(4)], false);
+                    map = DungeonMap.merge(map, DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
                 else
-                    map = DungeonMap.merge(map, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(4)]), false);
+                    map = DungeonMap.merge(map, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(numMorphs)]), false);
             }
             for (int ah = 1; ah < 4; ah++)
             {
-                map2 = DungeonMap.merge(DungeonMap.geomorphs[rnd.Next(4)], DungeonMap.geomorphs[rnd.Next(4)], false);
+                map2 = DungeonMap.merge(DungeonMap.geomorphs[rnd.Next(numMorphs)], DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
                 for (int eh = 0; eh < 4; eh++)
                 {
                     if (rnd.Next(2) == 0)
-                        map2 = DungeonMap.merge(map2, DungeonMap.geomorphs[rnd.Next(4)], false);
+                        map2 = DungeonMap.merge(map2, DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
                     else
-                        map2 = DungeonMap.merge(map2, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(4)]), false);
+                        map2 = DungeonMap.merge(map2, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(numMorphs)]), false);
                 }
                 map = DungeonMap.merge(map, map2, true);
             }
@@ -200,8 +201,9 @@ namespace AgateDemo
                 new Entity() { tile = 1188, x = 6, y = 15},
                 new Entity() { tile = 1188, x = 11, y = 17},*/
 			};
-          
+
             map = DungeonMap.cleanUp(map);
+            map = DungeonMap.theme(map);
            
             // map = DungeonMap.geomorph;
             int mw = map.GetLength(1), mh = map.GetLength(0);
@@ -228,6 +230,13 @@ namespace AgateDemo
                 entities.Add(Spawn(i, mw, mh));
             }
             */
+
+            var numGroundTiles = 0;
+            foreach (int eh in map)
+            {
+                if (eh == DungeonMap.gr || eh == 1187)
+                    numGroundTiles++;
+            }
             tileWidth = 48;
             tileHeight = 64;
             tileHIncrease = 16;
@@ -306,7 +315,7 @@ namespace AgateDemo
 
 //        private static bool hasPressedSpace = false;
         [STAThread]
-        static void Main(string[] args)
+        static void Main2(string[] args)
         {
             //AgateLib.AgateFileProvider.chosenLocation = (args.Length > 0) ? args[0] : null;
             using (AgateSetup setup = new AgateSetup("Vicious Agate Demo", args))

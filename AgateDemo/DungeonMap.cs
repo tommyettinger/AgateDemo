@@ -40,6 +40,28 @@ namespace AgateDemo
 new int[,] {
 {da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
 {da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{cw, cw, cw, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, cw, cw, cw}, 
+{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
+{cw, cw, cw, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, cw, cw, cw}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{cw, cw, cw, gr, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{da, da, cw, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}
+},
+new int[,] {
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
 {da, da, cw, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, cw, da, da}, 
 {cw, cw, cw, gr, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, gr, cw, cw, cw}, 
 {gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
@@ -66,18 +88,40 @@ new int[,] {
 {cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
 {gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
 {gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
-{cw, cw, cw, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, cw, cw, cw}, 
-{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
-{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
-{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
-{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
-{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
-{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da, da}, 
-{cw, cw, cw, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, cw, cw, cw}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
 {gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
 {gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
-{cw, cw, cw, gr, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
-{da, da, cw, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}
+ },
+new int[,] {
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{gr, gr, gr, gr, gr, gr, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{cw, cw, cw, cw, gr, cw, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, cw, gr, cw, cw, cw, cw}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, gr, gr, gr, gr, gr, gr}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
 {da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
 {da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}
 },
@@ -106,6 +150,50 @@ new int[,] {
 new int[,] {
 {da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
 {da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, cw, cw, cw, cw, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, gr, gr, gr, cw, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, gr, gr, gr, gr, cw, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, cw, cw, cw, cw, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da} 
+},
+new int[,] {
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, cw, cw, cw, cw, cw, cw}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, da, da, da, da, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, cw, cw, cw, cw, da, da}, 
+{da, da, da, cw, gr, gr, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da}, 
+{da, da, da, cw, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, cw, da, da}, 
+{da, da, da, cw, cw, cw, cw, cw, cw, cw, cw, cw, gr, cw, cw, cw, cw, cw, da, da}, 
+{da, da, da, da, da, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da, da, da}, 
+{cw, cw, cw, cw, cw, cw, cw, cw, cw, cw, cw, cw, cw, gr, cw, cw, cw, cw, cw, cw}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
+{cw, cw, cw, cw, gr, gr, cw, cw, cw, cw, cw, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}
+},
+new int[,] {
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
+{da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}, 
 {da, da, cw, cw, gr, gr, cw, da, cw, cw, cw, cw, da, cw, gr, gr, cw, da, da, da}, 
 {cw, cw, cw, gr, gr, gr, cw, cw, cw, gr, gr, cw, cw, cw, gr, gr, cw, cw, cw, cw}, 
 {gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr, gr}, 
@@ -126,21 +214,49 @@ new int[,] {
 {da, da, da, cw, gr, gr, cw, da, da, da, da, da, da, cw, gr, gr, cw, da, da, da}
         }
 };
-        public static int[,] cleanUp(int[,] geo)
+        //(+ (* (rand-int 3) 11) (* (rand-int 2) 38) 268 1177)
+        public static int[,] theme(int[,] geo)
         {
             int[,] geolocal = (int[,])geo.Clone();
-
-            for (int i = 0; i < geolocal.GetLength(0); i++)
+            Random rn = new Random();
+            for (int t1 = 0; t1 < geolocal.GetLength(0) / 20; t1++)
             {
-                for (int j = 0; j < geolocal.GetLength(1); j++)
+                for (int t2 = 0; t2 < geolocal.GetLength(1) / 20; t2++)
                 {
-                    if ((i == 0 || i == geolocal.GetUpperBound(0) ||
-                        j == 0 || j == geolocal.GetUpperBound(1)) && geolocal[i, j] == gr)
+                    if (rn.Next(3) == 0)
                     {
-                        geolocal[i, j] = cw;
+                        int currTheme = (rn.Next(3) * 11) + (rn.Next(2) * 38);
+                        if (currTheme == 2 * 11 || currTheme == 11 + 38)
+                            break;
+                        for (int i = 0; i < 20; i++)
+                        {
+                            for (int j = 0; j < 20; j++)
+                            {
+                                if (geolocal[i + (t1 * 20), j + (t2 * 20)] != gr && geolocal[i + (t1 * 20), j + (t2 * 20)] != da && geolocal[i + (t1 * 20), j + (t2 * 20)] != 1187)
+                                {
+                                    geolocal[i + (t1 * 20), j + (t2 * 20)] += 268 + currTheme;
+                                }
+                            }
+                        }
                     }
                 }
             }
+            return geolocal;
+        }
+        public static int[,] cleanUp(int[,] geo)
+        {
+            int[,] geolocal = (int[,])geo.Clone();
+                for (int i = 0; i < geolocal.GetLength(0); i++)
+                {
+                    for (int j = 0; j < geolocal.GetLength(1); j++)
+                    {
+                        if ((i == 0 || i == geolocal.GetUpperBound(0) ||
+                            j == 0 || j == geolocal.GetUpperBound(1)) && geolocal[i, j] == gr)
+                        {
+                            geolocal[i, j] = cw;
+                        }
+                    }
+                }
 
             //DOOR CODE
             for (int i = 0; i < geolocal.GetLength(0); i++)
@@ -162,12 +278,14 @@ new int[,] {
                         if (left && right && !top && !bottom)
                         {
                             geolocal[i, j] = 1187;
-                            Program.fixtures.Add(new Program.Entity() { x = j, y = i, tile = 1191 });
+                            Demo.Entity fx = new Demo.Entity() { x = j, y = i, tile = 1191 };
+                            Demo.fixtures.Add(fx.pos, fx);
                         }
                         else if (!left && !right && top && bottom)
                         {
                             geolocal[i, j] = 1187;
-                            Program.fixtures.Add(new Program.Entity() { x = j, y = i, tile = 1190 });
+                            Demo.Entity fx = new Demo.Entity() { x = j, y = i, tile = 1190 };
+                            Demo.fixtures.Add(fx.pos, fx);
                         }
 
                     }
@@ -276,6 +394,7 @@ new int[,] {
 
             return geolocal;
         }
+
         public static int[,] merge(int[,] fst, int[,] snd, bool mergeYaxis)
         {
             if (mergeYaxis)
