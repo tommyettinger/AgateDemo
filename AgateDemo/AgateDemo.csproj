@@ -94,36 +94,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Demo.cs" />
-    <Compile Include="DungeonMap.cs" />
-    <Compile Include="Program.cs">
+    <Compile Include="Source\Demo.cs" />
+    <Compile Include="Source\DungeonMap.cs" />
+    <Compile Include="Source\OldProgram.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SimpleUI.cs" />
-    <Compile Include="Skill.cs" />
-    <Content Include="Libraries\AgateLib.dll">
+    <Compile Include="Source\SimpleUI.cs" />
+    <Compile Include="Source\Skill.cs" />
+    <Content Include="AgateLib.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Libraries\AgateLib.WinForms.dll">
+    <Content Include="AgateLib.WinForms.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Libraries\AgateLib.WinForms.xml">
+    <Content Include="AgateLib.WinForms.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Libraries\AgateLib.xml">
+    <Content Include="AgateLib.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Libraries\AgateOTK.dll">
+    <Content Include="AgateOTK.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Libraries\AgateSDL.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Libraries\OpenTK.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Libraries\OpenTK.xml">
+    <Content Include="AgateSDL.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="LICENSE.txt" />
@@ -132,17 +126,22 @@
     <Content Include="mandrill_white.png" />
     <Content Include="mandrill_white_alt.png" />
     <Content Include="mandrill_white_small.png" />
-    <Content Include="monkey.png">
+    <Content Include="Resources\monkey.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="monkey_x2.png">
+    <Content Include="Resources\monkey_x2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="slashem-revised.png">
+    <Content Include="OpenTK.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="OpenTK.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\slashem-revised.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="slashem-revised-opaque.png" />
-    <Content Include="Compatibility\Tests.exe" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
