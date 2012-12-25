@@ -103,19 +103,11 @@
     <Compile Include="SimpleUI.cs" />
     <Compile Include="Skill.cs" />
     <Content Include="LICENSE.txt" />
-    <Content Include="mandrill.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="mandrill.png" />
     <Content Include="mandrill_trimmed.bmp" />
-    <Content Include="mandrill_white.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="mandrill_white_alt.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="mandrill_white_small.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="mandrill_white.png" />
+    <Content Include="mandrill_white_alt.png" />
+    <Content Include="mandrill_white_small.png" />
     <Content Include="monkey.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
