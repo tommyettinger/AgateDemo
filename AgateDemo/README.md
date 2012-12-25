@@ -9,6 +9,8 @@ On your units' turns, a menu will appear with Move, Attack and Wait as options.
  * Move lets a unit move up to 6 squares, ending when you press Z.  You can cancel with X to return to the action selection.
  * Attack lets you select one of your unit's skills, which may have a range it can be used at.  Move the cursor onto an enemy within range and press Z, or cancel with X.
 
+You can both move and attack in any order on your turn. You can't attack twice or move twice in one turn.
+If you can't do one or the other, just Wait after doing whatever it is that your unit *is* able to do.
 Creatures have a health number that flashes on their sprite, or in a few cases (such as for snakes and other small creatures), above it.
 When attacked their health goes down, and if it reaches 0 the creature is destroyed.
 
