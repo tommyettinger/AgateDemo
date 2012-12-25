@@ -54,7 +54,7 @@
     </StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>AgateLib-mono.ico</ApplicationIcon>
+    <ApplicationIcon>Libraries\AgateLib-mono.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <NoWin32Manifest>true</NoWin32Manifest>
@@ -126,7 +126,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="slashem-revised-opaque.png" />
-    <Content Include="Tests.exe" />
+    <Content Include="Libraries\Tests.exe" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -137,11 +137,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="AgateSDL.dll.config">
+    <None Include="Libraries\AgateSDL.dll.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="app.config" />
-    <None Include="OpenTK.dll.config">
+    <None Include="Libraries\OpenTK.dll.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Properties\Settings.settings">
@@ -153,59 +153,59 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Content Include="agate-debuglog.txt" />
-    <Content Include="AgateLib-mono.ico" />
+    <Content Include="Libraries\agate-debuglog.txt" />
+    <Content Include="Libraries\AgateLib-mono.ico" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AgateDrawing.dll" />
-    <Content Include="AgateLib.dll">
+    <Content Include="Libraries\AgateDrawing.dll" />
+    <Content Include="Libraries\AgateLib.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="AgateLib.WinForms.dll">
+    <Content Include="Libraries\AgateLib.WinForms.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="AgateLib.WinForms.xml">
+    <Content Include="Libraries\AgateLib.WinForms.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="AgateLib.xml">
+    <Content Include="Libraries\AgateLib.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="AgateOTK.dll">
+    <Content Include="Libraries\AgateOTK.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="AgateSDL.dll">
+    <Content Include="Libraries\AgateSDL.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Drivers\AgateFMOD.dll" />
     <Content Include="Drivers\AgateLib.dll" />
     <Content Include="Drivers\AgateLib.xml" />
-    <Content Include="errorlog.txt" />
-    <Content Include="libogg-0.dll">
+    <Content Include="Libraries\errorlog.txt" />
+    <Content Include="Libraries\libogg-0.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="libvorbis-0.dll">
+    <Content Include="Libraries\libvorbis-0.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="libvorbisfile-3.dll">
+    <Content Include="Libraries\libvorbisfile-3.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="OpenTK.dll">
+    <Content Include="Libraries\OpenTK.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="OpenTK.xml">
+    <Content Include="Libraries\OpenTK.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Readme-SDL.txt">
+    <Content Include="Libraries\Readme-SDL.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SDL.dll">
+    <Content Include="Libraries\SDL.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SDL_mixer.dll">
+    <Content Include="Libraries\SDL_mixer.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="settings_list.txt" />
+    <Content Include="Libraries\settings_list.txt" />
     <Content Include="slashem-revised-transparent.png" />
   </ItemGroup>
   <ItemGroup>
@@ -230,6 +230,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -17,6 +17,7 @@ namespace AgateDemo
         public static SimpleUI currentUI;
         public static KeyCode confirmKey = KeyCode.Z, backKey = KeyCode.X;
         public static MenuItem menuItemForFinish = null;
+        public static List<MenuItem> menuItemsForRecall = new List<MenuItem>();
         public static bool isHidden = false;
 //        public static LinkedAction associatedEvent;
         public static void Init()
@@ -28,9 +29,15 @@ namespace AgateDemo
         }
         public static void Navigate(Screen s)
         {
-           // currentUI.initialScreen = currentUI.currentScreen.Clone();
-            currentUI.previousScreen = currentUI.currentScreen.Clone();
+            // currentUI.initialScreen = currentUI.currentScreen.Clone();
+//            s.previousScreen = currentUI.currentScreen.Clone();
             currentUI.currentScreen = s;
+        }
+        public static void NavigateBackward(Screen s)
+        {
+            // currentUI.initialScreen = currentUI.currentScreen.Clone();
+           // currentUI.previousScreen = currentUI.currentScreen.Clone();
+            currentUI.currentScreen = s.previousScreen;
         }
         public static void Hide()
         {
@@ -72,12 +79,15 @@ namespace AgateDemo
                        || currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem].actionLink != null))
                 {
                     menuItemForFinish = currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem];
+                    menuItemsForRecall.Add(currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem]);
                     currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem].enabled = false;
                     currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem].handleAction(e);
                 }
-                else if (e.KeyCode == backKey && currentUI.previousScreen != null)
+                else if (e.KeyCode == backKey && currentUI.currentScreen.previousScreen != null)
                 {
-                    Navigate(currentUI.previousScreen);
+                    currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem].enabled = true;
+                    NavigateBackward(currentUI.currentScreen);
+                    HandleRecall();
                 }
             }
         }
@@ -91,11 +101,11 @@ namespace AgateDemo
         }
         public static void HandleRecall()
         {
-            if (menuItemForFinish != null)
+            foreach (MenuItem recaller in menuItemsForRecall)
             {
-                menuItemForFinish.handleRecall();
-                menuItemForFinish = null;
+                recaller.handleRecall();
             }
+            menuItemsForRecall.Clear();
         }
     }
     public class MenuItem
@@ -187,8 +197,12 @@ namespace AgateDemo
             if (linksTo == null && eventLink != null)
             {
                 ScreenBrowser.Navigate(ScreenBrowser.currentUI.initialScreen);
-               // enabled = false;
+                enabled = true;
                 Keyboard.KeyDown -= eventLink;
+            }
+            else if (linksTo != null)
+            {
+                enabled = true;
             }
         }
     }
@@ -197,6 +211,7 @@ namespace AgateDemo
         public string title;
         public List<MenuItem> menu;
         public int currentMenuItem = 0;
+        public Screen previousScreen = null;
         public Screen(string ttl, List<MenuItem> menus)
         {
             title = ttl;
@@ -212,7 +227,7 @@ namespace AgateDemo
     public class SimpleUI
     {
         public Screen currentScreen;
-        public Screen previousScreen;
+       // public Screen previousScreen;
         public Screen initialScreen;
         public Dictionary<String, Screen> allScreens;
         public List<MenuItem> allMenuItems;
@@ -224,7 +239,7 @@ namespace AgateDemo
         public SimpleUI(Screen s, FontSurface fnt)
         {
             initialScreen = s.Clone();
-            previousScreen = s.Clone();
+         //   previousScreen = s.Clone();
             currentScreen = s;
             allScreens = new Dictionary<String, Screen>() { { s.title, s }};
             allMenuItems = new List<MenuItem>(s.menu);
@@ -288,6 +303,7 @@ namespace AgateDemo
             initialActionChoices.menu.Add(moveItem);
             initialActionChoices.menu.Add(attackItem);
             initialActionChoices.menu.Add(waitItem);
+            attackChoices.previousScreen = initialActionChoices;
             //attackChoices.menu.Add(new MenuItem("Scorch", null, Demo.OnKeyDown_SelectSkill));
             SimpleUI sui = new SimpleUI(initialActionChoices, fnt);
             sui.allScreens.Add("Act", initialActionChoices);

@@ -535,8 +535,8 @@ namespace AgateDemo
             alphaMatrix.Matrix33 = 0.5f;
             alphaAttributes = new ImageAttributes();
             alphaAttributes.SetColorMatrix(alphaMatrix);*/
-            cursorX = 4;
-            cursorY = 5;
+            cursorX = 6;
+            cursorY = 7;
 
             //wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", ((mapWidth + 1) * 32) + (tileHIncrease * (1 + mapHeight)), (mapHeight * tileVIncrease) + tileHeight);
 
@@ -548,8 +548,8 @@ namespace AgateDemo
             mandrillFont = FontSurface.BitmapMonospace("monkey_x2.png", new Size(12, 28));
             mandrillFont.Color = Color.LightSkyBlue;
             ScreenBrowser.Init();
-            ScreenBrowser.currentUI.currentScreen.title = "Mobs with Jobs!";
-            ScreenBrowser.isHidden = false;
+            //ScreenBrowser.currentUI.currentScreen.title = "Mobs with Jobs!";
+            ScreenBrowser.isHidden = true;
             //ScreenBrowser.Show();
 //            basicUI = new SimpleUI(new Screen("Mobs with Jobs!", new List<MenuItem>() { }), mandrillFont);
         }
@@ -645,9 +645,13 @@ namespace AgateDemo
                 for (var col = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10; col <= mapWidth && (col < cursorX + 10 || col < 20); col++)
                 {
                     var dest = new Rectangle(pX, pY, tileWidth, tileHeight);
-                    if (cursorX == col && cursorY == row)
+                    if (cursorX == col && cursorY == row && lockState)
+                    {
+                        if(lockState)
+                            tileset.Color = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 0.5, 1.0);
                         tileset.Draw(new Rectangle((1442 % 38) * tileWidth, (1442 / 38) * tileHeight, tileWidth, tileHeight), dest);
-
+                        tileset.Color = Color.White;
+                    }
                     var tile = map[row, col];
                     Rectangle src;
                     if (tile != DungeonMap.gr)
@@ -661,10 +665,10 @@ namespace AgateDemo
                     {
                         tile = entity.tile;
                         src = new Rectangle((tile % 38) * tileWidth, (tile / 38) * tileHeight, tileWidth, tileHeight);
-                        var tsc = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 0.5, 1.0);
+                        Color tsc;// = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 0.5, 1.0);
                         if (lockState && entity.friendly && requestingMove.x == entity.o_pos.x && requestingMove.y == entity.o_pos.y)
                         {
-                            tileset.Color = tsc;
+                            //tileset.Color = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 0.5, 1.0);
                             tileset.Draw(src, dest);
                             tileset.Color = Color.White;
                         }
@@ -678,12 +682,22 @@ namespace AgateDemo
                         if (entity.health < 10)
                         {
                             if (entity.friendly)
-                                tsc = Color.Blue;
+                                tsc = Color.DarkBlue;
                             else
                                 tsc = Color.Black;//Color.FromHsv((Timing.TotalMilliseconds % 3600) / 5.0, 0.8, 1.0);
                             mandrillFont.Color = tsc;
                             mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1000.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1000;
-                            mandrillFont.DrawText(pX + 18, pY+16, "" + entity.health);
+                            mandrillFont.DrawText(pX + 18, pY + 16, "" + entity.health);
+                        }
+                        if (entity.health >= 10 && entity.health < 100)
+                        {
+                            if (entity.friendly)
+                                tsc = Color.DarkBlue;
+                            else
+                                tsc = Color.Black;//Color.FromHsv((Timing.TotalMilliseconds % 3600) / 5.0, 0.8, 1.0);
+                            mandrillFont.Color = tsc;
+                            mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1700.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1700;
+                            mandrillFont.DrawText(pX + 12, pY + 16, "" + entity.health);
                         }
                     }
                     else if (fixture != null)
@@ -887,9 +901,17 @@ namespace AgateDemo
                 {
                     o_entities[requestingMove].moveList.Add(Direction.None);
                 }*/
-
-
-                if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194))
+                
+                if (e.KeyCode == ScreenBrowser.backKey)
+                {
+                    cursorX = o_entities[requestingMove].x;
+                    cursorY = o_entities[requestingMove].y;
+                    o_entities[requestingMove].moveList.Clear();
+                    ScreenBrowser.HandleRecall();
+                    lockState = true;
+                    ScreenBrowser.UnHide();
+                }
+                else if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194))
                 {
                     if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.East)
                     {
@@ -977,7 +999,7 @@ namespace AgateDemo
                     else
                         o_entities[requestingMove].moveList.Add(Direction.South);
                 }*/
-                else if (e.KeyCode == ScreenBrowser.confirmKey)
+                else if (e.KeyCode == ScreenBrowser.confirmKey && o_entities[requestingMove].moveList.Count >= o_entities[requestingMove].currentSkill.minSkillDistance)
                 {
                     o_entities[requestingMove].currentSkill.targetSquare = new Cell() { x = cursorX, y = cursorY };
 

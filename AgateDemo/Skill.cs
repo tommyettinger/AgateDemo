@@ -7,7 +7,7 @@ namespace AgateDemo
 {
     public class Skill
     {
-        public int maxSkillDistance = 1;
+        public int maxSkillDistance = 1, minSkillDistance = 1;
         public int damage;
         public string name;
         public Demo.Cell targetSquare;
