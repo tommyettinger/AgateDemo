@@ -152,9 +152,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="AgateSDL.dll.config" />
     <None Include="Compatibility\AgateSDL.dll.config" />
     <None Include="app.config" />
     <None Include="Compatibility\OpenTK.dll.config" />
+    <None Include="OpenTK.dll.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
