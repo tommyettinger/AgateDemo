@@ -113,7 +113,7 @@ namespace AgateDemo
         }
         public static SortedDictionary<int, Cell> initiative = new SortedDictionary<int, Cell>();
         public static int currentInitiative;
-        public static bool lockState = false, lockForAnimation = false;
+        public static bool lockState = false, lockForAnimation = false, showHealth = false;
         static Cell requestingMove = new Cell() { x = -1, y = -1 };
         static Surface tileset;
         static int[,] map, map2;
@@ -555,6 +555,7 @@ namespace AgateDemo
             ScreenBrowser.isHidden = true;
             //ScreenBrowser.Show();
 //            basicUI = new SimpleUI(new Screen("Mobs with Jobs!", new List<MenuItem>() { }), mandrillFont);
+            Keyboard.KeyUp += new InputEventHandler(onKeyUp);
         }
 
         public static void Update()
@@ -682,25 +683,28 @@ namespace AgateDemo
                             src = new Rectangle((1443 % 38) * tileWidth, (1443 / 38) * tileHeight, tileWidth, tileHeight);
                             tileset.Draw(src, dest);
                         }
-                        if (entity.health < 10)
+                        if (showHealth)
                         {
-                            if (entity.friendly)
-                                tsc = Color.DarkBlue;
-                            else
-                                tsc = Color.Black;//Color.FromHsv((Timing.TotalMilliseconds % 3600) / 5.0, 0.8, 1.0);
-                            mandrillFont.Color = tsc;
-                            mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1000.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1000;
-                            mandrillFont.DrawText(pX + 18, pY + 16, "" + entity.health);
-                        }
-                        if (entity.health >= 10 && entity.health < 100)
-                        {
-                            if (entity.friendly)
-                                tsc = Color.DarkBlue;
-                            else
-                                tsc = Color.Black;//Color.FromHsv((Timing.TotalMilliseconds % 3600) / 5.0, 0.8, 1.0);
-                            mandrillFont.Color = tsc;
-                            mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1700.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1700;
-                            mandrillFont.DrawText(pX + 12, pY + 16, "" + entity.health);
+                            if (entity.health < 10)
+                            {
+                                if (entity.friendly)
+                                    tsc = Color.DarkBlue;
+                                else
+                                    tsc = Color.Black;//Color.FromHsv((Timing.TotalMilliseconds % 3600) / 5.0, 0.8, 1.0);
+                                mandrillFont.Color = tsc;
+                           //     mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1000.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1000;
+                                mandrillFont.DrawText(pX + 18, pY + 16, "" + entity.health);
+                            }
+                            if (entity.health >= 10 && entity.health < 100)
+                            {
+                                if (entity.friendly)
+                                    tsc = Color.DarkBlue;
+                                else
+                                    tsc = Color.Black;//Color.FromHsv((Timing.TotalMilliseconds % 3600) / 5.0, 0.8, 1.0);
+                                mandrillFont.Color = tsc;
+                         //       mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1700.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1700;
+                                mandrillFont.DrawText(pX + 12, pY + 16, "" + entity.health);
+                            }
                         }
                     }
                     else if (fixture != null)
@@ -754,7 +758,17 @@ namespace AgateDemo
             if (e.KeyCode == KeyCode.Q)
             {
                 Display.CurrentWindow.Dispose();
-                
+            }
+            if (e.KeyCode == KeyCode.S)
+            {
+                showHealth = true;
+            }
+        }
+        static void onKeyUp(InputEventArgs e)
+        {
+            if (e.KeyCode == KeyCode.S && showHealth)
+            {
+                showHealth = false;
             }
         }
         public static void OnKeyDown_ActionMenu(InputEventArgs e)
