@@ -546,9 +546,9 @@ namespace AgateDemo
             Display.RenderState.WaitForVerticalBlank = true;
             wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", ((20) * 32) + (tileHIncrease * (20)), (19 * tileVIncrease) + tileHeight);
 
-            tileset = new Surface("Resources" + System.IO.Path.DirectorySeparatorChar + "slashem-revised.png");
+            tileset = new Surface("Resources" + "/" + "slashem-revised.png"); //System.IO.Path.DirectorySeparatorChar
 
-            mandrillFont = FontSurface.BitmapMonospace("Resources" + System.IO.Path.DirectorySeparatorChar + "monkey_x2.png", new Size(12, 28));
+            mandrillFont = FontSurface.BitmapMonospace("Resources" + "/" + "monkey_x2.png", new Size(12, 28));
             mandrillFont.Color = Color.LightSkyBlue;
             ScreenBrowser.Init();
             //ScreenBrowser.currentUI.currentScreen.title = "Mobs with Jobs!";
