@@ -11,10 +11,19 @@ On your units' turns, a menu will appear with Move, Attack and Wait as options.
 
 You can both move and attack in any order on your turn. You can't attack twice or move twice in one turn.
 If you can't do one or the other, just Wait after doing whatever it is that your unit *is* able to do.
-Creatures have a health number that flashes on their sprite, or in a few cases (such as for snakes and other small creatures), above it.
-When attacked their health goes down, and if it reaches 0 the creature is destroyed.
+Creatures have a health number that shows over their sprite for as long as you hold down the S key, which you can do at any time.
+When attacked, a creature's health goes down, and if it reaches 0 the creature is destroyed.
 
 There's no victory condition right now, just survive as long as you can while the monsters try to eat you and each other.
+
+Building
+========
+There's a Visual Studio 2010 solution provided, but if you download the zip-archived (and possibly the tgz-archived) copy of the source from GitHub instead of cloning it,
+a DLL this project uses may be blocked by some firewalls (I know Norton does it).  That will make the project mysteriously fail until the DLL (AgateOTK.dll) is unblocked.
+ * The easiest way to avoid this is to go into the File Properties of the zip archive (having selected the zip, Alt+Enter in Windows Explorer) and
+click Unblock if it is an option.  Then you can correctly extract the files and open the solution.
+ * The hard way is to compile the current master version of AgateLib and, after building, copy the files from AgateLib's Binaries
+directory to this project's root/AgateDemo/ folder, set the files to have "Copy to Output Directory" set to "Copy Always", and set the references of the project to use the assemblies you just built.
 
 Credits
 =======
