@@ -96,6 +96,7 @@ namespace AgateDemo
         {
             if (menuItemForFinish != null)
             {
+                menuItemsForRecall.Clear();
                 menuItemForFinish.handleFinish();
                 menuItemForFinish = null;
             }
@@ -250,7 +251,7 @@ namespace AgateDemo
         }
         public SimpleUI(Screen s, FontSurface fnt)
         {
-            initialScreen = s.Clone();
+            initialScreen = s;
             //   previousScreen = s.Clone();
             currentScreen = s;
             allScreens = new Dictionary<String, Screen>() { { s.title, s } };
@@ -386,7 +387,7 @@ namespace AgateDemo
             tx += mandrillDict['┤'];
             currentLine++;
             mb.ui.font.DrawText(renderX, renderY + (mb.ui.font.FontHeight * currentLine), tx);
-            
+
             for (int i = 0; i < mb.skillList.Count; i++)
             {
                 currentLine++;
@@ -402,7 +403,7 @@ namespace AgateDemo
             tx = mandrillDict['└'].ToString();
             tx = tx.PadRight(maxWidth - 1, mandrillDict['─']);
             tx += mandrillDict['┘'];
-            currentLine++; 
+            currentLine++;
             mb.ui.font.DrawText(renderX, renderY + (mb.ui.font.FontHeight * currentLine), tx);
         }
     }
