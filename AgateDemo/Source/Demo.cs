@@ -9,16 +9,13 @@ using AgateLib.InputLib;
 
 namespace AgateDemo
 {
-    public static class Demo
+    public struct Cell
     {
-        static Random rnd = new Random();
-        public static int minVisibleX = 0, minVisibleY = 0, maxVisibleX = 19, maxVisibleY = 19;
-        public struct Cell {
-            public int x, y;
-            public Cell(int x, int y)
-            {
-                this.x = x; this.y = y;
-            }
+        public int x, y;
+        public Cell(int x, int y)
+        {
+            this.x = x; this.y = y;
+        }
         public override bool Equals(Object obj)
         {
             return obj is Cell && this == (Cell)obj;
@@ -35,8 +32,13 @@ namespace AgateDemo
         {
             return !(a == b);
         }
-        }
-        public enum Direction { North, East, South, West, None};
+    }
+    public static class Demo
+    {
+        static Random rnd = new Random();
+        public static int minVisibleX = 0, minVisibleY = 0, maxVisibleX = 19, maxVisibleY = 19;
+
+        public enum Direction { North, East, South, West, None };
         //public static List<Direction> dirlist = new List<Direction>();
         public class Entity
         {
@@ -56,25 +58,32 @@ namespace AgateDemo
         public class Mob : Entity
         {
             private int hp;
+            public int maxHP = 10;
             public int health
             {
                 get { return hp; }
-                set {
-                        hp = value;
-                        if (hp <= 0)
-                            this.Kill();
-                    }
+                set
+                {
+                    hp = value;
+                    if (hp <= 0)
+                        this.Kill();
+                    else if (hp > maxHP)
+                        hp = maxHP;
+                }
             }
             public bool friendly;
             public Cell o_pos;
+            public string name;
             public List<Direction> moveList = new List<Direction>();
             public int maxMoveDistance = 3, actionCount = 0;
             public List<Skill> skillList;
             public Skill currentSkill;
             public SimpleUI ui = null;
+
             public Mob(int tileNumber, int xPos, int yPos, bool isFriendly)
             {
                 tile = tileNumber;
+                name = TileData.tilesToNames[tileNumber];
                 x = xPos;
                 y = yPos;
                 o_pos = new Cell() { x = this.x, y = this.y };
@@ -82,11 +91,11 @@ namespace AgateDemo
                 if (friendly)
                 {
                     maxMoveDistance = 6;
-                    ui = SimpleUI.InitUI();
                 }
+                ui = SimpleUI.InitUI();
                 //hasActed = false;
                 health = 10;
-                skillList = new List<Skill>() {};
+                skillList = new List<Skill>() { };
                 currentSkill = null;
                 //initiative = rnd.Next(1000);
             }
@@ -115,12 +124,14 @@ namespace AgateDemo
         public static int currentInitiative;
         public static bool lockState = false, lockForAnimation = false, showHealth = false;
         static Cell requestingMove = new Cell() { x = -1, y = -1 };
+        public static Mob currentActor = null, hoverActor = null;
         static Surface tileset;
         static int[,] map, map2;
         public static Dictionary<Cell, Mob> entities, o_entities;
+        public static Dictionary<Cell, int> highlightedCells = new Dictionary<Cell, int>();
         public static Dictionary<Cell, Entity> fixtures;
 
-       // public static SimpleUI basicUI;
+        // public static SimpleUI basicUI;
 
         static int tileWidth = 48;
         static int tileHeight = 64;
@@ -185,6 +196,7 @@ namespace AgateDemo
                 //while (Timing.TotalMilliseconds - startingTime < 200 && (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)) ;
                 if (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)
                 {
+                    currentActor = ent;
                     lockForAnimation = true;
                     while (Timing.TotalMilliseconds - startingTime < 200)
                     {
@@ -356,7 +368,8 @@ namespace AgateDemo
         }
 
         static Mob Spawn(int tileNo, int width, int height)
-        {int rx = rnd.Next(width);
+        {
+            int rx = rnd.Next(width);
             int ry = rnd.Next(height);
             if (map[ry, rx] == DungeonMap.gr)
             {
@@ -544,7 +557,7 @@ namespace AgateDemo
             //wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", ((mapWidth + 1) * 32) + (tileHIncrease * (1 + mapHeight)), (mapHeight * tileVIncrease) + tileHeight);
 
             Display.RenderState.WaitForVerticalBlank = true;
-            wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", ((20) * 32) + (tileHIncrease * (20)), (19 * tileVIncrease) + tileHeight);
+            wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", 960, 672);//(19 * tileVIncrease) + tileHeight); //((20) * 32) + (tileHIncrease * (20))
 
             tileset = new Surface("Resources" + "/" + "slashem-revised.png"); //System.IO.Path.DirectorySeparatorChar
 
@@ -554,7 +567,7 @@ namespace AgateDemo
             //ScreenBrowser.currentUI.currentScreen.title = "Mobs with Jobs!";
             ScreenBrowser.isHidden = true;
             //ScreenBrowser.Show();
-//            basicUI = new SimpleUI(new Screen("Mobs with Jobs!", new List<MenuItem>() { }), mandrillFont);
+            //            basicUI = new SimpleUI(new Screen("Mobs with Jobs!", new List<MenuItem>() { }), mandrillFont);
             Keyboard.KeyUp += new InputEventHandler(onKeyUp);
         }
 
@@ -581,6 +594,7 @@ namespace AgateDemo
                     }
                     else
                     {
+                        currentActor = ent;
                         cursorX = ent.x;
                         cursorY = ent.y;
                         requestingMove.x = ent.o_pos.x;
@@ -638,22 +652,35 @@ namespace AgateDemo
                     // maxVisibleX++;
                     if (map[row, col] == DungeonMap.gr)
                     {
+                        if (highlightedCells.ContainsKey(new Cell(col, row)))
+                        {
+                            tileset.Color = Color.FromHsv(190.0, 0.5, 0.75 + (((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 4000 : (2000 - (Timing.TotalMilliseconds % 2000)) / 4000));
+                        }
                         var dest = new Rectangle(pX, pY, tileWidth, tileHeight);
                         var tile = map[row, col];
                         var src = new Rectangle((tile % 38) * tileWidth, (tile / 38) * tileHeight, tileWidth, tileHeight);
                         tileset.Draw(src, dest);
+                        tileset.Color = Color.White;
                     }
-                        pX += tileVIncrease;
+                    pX += tileVIncrease;
                 }
                 pX = tileHIncrease * (20 - 1 - ((cursorY <= 10) ? row : (cursorY > mapHeight - 10) ? row - (mapHeight - 19) : row - (cursorY - 10)));
                 for (var col = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10; col <= mapWidth && (col < cursorX + 10 || col < 20); col++)
                 {
                     var dest = new Rectangle(pX, pY, tileWidth, tileHeight);
+                    var entity = checkPos(col, row);
+                    var fixture = checkFixture(col, row);
                     if (cursorX == col && cursorY == row && lockState)
                     {
-                        if(lockState)
-                            tileset.Color = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 0.5, 1.0);
-                        tileset.Draw(new Rectangle((1442 % 38) * tileWidth, (1442 / 38) * tileHeight, tileWidth, tileHeight), dest);
+                        if (lockState)
+                            tileset.Color = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 1.0, 1.0);
+                        int offset = 0;
+                        if (entity != null && entity.x == cursorX && entity.y == cursorY)
+                            offset = (int)(((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 40 : (2000 - (Timing.TotalMilliseconds % 2000)) / 40);
+                        int cursorTile = 1442;
+                        if (entity != null)
+                            cursorTile = 1441;
+                        tileset.Draw(new Rectangle((cursorTile % 38) * tileWidth, (cursorTile / 38) * tileHeight, tileWidth, tileHeight), new Rectangle(pX, pY - offset, tileWidth, tileHeight));
                         tileset.Color = Color.White;
                     }
                     var tile = map[row, col];
@@ -663,8 +690,6 @@ namespace AgateDemo
                         src = new Rectangle((tile % 38) * tileWidth, (tile / 38) * tileHeight, tileWidth, tileHeight);
                         tileset.Draw(src, dest);
                     }
-                    var entity = checkPos(col, row);
-                    var fixture = checkFixture(col, row);
                     if (entity != null)
                     {
                         tile = entity.tile;
@@ -678,6 +703,17 @@ namespace AgateDemo
                         }
                         else
                             tileset.Draw(src, dest);
+
+                        if (cursorX == col && cursorY == row && lockState)
+                        {
+                            if (lockState)
+                                tileset.Color = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 1.0, 1.0);
+                            int offset = 0;
+                            if (entity.x == cursorX && entity.y == cursorY)
+                                offset = (int)(((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 40 : (2000 - (Timing.TotalMilliseconds % 2000)) / 40);
+                            tileset.Draw(new Rectangle((1440 % 38) * tileWidth, (1440 / 38) * tileHeight, tileWidth, tileHeight), new Rectangle(pX, pY - offset, tileWidth, tileHeight));
+                            tileset.Color = Color.White;
+                        }
                         if (entity.friendly)
                         {
                             src = new Rectangle((1443 % 38) * tileWidth, (1443 / 38) * tileHeight, tileWidth, tileHeight);
@@ -692,7 +728,7 @@ namespace AgateDemo
                                 else
                                     tsc = Color.Black;//Color.FromHsv((Timing.TotalMilliseconds % 3600) / 5.0, 0.8, 1.0);
                                 mandrillFont.Color = tsc;
-                           //     mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1000.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1000;
+                                //     mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1000.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1000;
                                 mandrillFont.DrawText(pX + 18, pY + 16, "" + entity.health);
                             }
                             if (entity.health >= 10 && entity.health < 100)
@@ -702,22 +738,47 @@ namespace AgateDemo
                                 else
                                     tsc = Color.Black;//Color.FromHsv((Timing.TotalMilliseconds % 3600) / 5.0, 0.8, 1.0);
                                 mandrillFont.Color = tsc;
-                         //       mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1700.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1700;
+                                //       mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1700.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1700;
                                 mandrillFont.DrawText(pX + 12, pY + 16, "" + entity.health);
                             }
                         }
                     }
                     else if (fixture != null)
                     {
+
+                        int frontTile = 1437;
+                        int backTile = 1436;
+
+                        if (cursorX == col && cursorY == row && lockState)
+                        {
+                            if (lockState)
+                                tileset.Color = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 1.0, 1.0);
+                            int offset = 0;
+                            tileset.Draw(new Rectangle((backTile % 38) * tileWidth, (backTile / 38) * tileHeight, tileWidth, tileHeight), new Rectangle(pX, pY - offset, tileWidth, tileHeight));
+                            tileset.Color = Color.White;
+                        }
                         tile = fixture.tile;
                         src = new Rectangle((tile % 38) * tileWidth, (tile / 38) * tileHeight, tileWidth, tileHeight);
                         tileset.Draw(src, dest);
+                        if (cursorX == col && cursorY == row && lockState)
+                        {
+                            if (lockState)
+                                tileset.Color = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 1.0, 1.0);
+                            int offset = 0;
+                            tileset.Draw(new Rectangle((frontTile % 38) * tileWidth, (frontTile / 38) * tileHeight, tileWidth, tileHeight), new Rectangle(pX, pY - offset, tileWidth, tileHeight));
+                            tileset.Color = Color.White;
+                        }
+
                     }
                     pX += tileVIncrease;
                 }
                 //pY += tileHIncrease;
             }
             ScreenBrowser.Show();
+            if (hoverActor != null)
+                UnitInfo.ShowMobInfo(hoverActor);
+            else if (currentActor != null)
+                UnitInfo.ShowMobInfo(currentActor);
             //mandrillFont.DrawText(32.0, 32.0, "FPS: " + (int)Display.FramesPerSecond);
         }
 
@@ -740,7 +801,7 @@ namespace AgateDemo
                 Init();
 
                 Keyboard.KeyDown += new InputEventHandler(OnKeyDown);
-                
+
                 Update();
                 while (!Display.CurrentWindow.IsClosed)
                 {
@@ -776,28 +837,85 @@ namespace AgateDemo
             if (lockState && !lockForAnimation && initiative[currentInitiative] == requestingMove && o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly)
             {
                 ScreenBrowser.OnKeyDown_Menu(e);
-//                OnKeyDown_SelectMove(e);
+                //                OnKeyDown_SelectMove(e);
+            }
+        }
+        public static void calculateAllMoves(int startX, int startY, int numMoves, bool performEntCheck)
+        {
+            if (numMoves == -1)
+                return;
+            else
+            {
+                Cell c = new Cell(startX, startY);
+
+                if (map[startY, startX] != DungeonMap.gr)
+                    return;
+                if (highlightedCells.Count != 0 && performEntCheck && checkPos(startX, startY) != null)
+                    return;
+                if (!highlightedCells.ContainsKey(c))
+                    highlightedCells.Add(c, numMoves);
+                calculateAllMoves(startX - 1, startY, numMoves - 1, performEntCheck);
+                calculateAllMoves(startX + 1, startY, numMoves - 1, performEntCheck);
+                calculateAllMoves(startX, startY - 1, numMoves - 1, performEntCheck);
+                calculateAllMoves(startX, startY + 1, numMoves - 1, performEntCheck);
+
+            }
+        }
+        public static void removeMovesUnderMinimum(int startX, int startY, int numMoves, bool performEntCheck)
+        {
+            if (numMoves == 0)
+                return;
+            else
+            {
+                Cell c = new Cell(startX, startY);
+
+                if (map[startY, startX] != DungeonMap.gr)
+                    return;
+                if (highlightedCells.Count != 0 && performEntCheck && checkPos(startX, startY) != null)
+                    return;
+                if (highlightedCells.ContainsKey(c))
+                    highlightedCells.Remove(c);
+                calculateAllMoves(startX - 1, startY, numMoves - 1, performEntCheck);
+                calculateAllMoves(startX + 1, startY, numMoves - 1, performEntCheck);
+                calculateAllMoves(startX, startY - 1, numMoves - 1, performEntCheck);
+                calculateAllMoves(startX, startY + 1, numMoves - 1, performEntCheck);
+
+            }
+        }
+        public static void HighlightMove()
+        {
+
+            if (highlightedCells.Count == 0 && o_entities.ContainsKey(requestingMove))
+            {
+                int highX = o_entities[requestingMove].x;
+                int highY = o_entities[requestingMove].y;
+                calculateAllMoves(highX, highY, o_entities[requestingMove].maxMoveDistance, true);
+            }
+        }
+        public static void HighlightSkill()
+        {
+            o_entities[requestingMove].currentSkill = o_entities[requestingMove].skillList[o_entities[requestingMove].ui.currentScreen.currentMenuItem];
+            if (highlightedCells.Count == 0 && o_entities.ContainsKey(requestingMove))
+            {
+                int highX = o_entities[requestingMove].x;
+                int highY = o_entities[requestingMove].y;
+                calculateAllMoves(highX, highY, o_entities[requestingMove].currentSkill.maxSkillDistance, false);
+                removeMovesUnderMinimum(highX, highY, o_entities[requestingMove].currentSkill.minSkillDistance, false);
             }
         }
         public static void OnKeyDown_SelectMove(InputEventArgs e)
         {
             if (lockState && !lockForAnimation && initiative[currentInitiative] == requestingMove &&
-                             o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly &&
-                             o_entities[requestingMove].moveList.Count <= o_entities[requestingMove].maxMoveDistance)
+                             o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly)
+            //                 o_entities[requestingMove].moveList.Count <= o_entities[requestingMove].maxMoveDistance)
             {
-
                 if (e.KeyCode == KeyCode.Space)
                 {
                     o_entities[requestingMove].moveList.Add(Direction.None);
                 }
                 else if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194) && checkPos(cursorX - 1, cursorY) == null)
                 {
-                    if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.East)
-                    {
-                        cursorX--;
-                        o_entities[requestingMove].moveList.RemoveAt(o_entities[requestingMove].moveList.Count - 1);
-                    }
-                    else if (o_entities[requestingMove].moveList.Count < o_entities[requestingMove].maxMoveDistance)
+                    if(highlightedCells.ContainsKey(new Cell(cursorX - 1, cursorY)))
                     {
                         cursorX--;
                         o_entities[requestingMove].moveList.Add(Direction.West);
@@ -805,12 +923,7 @@ namespace AgateDemo
                 }
                 else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194) && checkPos(cursorX + 1, cursorY) == null)
                 {
-                    if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.West)
-                    {
-                        cursorX++;
-                        o_entities[requestingMove].moveList.RemoveAt(o_entities[requestingMove].moveList.Count - 1);
-                    }
-                    else if (o_entities[requestingMove].moveList.Count < o_entities[requestingMove].maxMoveDistance)
+                    if (highlightedCells.ContainsKey(new Cell(cursorX + 1, cursorY)))
                     {
                         cursorX++;
                         o_entities[requestingMove].moveList.Add(Direction.East);
@@ -818,12 +931,7 @@ namespace AgateDemo
                 }
                 else if (e.KeyCode == KeyCode.Up && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194) && checkPos(cursorX, cursorY - 1) == null)
                 {
-                    if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.South)
-                    {
-                        cursorY--;
-                        o_entities[requestingMove].moveList.RemoveAt(o_entities[requestingMove].moveList.Count - 1);
-                    }
-                    else if (o_entities[requestingMove].moveList.Count < o_entities[requestingMove].maxMoveDistance)
+                    if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY - 1)))
                     {
                         cursorY--;
                         o_entities[requestingMove].moveList.Add(Direction.North);
@@ -831,12 +939,7 @@ namespace AgateDemo
                 }
                 else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194) && checkPos(cursorX, cursorY + 1) == null)
                 {
-                    if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.North)
-                    {
-                        cursorY++;
-                        o_entities[requestingMove].moveList.RemoveAt(o_entities[requestingMove].moveList.Count - 1);
-                    }
-                    else if (o_entities[requestingMove].moveList.Count < o_entities[requestingMove].maxMoveDistance)
+                    if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY + 1)))
                     {
                         cursorY++;
                         o_entities[requestingMove].moveList.Add(Direction.South);
@@ -871,20 +974,22 @@ namespace AgateDemo
                     cursorX = o_entities[requestingMove].x;
                     cursorY = o_entities[requestingMove].y;
                     o_entities[requestingMove].moveList.Clear();
+                    highlightedCells.Clear();
                     ScreenBrowser.HandleRecall();
                     lockState = true;
                     ScreenBrowser.UnHide();
                 }
                 else if (e.KeyCode == ScreenBrowser.confirmKey)
                 {
-//                    o_entities[requestingMove].moveList.AddRange(Enumerable.Repeat(Direction.None, o_entities[requestingMove].maxMoveDistance - o_entities[requestingMove].moveList.Count));
-                //}
-                //if (o_entities[requestingMove].moveList.Count == o_entities[requestingMove].maxMoveDistance)
-               // {
+                    //                    o_entities[requestingMove].moveList.AddRange(Enumerable.Repeat(Direction.None, o_entities[requestingMove].maxMoveDistance - o_entities[requestingMove].moveList.Count));
+                    //}
+                    //if (o_entities[requestingMove].moveList.Count == o_entities[requestingMove].maxMoveDistance)
+                    // {
 
                     ScreenBrowser.HandleFinish();
                     lockState = false;
-                    MoveMob(o_entities[requestingMove], o_entities[requestingMove].moveList.Take(o_entities[requestingMove].maxMoveDistance));
+                    highlightedCells.Clear();
+                    MoveMob(o_entities[requestingMove], o_entities[requestingMove].moveList);
                     // requestingMove.x = -1;
                     o_entities[requestingMove].moveList.Clear();
 
@@ -906,80 +1011,141 @@ namespace AgateDemo
                 }
             }
         }
+
+        public static void OnKeyDown_LookAround(InputEventArgs e)
+        {
+            if (lockState && !lockForAnimation && initiative[currentInitiative] == requestingMove &&
+                             o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly)
+            //                             o_entities[requestingMove].moveList.Count <= o_entities[requestingMove].maxMoveDistance)
+            {
+                currentActor = null;
+                if (e.KeyCode == KeyCode.Space)
+                {
+                    //o_entities[requestingMove].moveList.Add(Direction.None);
+                }
+                else if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194 || map[cursorY, cursorX - 1] == 1187))   // && checkPos(cursorX - 1, cursorY) == null)
+                {
+                    cursorX--;
+                    hoverActor = checkPos(cursorX, cursorY);
+                }
+                else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194 || map[cursorY, cursorX + 1] == 1187))
+                {
+                    cursorX++;
+                    hoverActor = checkPos(cursorX, cursorY);
+                }
+                else if (e.KeyCode == KeyCode.Up && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194 || map[cursorY - 1, cursorX] == 1187))
+                {
+
+                    cursorY--;
+                    hoverActor = checkPos(cursorX, cursorY);
+                }
+                else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194 || map[cursorY + 1, cursorX] == 1187))
+                {
+                    cursorY++;
+                    hoverActor = checkPos(cursorX, cursorY);
+                }
+                else if (e.KeyCode == ScreenBrowser.backKey || e.KeyCode == ScreenBrowser.confirmKey)
+                {
+                    cursorX = o_entities[requestingMove].x;
+                    cursorY = o_entities[requestingMove].y;
+                    currentActor = o_entities[requestingMove];
+                    hoverActor = null;
+                    //                    o_entities[requestingMove].moveList.Clear();
+                    ScreenBrowser.HandleRecall();
+                    lockState = true;
+                    ScreenBrowser.UnHide();
+                }
+                /*                else if (e.KeyCode == ScreenBrowser.confirmKey)
+                                {
+                                    //                    o_entities[requestingMove].moveList.AddRange(Enumerable.Repeat(Direction.None, o_entities[requestingMove].maxMoveDistance - o_entities[requestingMove].moveList.Count));
+                                    //}
+                                    //if (o_entities[requestingMove].moveList.Count == o_entities[requestingMove].maxMoveDistance)
+                                    // {
+
+                                    ScreenBrowser.HandleFinish();
+                                    lockState = false;
+                                    MoveMob(o_entities[requestingMove], o_entities[requestingMove].moveList.Take(o_entities[requestingMove].maxMoveDistance));
+                                    // requestingMove.x = -1;
+                                    o_entities[requestingMove].moveList.Clear();
+
+                                    o_entities[requestingMove].actionCount++;
+                                    if (o_entities[requestingMove].actionCount > 1)
+                                    {
+                                        Keyboard.KeyDown -= OnKeyDown_ActionMenu;
+                                        currentInitiative--;
+                                    }
+                                    else
+                                    {
+                                        lockState = true;
+                                        ScreenBrowser.UnHide();
+                                    }
+
+                                    cursorX = o_entities[requestingMove].x;
+                                    cursorY = o_entities[requestingMove].y;
+                                    //Update();
+                                }*/
+            }
+        }
         public static void OnKeyDown_SelectSkill(InputEventArgs e)
         {
             o_entities[requestingMove].currentSkill = o_entities[requestingMove].skillList[o_entities[requestingMove].ui.currentScreen.currentMenuItem];
             if (lockState && !lockForAnimation && initiative[currentInitiative] == requestingMove &&
-                             o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly &&
-                             o_entities[requestingMove].moveList.Count <= o_entities[requestingMove].currentSkill.maxSkillDistance)
+                             o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly)
+                            // o_entities[requestingMove].moveList.Count <= o_entities[requestingMove].currentSkill.maxSkillDistance)
             {
                 /*
                 if (e.KeyCode == KeyCode.Space)
                 {
                     o_entities[requestingMove].moveList.Add(Direction.None);
                 }*/
-                
+
                 if (e.KeyCode == ScreenBrowser.backKey)
                 {
                     cursorX = o_entities[requestingMove].x;
                     cursorY = o_entities[requestingMove].y;
                     o_entities[requestingMove].moveList.Clear();
+                    highlightedCells.Clear();
                     ScreenBrowser.HandleRecall();
                     lockState = true;
                     ScreenBrowser.UnHide();
                 }
                 else if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194))
                 {
-                    if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.East)
-                    {
-                        cursorX--;
-                        o_entities[requestingMove].moveList.RemoveAt(o_entities[requestingMove].moveList.Count - 1);
-                    }
-                    else if (o_entities[requestingMove].moveList.Count < o_entities[requestingMove].currentSkill.maxSkillDistance)
+                    if (highlightedCells.ContainsKey(new Cell(cursorX - 1, cursorY)))
                     {
                         cursorX--;
                         o_entities[requestingMove].moveList.Add(Direction.West);
                     }
+                    hoverActor = checkPos(cursorX, cursorY);
                 }
                 else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194))
                 {
-                    if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.West)
-                    {
-                        cursorX++;
-                        o_entities[requestingMove].moveList.RemoveAt(o_entities[requestingMove].moveList.Count - 1);
-                    }
-                    else if (o_entities[requestingMove].moveList.Count < o_entities[requestingMove].currentSkill.maxSkillDistance)
+                    if (highlightedCells.ContainsKey(new Cell(cursorX + 1, cursorY)))
                     {
                         cursorX++;
                         o_entities[requestingMove].moveList.Add(Direction.East);
                     }
+                    hoverActor = checkPos(cursorX, cursorY);
                 }
                 else if (e.KeyCode == KeyCode.Up && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194))
                 {
-                    if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.South)
-                    {
-                        cursorY--;
-                        o_entities[requestingMove].moveList.RemoveAt(o_entities[requestingMove].moveList.Count - 1);
-                    }
-                    else if (o_entities[requestingMove].moveList.Count < o_entities[requestingMove].currentSkill.maxSkillDistance)
+                    if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY - 1)))
                     {
                         cursorY--;
                         o_entities[requestingMove].moveList.Add(Direction.North);
                     }
+                    hoverActor = checkPos(cursorX, cursorY);
                 }
                 else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194))
                 {
-                    if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.North)
-                    {
-                        cursorY++;
-                        o_entities[requestingMove].moveList.RemoveAt(o_entities[requestingMove].moveList.Count - 1);
-                    }
-                    else if (o_entities[requestingMove].moveList.Count < o_entities[requestingMove].currentSkill.maxSkillDistance)
+                    if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY + 1)))
                     {
                         cursorY++;
                         o_entities[requestingMove].moveList.Add(Direction.South);
                     }
+                    hoverActor = checkPos(cursorX, cursorY);
                 }
+
 
 
                 /*
@@ -1018,12 +1184,15 @@ namespace AgateDemo
                 }*/
                 else if (e.KeyCode == ScreenBrowser.confirmKey && o_entities[requestingMove].moveList.Count >= o_entities[requestingMove].currentSkill.minSkillDistance)
                 {
+
+                    hoverActor = null;
                     o_entities[requestingMove].currentSkill.targetSquare = new Cell() { x = cursorX, y = cursorY };
 
-//                    o_entities[requestingMove].hasActed = true;
+                    //                    o_entities[requestingMove].hasActed = true;
 
                     o_entities[requestingMove].currentSkill.ApplySkill(o_entities[requestingMove]);
 
+                    highlightedCells.Clear();
                     ScreenBrowser.HandleFinish();
                     if (o_entities.ContainsKey(requestingMove) == false)
                     {
@@ -1050,11 +1219,12 @@ namespace AgateDemo
                     //Update();
                     cursorX = o_entities[requestingMove].x;
                     cursorY = o_entities[requestingMove].y;
-
+                    currentActor = o_entities[requestingMove];
                     lockState = false;
 
                 }
             }
+
         }
         public static void waitAction()
         {
