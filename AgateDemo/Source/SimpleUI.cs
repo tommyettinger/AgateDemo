@@ -344,12 +344,49 @@ namespace AgateDemo
         public static string RangeToString(Skill sk)
         {
             string current = "Range: ";
-            if (sk.maxSkillDistance == 0)
-                current += "Personal";
-            else if (sk.minSkillDistance == sk.maxSkillDistance)
-                current += sk.minSkillDistance;
-            else
-                current += "" + sk.minSkillDistance + "-" + sk.maxSkillDistance;
+            switch (sk.areaKind)
+            {
+                case SkillAreaKind.SingleTarget:
+                    {
+                        if (sk.maxSkillDistance == 0)
+                            current += "Personal";
+                        else if (sk.minSkillDistance == sk.maxSkillDistance)
+                            current += sk.minSkillDistance;
+                        else
+                            current += "" + sk.minSkillDistance + "-" + sk.maxSkillDistance;
+                        break;
+                    }
+                case SkillAreaKind.Burst:
+                    {
+                        current = "Burst: ";
+                        current += "Radius " + sk.radius;
+                        if (sk.maxSkillDistance == 0)
+                            current += ", Melee Range";
+                        else if (sk.minSkillDistance == sk.maxSkillDistance)
+                            current += " at Range " + sk.minSkillDistance;
+                        else
+                            current += " at Range " + sk.minSkillDistance + "-" + sk.maxSkillDistance;
+                        break;
+                    }
+                case SkillAreaKind.Ring:
+                    {
+                        current = "Ring: ";
+                        current += "Radius " + sk.radius;
+                        if (sk.maxSkillDistance == 0)
+                            current += ", Melee Range";
+                        else if (sk.minSkillDistance == sk.maxSkillDistance)
+                            current += " at Range " + sk.minSkillDistance;
+                        else
+                            current += " at Range " + sk.minSkillDistance + "-" + sk.maxSkillDistance;
+                        break;
+                    }
+                case SkillAreaKind.Spray:
+                    {
+                        current = "Spray: ";
+                        current += "Length " + sk.radius;
+                        break;
+                    }
+            }
             return current;
         }
     }
@@ -397,7 +434,11 @@ namespace AgateDemo
 
                 currentLine++;
                 mb.ui.font.DrawText(renderX, renderY + (mb.ui.font.FontHeight * currentLine), "" + mandrillDict['│']);
-                mb.ui.font.DrawText(renderX + 6.0, renderY + (mb.ui.font.FontHeight * (currentLine)), ("Damage: " + mb.skillList[i].damage + "   " + SkillView.RangeToString(mb.skillList[i])).PadRight(maxWidth - 2, ' '));
+                mb.ui.font.DrawText(renderX + 6.0, renderY + (mb.ui.font.FontHeight * (currentLine)), ("Damage: " + mb.skillList[i].damage).PadRight(maxWidth - 2, ' '));
+                mb.ui.font.DrawText(renderX + 6.0 * (maxWidth - 1), renderY + (mb.ui.font.FontHeight * currentLine), "" + mandrillDict['│']);
+                currentLine++;
+                mb.ui.font.DrawText(renderX, renderY + (mb.ui.font.FontHeight * currentLine), "" + mandrillDict['│']);
+                mb.ui.font.DrawText(renderX + 6.0, renderY + (mb.ui.font.FontHeight * (currentLine)), (SkillView.RangeToString(mb.skillList[i])).PadRight(maxWidth - 2, ' '));
                 mb.ui.font.DrawText(renderX + 6.0 * (maxWidth - 1), renderY + (mb.ui.font.FontHeight * currentLine), "" + mandrillDict['│']);
             }
             tx = mandrillDict['└'].ToString();

@@ -126,11 +126,13 @@ namespace AgateDemo
         static Cell requestingMove = new Cell() { x = -1, y = -1 };
         public static Mob currentActor = null, hoverActor = null;
         static Surface tileset;
-        static int[,] map, map2;
+        public static int[,] map, map2;
         public static Dictionary<Cell, Mob> entities, o_entities;
-        public static Dictionary<Cell, int> highlightedCells = new Dictionary<Cell, int>();
+        public static Dictionary<Cell, int> highlightedCells = new Dictionary<Cell, int>(), highlightedTargetCells = new Dictionary<Cell, int>();
         public static Dictionary<Cell, Entity> fixtures;
 
+        public static Dictionary<Cell, int> displayDamage = new Dictionary<Cell, int>();
+        public static Dictionary<Cell, bool> displayKills = new Dictionary<Cell, bool>();
         // public static SimpleUI basicUI;
 
         static int tileWidth = 48;
@@ -172,7 +174,83 @@ namespace AgateDemo
                 ret = null;
             return ret;
         }
+        public static void AnimateResults(SkillResult skr)
+        {
 
+            minVisibleY = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20;
+            maxVisibleY = minVisibleY;
+            for (int row = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20; row <= mapHeight && row <= cursorY + 20; row++)
+            {
+                maxVisibleY++;
+
+            }
+            minVisibleX = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10;
+            maxVisibleX = minVisibleX;
+            for (var col = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10; col <= mapWidth && (col < cursorX + 10 || col < 20); col++)
+            {
+                maxVisibleX++;
+            }
+            foreach (Cell c in skr.damages.Keys)
+            {
+                //while (Timing.TotalMilliseconds - startingTime < 200 && (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)) ;
+                if (c.x >= minVisibleX && c.x <= maxVisibleX && c.y >= minVisibleY && c.y <= maxVisibleY)
+                {
+                    currentActor = null;
+                    lockForAnimation = true;
+                    displayDamage.Add(c, skr.damages[c]);
+                }
+            }
+            double startingTime = Timing.TotalMilliseconds;
+            if (displayDamage.Count > 0)
+            {
+                while (Timing.TotalMilliseconds - startingTime < 500)
+                {
+                    System.Threading.Thread.Sleep(25);
+                    if (Display.CurrentWindow.IsClosed)
+                        return;
+                    Display.BeginFrame();
+                    Show();
+                    Display.EndFrame();
+                    Core.KeepAlive();
+                }
+                displayDamage.Clear();
+            }
+            startingTime = Timing.TotalMilliseconds;
+            foreach (Cell c in skr.kills.Keys)
+            {
+                //while (Timing.TotalMilliseconds - startingTime < 200 && (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)) ;
+                if (c.x >= minVisibleX && c.x <= maxVisibleX && c.y >= minVisibleY && c.y <= maxVisibleY)
+                {
+                    currentActor = null;
+                    lockForAnimation = true;
+                    displayKills.Add(c, skr.kills[c]);
+                }
+            }
+            if (displayKills.Count > 0)
+            {
+                while (Timing.TotalMilliseconds - startingTime < 1000)
+                {
+                    System.Threading.Thread.Sleep(25);
+                    if (Display.CurrentWindow.IsClosed)
+                        return;
+                    Display.BeginFrame();
+                    Show();
+                    Display.EndFrame();
+                    Core.KeepAlive();
+                }
+                displayKills.Clear();
+            }
+            if (Display.CurrentWindow.IsClosed)
+                return;
+            Display.BeginFrame();
+            Show();
+            Display.EndFrame();
+
+            //cursorX = ent.x;
+            //cursorY = ent.y;
+
+            lockForAnimation = false;
+        }
         public static void MoveMob(Mob ent, IEnumerable<Direction> movepath)
         {
 
@@ -342,22 +420,22 @@ namespace AgateDemo
             if (entities.ContainsKey(cEast))
             {
                 ent.currentSkill.targetSquare = cEast;
-                ent.currentSkill.ApplySkill(ent);
+                AnimateResults(ent.currentSkill.ApplySkill(ent));
             }
             else if (entities.ContainsKey(cWest))
             {
                 ent.currentSkill.targetSquare = cWest;
-                ent.currentSkill.ApplySkill(ent);
+                AnimateResults(ent.currentSkill.ApplySkill(ent));
             }
             else if (entities.ContainsKey(cNorth))
             {
                 ent.currentSkill.targetSquare = cNorth;
-                ent.currentSkill.ApplySkill(ent);
+                AnimateResults(ent.currentSkill.ApplySkill(ent));
             }
             else if (entities.ContainsKey(cSouth))
             {
                 ent.currentSkill.targetSquare = cSouth;
-                ent.currentSkill.ApplySkill(ent);
+                AnimateResults(ent.currentSkill.ApplySkill(ent));
             }
             ent.moveList.Clear();
             /*                entities[ent.pos] = ent;
@@ -377,7 +455,7 @@ namespace AgateDemo
 
                 if (checkPos(nt.x, nt.y) != null)
                     return Spawn(tileNo, width, height);
-                nt.skillList.Add(new Skill("Basic Attack", 4, 1));
+                nt.skillList.Add(new Skill("Basic Attack", rnd.Next(3, 7), 1));
                 nt.currentSkill = nt.skillList[0];
                 entities[nt.pos] = nt;
                 o_entities[nt.o_pos] = nt;
@@ -461,24 +539,39 @@ namespace AgateDemo
             nt = new Mob(541, 6, 7, true); //beholder
             nt.skillList.Add(new Skill("Eye Beam", 3, 8));
             nt.skillList.Add(new Skill("Disintegrate", 10, 2));
+            nt.skillList.Add(new Skill("Horrid Glare", 2, 0, 1, SkillAreaKind.Spray, 5, false));
+            nt.ui.addSkills(nt);
+            entities[nt.pos] = nt;
+            o_entities[nt.o_pos] = nt;
+            nt = new Mob(541, 6, 8, true); //beholder
+            nt.skillList.Add(new Skill("Eye Beam", 3, 8));
+            nt.skillList.Add(new Skill("Disintegrate", 10, 2));
+            nt.skillList.Add(new Skill("Horrid Glare", 2, 0, 1, SkillAreaKind.Spray, 5, false));
+            nt.ui.addSkills(nt);
+            entities[nt.pos] = nt;
+            o_entities[nt.o_pos] = nt;
+            nt = new Mob(541, 6, 9, true); //beholder
+            nt.skillList.Add(new Skill("Eye Beam", 3, 8));
+            nt.skillList.Add(new Skill("Disintegrate", 10, 2));
+            nt.skillList.Add(new Skill("Horrid Glare", 2, 0, 1, SkillAreaKind.Spray, 5, false));
             nt.ui.addSkills(nt);
             entities[nt.pos] = nt;
             o_entities[nt.o_pos] = nt;
             nt = new Mob(503, 15, 4, true); //demogorgon
-            nt.skillList.Add(new Skill("Tentacle Flail", 3, 3));
+            nt.skillList.Add(new Skill("Tentacle Flail", 3, 0, 0, SkillAreaKind.Ring, 2, true));
             nt.skillList.Add(new Skill("Vicious Bites", 10, 1));
             nt.ui.addSkills(nt);
             entities[nt.pos] = nt;
             o_entities[nt.o_pos] = nt;
             nt = new Mob(1409, 4, 18, true); //drow
-            nt.skillList.Add(new Skill("Sword Slash", 5, 1));
+            nt.skillList.Add(new Skill("Sword Slash", 5, 0, 0, SkillAreaKind.Ring, 1, false));
             nt.skillList.Add(new Skill("Crossbow", 3, 6));
             nt.ui.addSkills(nt);
             entities[nt.pos] = nt;
             o_entities[nt.o_pos] = nt;
             nt = new Mob(1406, 4, 3, true); //baku
             nt.skillList.Add(new Skill("Tusk Attack", 6, 1));
-            nt.skillList.Add(new Skill("Trunk Slap", 2, 2));
+            nt.skillList.Add(new Skill("Trunk Slap", 2, 0, 0, SkillAreaKind.Ring, 3, true));
             Skill heal = new Skill("Rapid Healing", -5, 0);
             heal.minSkillDistance = 0;
             nt.skillList.Add(heal);
@@ -511,10 +604,10 @@ namespace AgateDemo
             entities[nt.pos] = nt;
             o_entities[nt.pos] = nt;
             */
-            for (int i = 0, c = 0; i < 222; c++, i++)//= rnd.Next(2, 7)) //check for c to limit number of entities
+            /*for (int i = 0, c = 0; i < 222; c++, i++)//= rnd.Next(2, 7)) //check for c to limit number of entities
             {
                 Spawn(i, mw, mh);
-            }
+            }*/
             for (int i = 226; i < 434; i++)
             {
                 Spawn(i, mw, mh);
@@ -652,7 +745,11 @@ namespace AgateDemo
                     // maxVisibleX++;
                     if (map[row, col] == DungeonMap.gr)
                     {
-                        if (highlightedCells.ContainsKey(new Cell(col, row)))
+                        if (highlightedTargetCells.ContainsKey(new Cell(col, row)))
+                        {
+                            tileset.Color = Color.FromHsv(10.0, 0.7, 0.70 + (((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 4000 : (2000 - (Timing.TotalMilliseconds % 2000)) / 4000));
+                        }
+                        else if (highlightedCells.ContainsKey(new Cell(col, row)))
                         {
                             tileset.Color = Color.FromHsv(190.0, 0.5, 0.75 + (((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 4000 : (2000 - (Timing.TotalMilliseconds % 2000)) / 4000));
                         }
@@ -770,6 +867,40 @@ namespace AgateDemo
                         }
 
                     }
+                    //     mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1000.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1000;
+                    //       mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1700.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1700;
+                    foreach (Cell cl in displayDamage.Keys)
+                    {
+                        if (cl.y == row && cl.x == col)
+                        {
+                            if (displayDamage[cl] < 10)
+                            {
+                                int offset = (int)(((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 50 : (2000 - (Timing.TotalMilliseconds % 2000)) / 50);
+                                mandrillFont.Color = Color.DarkRed;
+                                mandrillFont.DrawText(pX + 18, pY + 16 - offset, "" + displayDamage[cl]);
+                                mandrillFont.Color = Color.White;
+                            }
+                            else if (displayDamage[cl] >= 10 && displayDamage[cl] < 100)
+                            {
+                                int offset = (int)(((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 40 : (2000 - (Timing.TotalMilliseconds % 2000)) / 40);
+                                mandrillFont.Color = Color.DarkRed;
+                                mandrillFont.DrawText(pX + 12, pY + 16 - offset, "" + displayDamage[cl]);
+                                mandrillFont.Color = Color.White;
+                            }
+                        }
+                    }
+                    foreach (Cell cl in displayKills.Keys)
+                    {
+                        if (cl.y == row && cl.x == col && displayKills[cl])
+                        {
+                            int offset = (int)(((Timing.TotalMilliseconds % 4000) < 2000) ? (Timing.TotalMilliseconds % 4000) / 100 : (4000 - (Timing.TotalMilliseconds % 4000)) / 100);
+                            mandrillFont.Color = Color.DarkRed;
+                            mandrillFont.DrawText(pX, pY + 16 - offset, "DEAD");
+                            mandrillFont.Color = Color.White;
+
+                        }
+                    }
+
                     pX += tileVIncrease;
                 }
                 //pY += tileHIncrease;
@@ -882,6 +1013,169 @@ namespace AgateDemo
 
             }
         }
+        public static void calculateAllTargets(Mob user, int startX, int startY, Skill sk)
+        {
+            SkillAreaKind sak = sk.areaKind;
+            int radius = sk.radius;
+            switch (sak)
+            {
+                case SkillAreaKind.Ring:
+                    {   
+                        //assuming targetSquare of 10, 11 and radius 1:
+                        int minX = startX - radius; // 9
+                        if (minX < 0)
+                            minX = 0;
+                        int minY = startY - radius; // 10
+                        if (minY < 0)
+                            minY = 0;
+                        int maxX = startX + radius; // 11
+                        if (maxX > Demo.map.GetUpperBound(1))
+                            maxX = Demo.map.GetUpperBound(1);
+                        int maxY = startY + radius; // 12
+                        if (maxY > Demo.map.GetUpperBound(0))
+                            maxY = Demo.map.GetUpperBound(0);
+
+                        for (int i = minX; i <= maxX; i++)
+                        {
+                            for (int j = minY; j <= maxY; j++)
+                            {
+                                if (j - startY > i - startX + radius ||        // 10 - 10 > 10 - 11 + 1
+                                    j - startY > -1 * (i - startX) + radius || // 10 - 10 > -10 + 11 + 1
+                                    j - startY < i - startX - radius ||        // 10 - 10 < 10 - 11 - 1
+                                    j - startY < -1 * (i - startX) - radius || // 10 - 10 < -10 + 11 - 1
+                                    (i == startX && j == startY))
+                                    continue;
+                                if (sk.hitsAllies == false && checkPos(i, j) != null && checkPos(i, j).friendly == user.friendly)
+                                    continue;
+                                if (map[j, i] == DungeonMap.gr)
+                                    highlightedTargetCells.Add(new Cell(i, j), 1);
+                            }
+                        }
+                        break;
+                    }
+                case SkillAreaKind.Burst:
+                    {
+                        Dictionary<Cell, int> damages = new Dictionary<Cell, int>();
+                        Dictionary<Cell, bool> kills = new Dictionary<Cell, bool>();
+                        //assuming targetSquare of 10, 11 and radius 1:
+                        int minX = startX - radius; // 9
+                        if (minX < 0)
+                            minX = 0;
+                        int minY = startY - radius; // 10
+                        if (minY < 0)
+                            minY = 0;
+                        int maxX = startX + radius; // 11
+                        if (maxX > Demo.map.GetUpperBound(1))
+                            maxX = Demo.map.GetUpperBound(1);
+                        int maxY = startY + radius; // 12
+                        if (maxY > Demo.map.GetUpperBound(0))
+                            maxY = Demo.map.GetUpperBound(0);
+
+                        for (int i = minX; i <= maxX; i++)
+                        {
+                            for (int j = minY; j <= maxY; j++)
+                            {
+                                if (j - startY > i - startX + radius ||        // 10 - 10 > 10 - 11 + 1
+                                    j - startY > -1 * (i - startX) + radius || // 10 - 10 > -10 + 11 + 1
+                                    j - startY < i - startX - radius ||        // 10 - 10 < 10 - 11 - 1
+                                    j - startY < -1 * (i - startX) - radius)   // 10 - 10 < -10 + 11 - 1
+                                    continue;
+
+                                if (sk.hitsAllies == false && checkPos(i, j) != null && checkPos(i, j).friendly == user.friendly)
+                                    continue;
+                                if (map[j, i] == DungeonMap.gr)
+                                    highlightedTargetCells.Add(new Cell(i, j), 1);
+                            }
+                        }
+                        break;
+                    }
+                case SkillAreaKind.Spray:
+                    {
+
+                        Dictionary<Cell, int> damages = new Dictionary<Cell, int>();
+                        Dictionary<Cell, bool> kills = new Dictionary<Cell, bool>();
+                        //assuming targetSquare of 10, 11 and radius 2:
+                        int minX = startX - radius; // 8
+                        if (minX < 0)
+                            minX = 0;
+                        int minY = startY - radius; // 9
+                        if (minY < 0)
+                            minY = 0;
+                        int maxX = startX + radius; // 12
+                        if (maxX > Demo.map.GetUpperBound(1))
+                            maxX = Demo.map.GetUpperBound(1);
+                        int maxY = startY + radius; // 13
+                        if (maxY > Demo.map.GetUpperBound(0))
+                            maxY = Demo.map.GetUpperBound(0);
+
+                        if (startY == user.y && startX == user.x)
+                        {
+                            minY++;
+                            maxY++;
+                        }
+                        for (int i = minX; i <= maxX; i++)
+                        {
+                            for (int j = minY; j <= maxY; j++)
+                            {
+                                if (startY == user.y && startX == user.x)
+                                {
+                                    if (j - startY > radius + 1 ||
+                                        j - startY < i - startX + 1 ||
+                                        j - startY < -1 * (i - startX) + 1 ||
+                                        (i == startX && j == startY))
+                                        continue;
+                                }
+                                else if (startY - user.y >= user.x - startX && startY - user.y >= startX - user.x)
+                                {
+                                    if (j - startY > radius ||
+                                        j - startY < i - startX ||
+                                        j - startY < -1 * (i - startX))// ||  //+1
+                                        //(i == startX && j == startY))
+                                        continue;
+                                }
+                                else if (user.y - startY >= user.x - startX && user.y - startY >= startX - user.x)
+                                {
+                                    if (j - startY < -1 * radius ||
+                                        j - startY > i - startX ||
+                                        j - startY > -1 * (i - startX))// || //-1
+                                       // (i == startX && j == startY))
+                                        continue;
+                                }
+                                else if (startX - user.x > user.y - startY && startX - user.x > startY - user.y)
+                                {
+                                    if (i - startX > radius ||
+                                        i - startX < j - startY ||
+                                        i - startX < -1 * (j - startY))// || // + 1 
+                                        //(i == startX && j == startY))
+                                        continue;
+                                }
+                                else if (user.x - startX > user.y - startY && user.x - startX > startY - user.y)
+                                {
+                                    if (i - startX < -1 * radius ||
+                                        i - startX > j - startY ||
+                                        i - startX > -1 * (j - startY))// || //- 1
+                                        //(i == startX && j == startY))
+                                        continue;
+                                }
+
+                                if (sk.hitsAllies == false && checkPos(i, j) != null && checkPos(i, j).friendly == user.friendly)
+                                    continue;
+                                if (map[j, i] == DungeonMap.gr)
+                                    highlightedTargetCells.Add(new Cell(i, j), 1);
+                            }
+                        }
+                    }
+
+                    break;
+                case SkillAreaKind.SingleTarget:
+                    {
+                        if (sk.hitsAllies == false && checkPos(startX, startY) != null && checkPos(startX, startY).friendly == user.friendly)
+                            break;
+                        highlightedTargetCells.Add(new Cell(startX, startY), 1);
+                        break;
+                    }
+            }
+        }
         public static void HighlightMove()
         {
 
@@ -901,6 +1195,18 @@ namespace AgateDemo
                 int highY = o_entities[requestingMove].y;
                 calculateAllMoves(highX, highY, o_entities[requestingMove].currentSkill.maxSkillDistance, false);
                 removeMovesUnderMinimum(highX, highY, o_entities[requestingMove].currentSkill.minSkillDistance, false);
+                HighlightSkillArea();
+            }
+        }
+        public static void HighlightSkillArea()
+        {
+            highlightedTargetCells.Clear();
+            if (o_entities.ContainsKey(requestingMove))
+            {
+                o_entities[requestingMove].currentSkill = o_entities[requestingMove].skillList[o_entities[requestingMove].ui.currentScreen.currentMenuItem];
+                int highX = o_entities[requestingMove].x;
+                int highY = o_entities[requestingMove].y;
+                calculateAllTargets(o_entities[requestingMove], cursorX, cursorY, o_entities[requestingMove].currentSkill);
             }
         }
         public static void OnKeyDown_SelectMove(InputEventArgs e)
@@ -915,7 +1221,7 @@ namespace AgateDemo
                 }
                 else if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194) && checkPos(cursorX - 1, cursorY) == null)
                 {
-                    if(highlightedCells.ContainsKey(new Cell(cursorX - 1, cursorY)))
+                    if (highlightedCells.ContainsKey(new Cell(cursorX - 1, cursorY)))
                     {
                         cursorX--;
                         o_entities[requestingMove].moveList.Add(Direction.West);
@@ -1091,7 +1397,7 @@ namespace AgateDemo
             o_entities[requestingMove].currentSkill = o_entities[requestingMove].skillList[o_entities[requestingMove].ui.currentScreen.currentMenuItem];
             if (lockState && !lockForAnimation && initiative[currentInitiative] == requestingMove &&
                              o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly)
-                            // o_entities[requestingMove].moveList.Count <= o_entities[requestingMove].currentSkill.maxSkillDistance)
+            // o_entities[requestingMove].moveList.Count <= o_entities[requestingMove].currentSkill.maxSkillDistance)
             {
                 /*
                 if (e.KeyCode == KeyCode.Space)
@@ -1105,6 +1411,7 @@ namespace AgateDemo
                     cursorY = o_entities[requestingMove].y;
                     o_entities[requestingMove].moveList.Clear();
                     highlightedCells.Clear();
+                    highlightedTargetCells.Clear();
                     ScreenBrowser.HandleRecall();
                     lockState = true;
                     ScreenBrowser.UnHide();
@@ -1115,6 +1422,7 @@ namespace AgateDemo
                     {
                         cursorX--;
                         o_entities[requestingMove].moveList.Add(Direction.West);
+                        HighlightSkillArea();
                     }
                     hoverActor = checkPos(cursorX, cursorY);
                 }
@@ -1124,6 +1432,7 @@ namespace AgateDemo
                     {
                         cursorX++;
                         o_entities[requestingMove].moveList.Add(Direction.East);
+                        HighlightSkillArea();
                     }
                     hoverActor = checkPos(cursorX, cursorY);
                 }
@@ -1133,6 +1442,7 @@ namespace AgateDemo
                     {
                         cursorY--;
                         o_entities[requestingMove].moveList.Add(Direction.North);
+                        HighlightSkillArea();
                     }
                     hoverActor = checkPos(cursorX, cursorY);
                 }
@@ -1142,6 +1452,7 @@ namespace AgateDemo
                     {
                         cursorY++;
                         o_entities[requestingMove].moveList.Add(Direction.South);
+                        HighlightSkillArea();
                     }
                     hoverActor = checkPos(cursorX, cursorY);
                 }
@@ -1190,9 +1501,10 @@ namespace AgateDemo
 
                     //                    o_entities[requestingMove].hasActed = true;
 
-                    o_entities[requestingMove].currentSkill.ApplySkill(o_entities[requestingMove]);
-
+                    SkillResult sa = o_entities[requestingMove].currentSkill.ApplySkill(o_entities[requestingMove]);
                     highlightedCells.Clear();
+                    highlightedTargetCells.Clear();
+                    AnimateResults(sa);
                     ScreenBrowser.HandleFinish();
                     if (o_entities.ContainsKey(requestingMove) == false)
                     {
