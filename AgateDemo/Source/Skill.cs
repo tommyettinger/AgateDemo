@@ -198,16 +198,16 @@ namespace AgateDemo
                         Dictionary<Cell, int> damages = new Dictionary<Cell, int>();
                         Dictionary<Cell, bool> kills = new Dictionary<Cell, bool>();
                         //assuming targetSquare of 10, 11 and radius 2:
-                        int minX = targetSquare.x - radius; // 8
+                        int minX = targetSquare.x - (radius - 1); // 8
                         if (minX < 0)
                             minX = 0;
-                        int minY = targetSquare.y - radius; // 9
+                        int minY = targetSquare.y - (radius - 1); // 9
                         if (minY < 0)
                             minY = 0;
-                        int maxX = targetSquare.x + radius; // 12
+                        int maxX = targetSquare.x + (radius - 1); // 12
                         if (maxX > Demo.map.GetUpperBound(1))
                             maxX = Demo.map.GetUpperBound(1);
-                        int maxY = targetSquare.y + radius; // 13
+                        int maxY = targetSquare.y + (radius - 1); // 13
                         if (maxY > Demo.map.GetUpperBound(0))
                             maxY = Demo.map.GetUpperBound(0);
                         if (targetSquare.y == user.y && targetSquare.x == user.x)

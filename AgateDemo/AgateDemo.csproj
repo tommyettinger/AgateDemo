@@ -60,13 +60,13 @@
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Accessibility">
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="AgateLib, Version=0.3.9.0, Culture=neutral, PublicKeyToken=642f596f456eeb64, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\AgateLib.dll</HintPath>
+    </Reference>
+    <Reference Include="AgateLib.WinForms, Version=0.3.2.0, Culture=neutral, PublicKeyToken=4817d5d3ffacde03, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\AgateLib.WinForms.dll</HintPath>
     </Reference>
     <Reference Include="AgateOTK, Version=0.3.2.0, Culture=neutral, PublicKeyToken=2d918b4908ef6225, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -82,9 +82,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing">
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -101,7 +98,9 @@
     <Content Include="AgateLib.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="AgateLib.WinForms.dll" />
+    <Content Include="AgateLib.WinForms.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="AgateLib.WinForms.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
