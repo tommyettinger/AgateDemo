@@ -126,9 +126,11 @@ namespace AgateDemo
         static Cell requestingMove = new Cell() { x = -1, y = -1 };
         public static Mob currentActor = null, hoverActor = null;
         static Surface tileset;
+
+        public static int mapDisplayWidth = 960, mapDisplayHeight = 672;
         public static int[,] map, map2;
         public static Dictionary<Cell, Mob> entities, o_entities;
-        public static Dictionary<Cell, int> highlightedCells = new Dictionary<Cell, int>(), highlightedTargetCells = new Dictionary<Cell, int>();
+        public static Dictionary<Cell, int> highlightedCells = new Dictionary<Cell, int>(), highlightedTargetCells = new Dictionary<Cell, int>(), nonHighlightedFreeCells = new Dictionary<Cell,int>();
         public static Dictionary<Cell, Entity> fixtures;
 
         public static Dictionary<Cell, int> displayDamage = new Dictionary<Cell, int>();
@@ -195,7 +197,7 @@ namespace AgateDemo
                 //while (Timing.TotalMilliseconds - startingTime < 200 && (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)) ;
                 if (c.x >= minVisibleX && c.x <= maxVisibleX && c.y >= minVisibleY && c.y <= maxVisibleY)
                 {
-                    currentActor = null;
+                    //currentActor = null;
                     lockForAnimation = true;
                     displayDamage.Add(c, skr.damages[c]);
                 }
@@ -221,7 +223,7 @@ namespace AgateDemo
                 //while (Timing.TotalMilliseconds - startingTime < 200 && (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)) ;
                 if (c.x >= minVisibleX && c.x <= maxVisibleX && c.y >= minVisibleY && c.y <= maxVisibleY)
                 {
-                    currentActor = null;
+                    //currentActor = null;
                     lockForAnimation = true;
                     displayKills.Add(c, skr.kills[c]);
                 }
@@ -566,6 +568,7 @@ namespace AgateDemo
             nt = new Mob(1409, 4, 18, true); //drow
             nt.skillList.Add(new Skill("Sword Slash", 5, 0, 0, SkillAreaKind.Ring, 1, false));
             nt.skillList.Add(new Skill("Crossbow", 3, 6));
+            nt.skillList.Add(new Skill("Choking Bomb", 3, 2, 4, SkillAreaKind.Burst, 2, true));
             nt.ui.addSkills(nt);
             entities[nt.pos] = nt;
             o_entities[nt.o_pos] = nt;
@@ -578,6 +581,14 @@ namespace AgateDemo
             nt.ui.addSkills(nt);
             entities[nt.pos] = nt;
             o_entities[nt.o_pos] = nt;
+            nt = new Mob(102, 15, 15, true); //Tengu
+            nt.skillList.Add(new Skill("Leaf Chop", 6, 1));
+            nt.skillList.Add(new Skill("Fan Blast", 3, 0, 1, SkillAreaKind.Spray, 4, true));
+            nt.skillList.Add(new Skill("Tornado", 5, 3, 6, SkillAreaKind.Burst, 1, true));
+            nt.ui.addSkills(nt);
+            entities[nt.pos] = nt;
+            o_entities[nt.o_pos] = nt;
+
             /*
             nt = new Mob(414, 11, 5, true);
             entities[nt.pos] = nt;
@@ -650,7 +661,7 @@ namespace AgateDemo
             //wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", ((mapWidth + 1) * 32) + (tileHIncrease * (1 + mapHeight)), (mapHeight * tileVIncrease) + tileHeight);
 
             Display.RenderState.WaitForVerticalBlank = true;
-            wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", 960, 672);//(19 * tileVIncrease) + tileHeight); //((20) * 32) + (tileHIncrease * (20))
+            wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", mapDisplayWidth, mapDisplayHeight + 32, false);      //(19 * tileVIncrease) + tileHeight); //((20) * 32) + (tileHIncrease * (20))
 
             tileset = new Surface("Resources" + "/" + "slashem-revised.png"); //System.IO.Path.DirectorySeparatorChar
 
@@ -662,6 +673,11 @@ namespace AgateDemo
             //ScreenBrowser.Show();
             //            basicUI = new SimpleUI(new Screen("Mobs with Jobs!", new List<MenuItem>() { }), mandrillFont);
             Keyboard.KeyUp += new InputEventHandler(onKeyUp);
+
+            MessageBrowser.font = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
+            MessageBrowser.x = 100;
+            MessageBrowser.y = mapDisplayHeight + 4;
+            
         }
 
         public static void Update()
@@ -910,6 +926,9 @@ namespace AgateDemo
                 UnitInfo.ShowMobInfo(hoverActor);
             else if (currentActor != null)
                 UnitInfo.ShowMobInfo(currentActor);
+            Display.FillRect(new Rectangle(0, mapDisplayHeight, mapDisplayWidth, 32), (Color.Black));
+
+            MessageBrowser.Show();
             //mandrillFont.DrawText(32.0, 32.0, "FPS: " + (int)Display.FramesPerSecond);
         }
 
@@ -1002,14 +1021,18 @@ namespace AgateDemo
 
                 if (map[startY, startX] != DungeonMap.gr)
                     return;
-                if (highlightedCells.Count != 0 && performEntCheck && checkPos(startX, startY) != null)
-                    return;
-                if (highlightedCells.ContainsKey(c))
+                //if (nonHighlightedFreeCells.Count == 0)// && performEntCheck && checkPos(startX, startY) != null)
+                //    nonHighlightedFreeCells.Add(c, 1);
+                    //return;
+                if (highlightedCells.ContainsKey(c) && !nonHighlightedFreeCells.ContainsKey(c))
+                {
                     highlightedCells.Remove(c);
-                calculateAllMoves(startX - 1, startY, numMoves - 1, performEntCheck);
-                calculateAllMoves(startX + 1, startY, numMoves - 1, performEntCheck);
-                calculateAllMoves(startX, startY - 1, numMoves - 1, performEntCheck);
-                calculateAllMoves(startX, startY + 1, numMoves - 1, performEntCheck);
+                    nonHighlightedFreeCells.Add(c, 1);
+                }
+                removeMovesUnderMinimum(startX - 1, startY, numMoves - 1, performEntCheck);
+                removeMovesUnderMinimum(startX + 1, startY, numMoves - 1, performEntCheck);
+                removeMovesUnderMinimum(startX, startY - 1, numMoves - 1, performEntCheck);
+                removeMovesUnderMinimum(startX, startY + 1, numMoves - 1, performEntCheck);
 
             }
         }
@@ -1178,7 +1201,8 @@ namespace AgateDemo
         }
         public static void HighlightMove()
         {
-
+            MessageBrowser.AddHint("Move the cursor (which surrounds the corners of a floor tile, changing color) with the arrow keys.", 10000.0);
+            MessageBrowser.AddHint("After moving the cursor to a place within the green area, press Z to move your creature.", 10000.0);
             if (highlightedCells.Count == 0 && o_entities.ContainsKey(requestingMove))
             {
                 int highX = o_entities[requestingMove].x;
@@ -1188,6 +1212,8 @@ namespace AgateDemo
         }
         public static void HighlightSkill()
         {
+            MessageBrowser.AddHint("Move the cursor (which surrounds the corners of a floor tile, changing color) with the arrow keys. ", 10000.0);
+            MessageBrowser.AddHint("After moving the red area with the cursor, press Z to attack everything with a red tile under it.", 10000.0);
             o_entities[requestingMove].currentSkill = o_entities[requestingMove].skillList[o_entities[requestingMove].ui.currentScreen.currentMenuItem];
             if (highlightedCells.Count == 0 && o_entities.ContainsKey(requestingMove))
             {
@@ -1204,9 +1230,8 @@ namespace AgateDemo
             if (o_entities.ContainsKey(requestingMove))
             {
                 o_entities[requestingMove].currentSkill = o_entities[requestingMove].skillList[o_entities[requestingMove].ui.currentScreen.currentMenuItem];
-                int highX = o_entities[requestingMove].x;
-                int highY = o_entities[requestingMove].y;
-                calculateAllTargets(o_entities[requestingMove], cursorX, cursorY, o_entities[requestingMove].currentSkill);
+                if (!nonHighlightedFreeCells.ContainsKey(new Cell(cursorX, cursorY)))
+                    calculateAllTargets(o_entities[requestingMove], cursorX, cursorY, o_entities[requestingMove].currentSkill);
             }
         }
         public static void OnKeyDown_SelectMove(InputEventArgs e)
@@ -1291,7 +1316,6 @@ namespace AgateDemo
                     //}
                     //if (o_entities[requestingMove].moveList.Count == o_entities[requestingMove].maxMoveDistance)
                     // {
-
                     ScreenBrowser.HandleFinish();
                     lockState = false;
                     highlightedCells.Clear();
@@ -1410,6 +1434,7 @@ namespace AgateDemo
                     cursorX = o_entities[requestingMove].x;
                     cursorY = o_entities[requestingMove].y;
                     o_entities[requestingMove].moveList.Clear();
+                    nonHighlightedFreeCells.Clear();
                     highlightedCells.Clear();
                     highlightedTargetCells.Clear();
                     ScreenBrowser.HandleRecall();
@@ -1418,7 +1443,7 @@ namespace AgateDemo
                 }
                 else if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194))
                 {
-                    if (highlightedCells.ContainsKey(new Cell(cursorX - 1, cursorY)))
+                    if (highlightedCells.ContainsKey(new Cell(cursorX - 1, cursorY)) || nonHighlightedFreeCells.ContainsKey(new Cell(cursorX - 1, cursorY)))
                     {
                         cursorX--;
                         o_entities[requestingMove].moveList.Add(Direction.West);
@@ -1428,7 +1453,7 @@ namespace AgateDemo
                 }
                 else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194))
                 {
-                    if (highlightedCells.ContainsKey(new Cell(cursorX + 1, cursorY)))
+                    if (highlightedCells.ContainsKey(new Cell(cursorX + 1, cursorY)) || nonHighlightedFreeCells.ContainsKey(new Cell(cursorX + 1, cursorY)))
                     {
                         cursorX++;
                         o_entities[requestingMove].moveList.Add(Direction.East);
@@ -1438,7 +1463,7 @@ namespace AgateDemo
                 }
                 else if (e.KeyCode == KeyCode.Up && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194))
                 {
-                    if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY - 1)))
+                    if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY - 1)) || nonHighlightedFreeCells.ContainsKey(new Cell(cursorX, cursorY - 1)))
                     {
                         cursorY--;
                         o_entities[requestingMove].moveList.Add(Direction.North);
@@ -1448,7 +1473,7 @@ namespace AgateDemo
                 }
                 else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194))
                 {
-                    if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY + 1)))
+                    if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY + 1)) || nonHighlightedFreeCells.ContainsKey(new Cell(cursorX, cursorY + 1)))
                     {
                         cursorY++;
                         o_entities[requestingMove].moveList.Add(Direction.South);
@@ -1493,17 +1518,23 @@ namespace AgateDemo
                     else
                         o_entities[requestingMove].moveList.Add(Direction.South);
                 }*/
-                else if (e.KeyCode == ScreenBrowser.confirmKey && o_entities[requestingMove].moveList.Count >= o_entities[requestingMove].currentSkill.minSkillDistance)
+                else if (e.KeyCode == ScreenBrowser.confirmKey)// && o_entities[requestingMove].moveList.Count >= o_entities[requestingMove].currentSkill.minSkillDistance)
                 {
-
+                    Cell cursorPos = new Cell() { x = cursorX, y = cursorY };
+                    if (nonHighlightedFreeCells.ContainsKey(cursorPos))
+                    {
+                        MessageBrowser.AddMessage("Minimum range not met, move the cursor into a highlighted area.", 5000.0, true);
+                        return;
+                    }
+                    o_entities[requestingMove].currentSkill.targetSquare = cursorPos;
+                    
                     hoverActor = null;
-                    o_entities[requestingMove].currentSkill.targetSquare = new Cell() { x = cursorX, y = cursorY };
-
                     //                    o_entities[requestingMove].hasActed = true;
 
                     SkillResult sa = o_entities[requestingMove].currentSkill.ApplySkill(o_entities[requestingMove]);
                     highlightedCells.Clear();
                     highlightedTargetCells.Clear();
+                    nonHighlightedFreeCells.Clear();
                     AnimateResults(sa);
                     ScreenBrowser.HandleFinish();
                     if (o_entities.ContainsKey(requestingMove) == false)

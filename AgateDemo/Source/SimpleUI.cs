@@ -448,4 +448,109 @@ namespace AgateDemo
             mb.ui.font.DrawText(renderX, renderY + (mb.ui.font.FontHeight * currentLine), tx);
         }
     }
+    public static class MessageBrowser
+    {
+        public static double x, y;
+        public static FontSurface font;
+        public static List<string> messages = new List<string>() { "Welcome to the Demo!", "Use the arrow keys to move through the menu, and Z to confirm.", "Pressing X goes back in menus." },
+                                   log = new List<string>() { "Welcome to the Demo!", "Use the arrow keys to move through the menu, and Z to confirm.", "Pressing X goes back in menus." },
+                                   hints = new List<string>();
+        public static Dictionary<string, bool> hintsShown = new Dictionary<string, bool>() { { "Use the arrow keys to move through the menu, and Z to confirm.", true }, { "Pressing X goes back in menus.", false } };
+        public static List<double> durations = new List<double>() { 5000.0, 8000.0, 8000.0},
+                                   hintDurations = new List<double>();
+
+        public static Timing.StopWatch stopwatch = new Timing.StopWatch(false);
+        public static void AddMessage(string text, double duration, bool urgent)
+        {
+            if (urgent && messages.Count > 0 && durations.Count > 0)
+            {
+                messages[0] = text;
+                durations[0] = duration;
+                stopwatch.Reset();
+            }
+            else
+            {
+
+                messages.Add(text);
+                durations.Add(duration);
+
+            }
+            log.Add(text);
+        }
+        public static void AddHint(string text, double duration)
+        {
+            if (hintsShown.ContainsKey(text))
+                return;
+            if (hints.Count > 1 && hintDurations.Count > 1)
+            {
+                hints[1] = text;
+                hintDurations[1] = duration;
+                hintsShown.Add(text, true);
+                stopwatch.Reset();
+            }
+            else
+            {
+
+                hints.Add(text);
+                hintDurations.Add(duration);
+                hintsShown.Add(text, true);
+
+            }
+            log.Add(text);
+        }
+        public static void Show()
+        {
+            if (durations.Count + hintDurations.Count == 0 || messages.Count + hints.Count == 0)
+                return;
+            if (hintDurations.Count > 0)
+            {
+                if (stopwatch.TotalMilliseconds >= hintDurations[0])
+                {
+                    hints.RemoveAt(0);
+                    hintDurations.RemoveAt(0);
+                    stopwatch.Reset();
+                    stopwatch.Pause();
+                }
+                if (durations.Count + hintDurations.Count == 0 || messages.Count + hints.Count == 0)
+                {
+                    return;
+                }
+                stopwatch.Resume();
+                if(hints.Count > 0)
+                    font.DrawText(x, y, hints[0]);
+                if (hints.Count > 1)
+                {
+                    font.DrawText(x, y + font.FontHeight, hints[1]);
+                    return;
+                }
+            }
+            if (durations.Count > 0)
+            {
+                if (stopwatch.TotalMilliseconds >= durations[0])
+                {
+                    messages.RemoveAt(0);
+                    durations.RemoveAt(0);
+                    stopwatch.Reset();
+                    stopwatch.Pause();
+                }
+                if (durations.Count + hintDurations.Count == 0 || messages.Count + hints.Count == 0)
+                {
+                    return;
+                }
+                stopwatch.Resume();
+                if (hints.Count >= 1)
+                {
+                    if (messages.Count > 0)
+                        font.DrawText(x, y + font.FontHeight, messages[0]);
+                }
+                else
+                {
+                    if (messages.Count > 0)
+                        font.DrawText(x, y, messages[0]);
+                    if (messages.Count > 1)
+                        font.DrawText(x, y + font.FontHeight, messages[1]);
+                }
+            }
+        }
+    }
 }

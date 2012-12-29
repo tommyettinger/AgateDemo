@@ -227,7 +227,7 @@ namespace AgateDemo
                                         (i == targetSquare.x && j == targetSquare.y))
                                         continue;
                                 }
-                                if (targetSquare.y - user.y >= user.x - targetSquare.x && targetSquare.y - user.y >= targetSquare.x - user.x)
+                                else if (targetSquare.y - user.y >= user.x - targetSquare.x && targetSquare.y - user.y >= targetSquare.x - user.x)
                                 {
                                     if (j - targetSquare.y > radius ||
                                         j - targetSquare.y < i - targetSquare.x ||
