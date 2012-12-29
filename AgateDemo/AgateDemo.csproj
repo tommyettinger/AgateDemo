@@ -68,11 +68,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\AgateLib.dll</HintPath>
     </Reference>
-    <Reference Include="AgateLib.WinForms, Version=0.3.2.0, Culture=neutral, PublicKeyToken=4817d5d3ffacde03, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\AgateLib.WinForms.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
     <Reference Include="AgateOTK, Version=0.3.2.0, Culture=neutral, PublicKeyToken=2d918b4908ef6225, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\AgateOTK.dll</HintPath>
@@ -106,9 +101,7 @@
     <Content Include="AgateLib.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="AgateLib.WinForms.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="AgateLib.WinForms.dll" />
     <Content Include="AgateLib.WinForms.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

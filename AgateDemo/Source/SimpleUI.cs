@@ -63,11 +63,11 @@ namespace AgateDemo
             }
             //            return s;
         }
-        public static void OnKeyDown_Menu(InputEventArgs e)
+        public static bool OnKeyDown_Menu(InputEventArgs e)
         {
             if (isHidden)
             {
-                return;
+                return false;
             }
             else
             {
@@ -76,7 +76,8 @@ namespace AgateDemo
                 else if (e.KeyCode == KeyCode.Down && currentUI.currentScreen.menu.Count > 1 && currentUI.currentScreen.currentMenuItem < currentUI.currentScreen.menu.Count - 1)
                     currentUI.currentScreen.currentMenuItem++;
                 else if (e.KeyCode == confirmKey && currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem].enabled &&
-                         (currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem].linksTo != null || currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem].eventLink != null
+                         (currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem].linksTo != null ||
+                          currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem].eventLink != null
                        || currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem].actionLink != null))
                 {
                     menuItemForFinish = currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem];
@@ -90,6 +91,7 @@ namespace AgateDemo
                     NavigateBackward(currentUI.currentScreen);
                     HandleRecall();
                 }
+                return false;
             }
         }
         public static void HandleFinish()
@@ -172,7 +174,8 @@ namespace AgateDemo
             else if (eventLink != null)
             {
                 ScreenBrowser.Hide();
-                Keyboard.KeyDown -= new InputEventHandler(ScreenBrowser.OnKeyDown_Menu);
+                Demo.mode = Demo.InputMode.Map;
+                Keyboard.KeyDown -= eventLink;
                 Keyboard.KeyDown += eventLink;
             }
             if (actionLink != null)
@@ -187,6 +190,7 @@ namespace AgateDemo
                 ScreenBrowser.Navigate(ScreenBrowser.currentUI.initialScreen);
                 enabled = false;
                 Keyboard.KeyDown -= eventLink;
+                Demo.mode = Demo.InputMode.Menu;
             }
             else if (actionLink != null)
             {
@@ -202,6 +206,7 @@ namespace AgateDemo
                 ScreenBrowser.Navigate(ScreenBrowser.currentUI.initialScreen);
                 enabled = true;
                 Keyboard.KeyDown -= eventLink;
+                Demo.mode = Demo.InputMode.Menu;
             }
             else if (linksTo != null)
             {

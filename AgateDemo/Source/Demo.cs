@@ -39,6 +39,8 @@ namespace AgateDemo
         public static int minVisibleX = 0, minVisibleY = 0, maxVisibleX = 19, maxVisibleY = 19;
 
         public enum Direction { North, East, South, West, None };
+        public enum InputMode { Menu, Map, None};
+        public static InputMode mode = InputMode.None;
         //public static List<Direction> dirlist = new List<Direction>();
         public class Entity
         {
@@ -122,7 +124,7 @@ namespace AgateDemo
         }
         public static SortedDictionary<int, Cell> initiative = new SortedDictionary<int, Cell>();
         public static int currentInitiative;
-        public static bool lockState = false, lockForAnimation = false, showHealth = false;
+        public static bool lockState = false, lockForAnimation = false, showHealth = false; //currentlyPerformingMenuEvent = false, 
         static Cell requestingMove = new Cell() { x = -1, y = -1 };
         public static Mob currentActor = null, hoverActor = null;
         static Surface tileset;
@@ -618,11 +620,11 @@ namespace AgateDemo
             /*for (int i = 0, c = 0; i < 222; c++, i++)//= rnd.Next(2, 7)) //check for c to limit number of entities
             {
                 Spawn(i, mw, mh);
-            }*/
+            }
             for (int i = 226; i < 434; i++)
             {
                 Spawn(i, mw, mh);
-            }
+            }*/
             for (int i = 473; i < 542; i++)
             {
                 Spawn(i, mw, mh);
@@ -677,7 +679,8 @@ namespace AgateDemo
             MessageBrowser.font = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
             MessageBrowser.x = 100;
             MessageBrowser.y = mapDisplayHeight + 4;
-            
+
+            Keyboard.KeyDown += OnKeyDown_ActionMenu;
         }
 
         public static void Update()
@@ -703,6 +706,7 @@ namespace AgateDemo
                     }
                     else
                     {
+                        mode = InputMode.Menu;
                         currentActor = ent;
                         cursorX = ent.x;
                         cursorY = ent.y;
@@ -711,10 +715,10 @@ namespace AgateDemo
                         lockState = true;
                         ScreenBrowser.currentUI = ent.ui;
                         ScreenBrowser.UnHide();
+//                        MessageBrowser.AddMessage(ent.name + ": actionCount is " + ent.actionCount, 8000, true);
                         if (ent.actionCount < 1)
                         {
                             ScreenBrowser.Refresh();
-                            Keyboard.KeyDown += new InputEventHandler(OnKeyDown_ActionMenu);
                         }
                         cursorX = o_entities[initiative[currentInitiative]].x;
                         cursorY = o_entities[initiative[currentInitiative]].y;
@@ -984,12 +988,27 @@ namespace AgateDemo
         }
         public static void OnKeyDown_ActionMenu(InputEventArgs e)
         {
-            if (lockState && !lockForAnimation && initiative[currentInitiative] == requestingMove && o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly)
+            if (lockState && !lockForAnimation && mode == InputMode.Menu && initiative[currentInitiative] == requestingMove && o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly)
             {
+                //currentlyPerformingMenuEvent = true;
+                //currentlyPerformingMenuEvent = 
                 ScreenBrowser.OnKeyDown_Menu(e);
+            }
+        }
+        public static void OnKeyDown_CorrectEvents(InputEventArgs e)
+        {
+            if ( //e.KeyCode == KeyCode.Plus && 
+                lockState && !lockForAnimation && 
+//                ScreenBrowser.isHidden == false && 
+                initiative[currentInitiative] == requestingMove && 
+                o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly)
+            {
+                Keyboard.KeyDown -= new InputEventHandler(OnKeyDown_ActionMenu);
+                Keyboard.KeyDown += new InputEventHandler(OnKeyDown_ActionMenu);
                 //                OnKeyDown_SelectMove(e);
             }
         }
+        
         public static void calculateAllMoves(int startX, int startY, int numMoves, bool performEntCheck)
         {
             if (numMoves == -1)
@@ -1236,10 +1255,12 @@ namespace AgateDemo
         }
         public static void OnKeyDown_SelectMove(InputEventArgs e)
         {
-            if (lockState && !lockForAnimation && initiative[currentInitiative] == requestingMove &&
+            if (lockState && !lockForAnimation && mode == InputMode.Map
+                && initiative[currentInitiative] == requestingMove &&
                              o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly)
             //                 o_entities[requestingMove].moveList.Count <= o_entities[requestingMove].maxMoveDistance)
             {
+
                 if (e.KeyCode == KeyCode.Space)
                 {
                     o_entities[requestingMove].moveList.Add(Direction.None);
@@ -1281,24 +1302,32 @@ namespace AgateDemo
                     map[cursorY, cursorX - 1] = 1194;
                     fixtures[new Cell() { x = cursorX - 1, y = cursorY }].tile = 1188;
                     o_entities[requestingMove].moveList.Add(Direction.None);
+                    highlightedCells.Clear();
+                    HighlightMove();
                 }
                 else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1187) && checkPos(cursorX + 1, cursorY) == null && checkFixture(cursorX + 1, cursorY, 1190) != null)
                 {
                     map[cursorY, cursorX + 1] = 1194;
                     fixtures[new Cell() { x = cursorX + 1, y = cursorY }].tile = 1188;
                     o_entities[requestingMove].moveList.Add(Direction.None);
+                    highlightedCells.Clear();
+                    HighlightMove();
                 }
                 else if (e.KeyCode == KeyCode.Up && cursorY > 0 && (map[cursorY - 1, cursorX] == 1187) && checkPos(cursorX, cursorY - 1) == null && checkFixture(cursorX, cursorY - 1, 1191) != null)
                 {
                     map[cursorY - 1, cursorX] = 1194;
                     fixtures[new Cell() { x = cursorX, y = cursorY - 1 }].tile = 1189;
                     o_entities[requestingMove].moveList.Add(Direction.None);
+                    highlightedCells.Clear();
+                    HighlightMove();
                 }
                 else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1187) && checkPos(cursorX, cursorY + 1) == null && checkFixture(cursorX, cursorY + 1, 1191) != null)
                 {
                     map[cursorY + 1, cursorX] = 1194;
                     fixtures[new Cell() { x = cursorX, y = cursorY + 1 }].tile = 1189;
                     o_entities[requestingMove].moveList.Add(Direction.None);
+                    highlightedCells.Clear();
+                    HighlightMove();
                 }
                 else if (e.KeyCode == ScreenBrowser.backKey)
                 {
@@ -1309,6 +1338,7 @@ namespace AgateDemo
                     ScreenBrowser.HandleRecall();
                     lockState = true;
                     ScreenBrowser.UnHide();
+                    mode = InputMode.Menu;
                 }
                 else if (e.KeyCode == ScreenBrowser.confirmKey)
                 {
@@ -1316,38 +1346,43 @@ namespace AgateDemo
                     //}
                     //if (o_entities[requestingMove].moveList.Count == o_entities[requestingMove].maxMoveDistance)
                     // {
-                    ScreenBrowser.HandleFinish();
                     lockState = false;
                     highlightedCells.Clear();
                     MoveMob(o_entities[requestingMove], o_entities[requestingMove].moveList);
+                    ScreenBrowser.HandleFinish();
                     // requestingMove.x = -1;
                     o_entities[requestingMove].moveList.Clear();
 
                     o_entities[requestingMove].actionCount++;
                     if (o_entities[requestingMove].actionCount > 1)
                     {
-                        Keyboard.KeyDown -= OnKeyDown_ActionMenu;
+                        mode = InputMode.None;
                         currentInitiative--;
                     }
                     else
                     {
                         lockState = true;
                         ScreenBrowser.UnHide();
+                        mode = InputMode.Menu;
                     }
 
                     cursorX = o_entities[requestingMove].x;
                     cursorY = o_entities[requestingMove].y;
                     //Update();
+
+//                    singleEventLock = false;
                 }
             }
         }
 
         public static void OnKeyDown_LookAround(InputEventArgs e)
         {
-            if (lockState && !lockForAnimation && initiative[currentInitiative] == requestingMove &&
+            if (lockState && !lockForAnimation && mode == InputMode.Map && initiative[currentInitiative] == requestingMove &&
                              o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly)
             //                             o_entities[requestingMove].moveList.Count <= o_entities[requestingMove].maxMoveDistance)
             {
+
+                
                 currentActor = null;
                 if (e.KeyCode == KeyCode.Space)
                 {
@@ -1384,6 +1419,8 @@ namespace AgateDemo
                     ScreenBrowser.HandleRecall();
                     lockState = true;
                     ScreenBrowser.UnHide();
+
+                    mode = InputMode.Menu;
                 }
                 /*                else if (e.KeyCode == ScreenBrowser.confirmKey)
                                 {
@@ -1414,15 +1451,17 @@ namespace AgateDemo
                                     cursorY = o_entities[requestingMove].y;
                                     //Update();
                                 }*/
+
             }
         }
         public static void OnKeyDown_SelectSkill(InputEventArgs e)
         {
-            o_entities[requestingMove].currentSkill = o_entities[requestingMove].skillList[o_entities[requestingMove].ui.currentScreen.currentMenuItem];
-            if (lockState && !lockForAnimation && initiative[currentInitiative] == requestingMove &&
+            if (lockState && !lockForAnimation && mode == InputMode.Map && initiative[currentInitiative] == requestingMove &&
                              o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly)
             // o_entities[requestingMove].moveList.Count <= o_entities[requestingMove].currentSkill.maxSkillDistance)
             {
+
+                o_entities[requestingMove].currentSkill = o_entities[requestingMove].skillList[o_entities[requestingMove].ui.currentScreen.currentMenuItem];
                 /*
                 if (e.KeyCode == KeyCode.Space)
                 {
@@ -1440,6 +1479,8 @@ namespace AgateDemo
                     ScreenBrowser.HandleRecall();
                     lockState = true;
                     ScreenBrowser.UnHide();
+                    mode = InputMode.Menu;
+
                 }
                 else if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194))
                 {
@@ -1539,7 +1580,7 @@ namespace AgateDemo
                     ScreenBrowser.HandleFinish();
                     if (o_entities.ContainsKey(requestingMove) == false)
                     {
-                        Keyboard.KeyDown -= OnKeyDown_ActionMenu;
+                        mode = InputMode.None;
                         currentInitiative--;
                         lockState = false;
                         return;
@@ -1547,13 +1588,14 @@ namespace AgateDemo
                     o_entities[requestingMove].actionCount++;
                     if (o_entities[requestingMove].actionCount > 1)
                     {
-                        Keyboard.KeyDown -= OnKeyDown_ActionMenu;
+                        mode = InputMode.None;
                         currentInitiative--;
                     }
                     else
                     {
                         lockState = true;
                         ScreenBrowser.UnHide();
+                        mode = InputMode.Menu;
                     }
 
 
@@ -1573,7 +1615,7 @@ namespace AgateDemo
         {
             lockState = false;
             o_entities[requestingMove].actionCount = 2;
-            Keyboard.KeyDown -= OnKeyDown_ActionMenu;
+            mode = InputMode.None;
             currentInitiative--;
             o_entities[requestingMove].moveList.Clear();
 
