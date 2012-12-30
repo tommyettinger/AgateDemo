@@ -126,7 +126,50 @@ namespace AgateDemo
         public static int currentInitiative;
         public static bool lockState = false, lockForAnimation = false, showHealth = false; //currentlyPerformingMenuEvent = false, 
         static Cell requestingMove = new Cell() { x = -1, y = -1 };
-        public static Mob currentActor = null, hoverActor = null;
+        private static Mob currentActorInternal = null, hoverActorInternal = null;
+        public static Mob currentActor
+            {
+                get { return currentActorInternal ; }
+                set
+                {
+                    if (value == null && hoverActor == null)
+                    {
+                        currentActorInternal = null;
+                        UnitInfo.sw.Reset();
+                        UnitInfo.sw.Pause();
+                    }
+                    else if(hoverActor == null)
+                    {
+                        currentActorInternal = value;
+                        UnitInfo.sw.Reset();
+                        UnitInfo.sw.ForceResume();
+                    }
+                    else
+                    {
+                        currentActorInternal = value;
+                    }
+                }
+            }
+        public static Mob hoverActor
+            {
+                get { return hoverActorInternal; }
+                set
+                {
+
+                    if (value == null && currentActor == null)
+                    {
+                        hoverActorInternal = null;
+                        UnitInfo.sw.Reset();
+                        UnitInfo.sw.Pause();
+                    }
+                    else 
+                    {
+                        hoverActorInternal = value;
+                        UnitInfo.sw.Reset();
+                        UnitInfo.sw.ForceResume();
+                    }
+                }
+            }
         static Surface tileset;
 
         public static int mapDisplayWidth = 960, mapDisplayHeight = 672;
@@ -544,6 +587,7 @@ namespace AgateDemo
             nt.skillList.Add(new Skill("Eye Beam", 3, 8));
             nt.skillList.Add(new Skill("Disintegrate", 10, 2));
             nt.skillList.Add(new Skill("Horrid Glare", 2, 0, 1, SkillAreaKind.Spray, 5, false));
+            nt.skillList.Add(new Skill("Dark Magic", 2, 3, 6, SkillAreaKind.Burst, 1, true));
             nt.ui.addSkills(nt);
             entities[nt.pos] = nt;
             o_entities[nt.o_pos] = nt;
@@ -551,6 +595,7 @@ namespace AgateDemo
             nt.skillList.Add(new Skill("Eye Beam", 3, 8));
             nt.skillList.Add(new Skill("Disintegrate", 10, 2));
             nt.skillList.Add(new Skill("Horrid Glare", 2, 0, 1, SkillAreaKind.Spray, 5, false));
+            nt.skillList.Add(new Skill("Dark Magic", 2, 3, 6, SkillAreaKind.Burst, 1, true));
             nt.ui.addSkills(nt);
             entities[nt.pos] = nt;
             o_entities[nt.o_pos] = nt;
@@ -558,12 +603,17 @@ namespace AgateDemo
             nt.skillList.Add(new Skill("Eye Beam", 3, 8));
             nt.skillList.Add(new Skill("Disintegrate", 10, 2));
             nt.skillList.Add(new Skill("Horrid Glare", 2, 0, 1, SkillAreaKind.Spray, 5, false));
+            nt.skillList.Add(new Skill("Dark Magic", 2, 3, 6, SkillAreaKind.Burst, 1, true));
             nt.ui.addSkills(nt);
             entities[nt.pos] = nt;
             o_entities[nt.o_pos] = nt;
             nt = new Mob(503, 15, 4, true); //demogorgon
             nt.skillList.Add(new Skill("Tentacle Flail", 3, 0, 0, SkillAreaKind.Ring, 2, true));
             nt.skillList.Add(new Skill("Vicious Bites", 10, 1));
+            nt.skillList.Add(new Skill("Dark Magic", 2, 3, 6, SkillAreaKind.Burst, 1, true));
+            nt.skillList.Add(new Skill("Fire Magic", 3, 0, 1, SkillAreaKind.Spray, 3, true));
+            nt.skillList.Add(new Skill("Storm Magic", 3, 0, 0, SkillAreaKind.Ring, 2, true));
+            nt.skillList.Add(new Skill("Ice Magic", 5, 2, 5, SkillAreaKind.SingleTarget, 0, true));
             nt.ui.addSkills(nt);
             entities[nt.pos] = nt;
             o_entities[nt.o_pos] = nt;
@@ -896,14 +946,14 @@ namespace AgateDemo
                             if (displayDamage[cl] < 10)
                             {
                                 int offset = (int)(((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 50 : (2000 - (Timing.TotalMilliseconds % 2000)) / 50);
-                                mandrillFont.Color = Color.DarkRed;
+                                mandrillFont.Color = (Timing.TotalMilliseconds % 100 < 50) ? Color.Black : Color.White;
                                 mandrillFont.DrawText(pX + 18, pY + 16 - offset, "" + displayDamage[cl]);
                                 mandrillFont.Color = Color.White;
                             }
                             else if (displayDamage[cl] >= 10 && displayDamage[cl] < 100)
                             {
                                 int offset = (int)(((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 40 : (2000 - (Timing.TotalMilliseconds % 2000)) / 40);
-                                mandrillFont.Color = Color.DarkRed;
+                                mandrillFont.Color = (Timing.TotalMilliseconds % 100 < 50) ? Color.Black : Color.White; //Color.DarkRed;
                                 mandrillFont.DrawText(pX + 12, pY + 16 - offset, "" + displayDamage[cl]);
                                 mandrillFont.Color = Color.White;
                             }
@@ -914,7 +964,7 @@ namespace AgateDemo
                         if (cl.y == row && cl.x == col && displayKills[cl])
                         {
                             int offset = (int)(((Timing.TotalMilliseconds % 4000) < 2000) ? (Timing.TotalMilliseconds % 4000) / 100 : (4000 - (Timing.TotalMilliseconds % 4000)) / 100);
-                            mandrillFont.Color = Color.DarkRed;
+                            mandrillFont.Color = (Timing.TotalMilliseconds % 100 < 50) ? Color.Black : Color.White;
                             mandrillFont.DrawText(pX, pY + 16 - offset, "DEAD");
                             mandrillFont.Color = Color.White;
 

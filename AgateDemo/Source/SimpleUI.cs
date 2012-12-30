@@ -399,8 +399,9 @@ namespace AgateDemo
     {
         public static int maxWidth = 30;
         public static int maxHeight = 15;
-        public static int renderX = 760;
-        public static int renderY = 420;
+        public static int renderX = 770;
+        public static int renderY = 400;
+        public static Timing.StopWatch sw = new Timing.StopWatch(false);
         public static void ShowMobInfo(Demo.Mob mb)
         {
             Dictionary<char, char> mandrillDict = SimpleUI.mandrillDict;
@@ -430,20 +431,37 @@ namespace AgateDemo
             currentLine++;
             mb.ui.font.DrawText(renderX, renderY + (mb.ui.font.FontHeight * currentLine), tx);
 
-            for (int i = 0; i < mb.skillList.Count; i++)
+            int counter = 0;
+            if(mb.skillList.Count > 4)
+                counter = (int)(sw.TotalMilliseconds / 5000);
+            List<Skill> shownSkills = new List<Skill>();
+
+            for (int i = counter % mb.skillList.Count, t = 0; t < 4 && t < mb.skillList.Count; i = (i + 1) % mb.skillList.Count, t++)
+            {
+                shownSkills.Add(mb.skillList[i]);
+            }
+            /*
+             
+            if (counter + 4 > mb.skillList.Count)
+            {
+                counter = 0;
+                sw.Reset();
+            }
+             */
+            for (int i = 0; i < shownSkills.Count; i++)
             {
                 currentLine++;
                 mb.ui.font.DrawText(renderX, renderY + (mb.ui.font.FontHeight * currentLine), "" + mandrillDict['│']);
-                mb.ui.font.DrawText(renderX + 6.0, renderY + (mb.ui.font.FontHeight * (currentLine)), mb.skillList[i].name.PadRight(maxWidth - 2, ' '));
+                mb.ui.font.DrawText(renderX + 6.0, renderY + (mb.ui.font.FontHeight * (currentLine)), shownSkills[i].name.PadRight(maxWidth - 2, ' '));
                 mb.ui.font.DrawText(renderX + 6.0 * (maxWidth - 1), renderY + (mb.ui.font.FontHeight * currentLine), "" + mandrillDict['│']);
 
                 currentLine++;
                 mb.ui.font.DrawText(renderX, renderY + (mb.ui.font.FontHeight * currentLine), "" + mandrillDict['│']);
-                mb.ui.font.DrawText(renderX + 6.0, renderY + (mb.ui.font.FontHeight * (currentLine)), ("Damage: " + mb.skillList[i].damage).PadRight(maxWidth - 2, ' '));
+                mb.ui.font.DrawText(renderX + 6.0, renderY + (mb.ui.font.FontHeight * (currentLine)), ("Damage: " + shownSkills[i].damage).PadRight(maxWidth - 2, ' '));
                 mb.ui.font.DrawText(renderX + 6.0 * (maxWidth - 1), renderY + (mb.ui.font.FontHeight * currentLine), "" + mandrillDict['│']);
                 currentLine++;
                 mb.ui.font.DrawText(renderX, renderY + (mb.ui.font.FontHeight * currentLine), "" + mandrillDict['│']);
-                mb.ui.font.DrawText(renderX + 6.0, renderY + (mb.ui.font.FontHeight * (currentLine)), (SkillView.RangeToString(mb.skillList[i])).PadRight(maxWidth - 2, ' '));
+                mb.ui.font.DrawText(renderX + 6.0, renderY + (mb.ui.font.FontHeight * (currentLine)), (SkillView.RangeToString(shownSkills[i])).PadRight(maxWidth - 2, ' '));
                 mb.ui.font.DrawText(renderX + 6.0 * (maxWidth - 1), renderY + (mb.ui.font.FontHeight * currentLine), "" + mandrillDict['│']);
             }
             tx = mandrillDict['└'].ToString();
@@ -461,7 +479,7 @@ namespace AgateDemo
                                    log = new List<string>() { "Welcome to the Demo!", "Use the arrow keys to move through the menu, and Z to confirm.", "Pressing X goes back in menus." },
                                    hints = new List<string>();
         public static Dictionary<string, bool> hintsShown = new Dictionary<string, bool>() { { "Use the arrow keys to move through the menu, and Z to confirm.", true }, { "Pressing X goes back in menus.", false } };
-        public static List<double> durations = new List<double>() { 5000.0, 8000.0, 8000.0},
+        public static List<double> durations = new List<double>() { 5000.0, 6000.0, 6000.0},
                                    hintDurations = new List<double>();
 
         public static Timing.StopWatch stopwatch = new Timing.StopWatch(false);
