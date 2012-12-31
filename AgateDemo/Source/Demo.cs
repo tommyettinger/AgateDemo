@@ -847,10 +847,10 @@ namespace AgateDemo
             entities[nt.pos] = nt;
             o_entities[nt.pos] = nt;
             */
-/*            for (int i = 0, c = 0; i < 222; c++, i++)//= rnd.Next(2, 7)) //check for c to limit number of entities
+            for (int i = 0, c = 0; i < 222; c++, i++)//= rnd.Next(2, 7)) //check for c to limit number of entities
             {
                 Spawn(i, mw, mh);
-            }*/
+            }
             for (int i = 226; i < 434; i++)
             {
                 Spawn(i, mw, mh);
@@ -920,7 +920,7 @@ namespace AgateDemo
             {
                 return;
             }
-            for (int i = currentInitiative; i >= 0; i--, currentInitiative--)    //each (Mob ent in entities.Values.OrderByDescending(n => (n.hasActed) ? -1 : n.initiative))
+            for (int i = currentInitiative; i >= -1; i--, currentInitiative--)    //each (Mob ent in entities.Values.OrderByDescending(n => (n.hasActed) ? -1 : n.initiative))
             {
                 if (initiative.ContainsKey(i))
                 {
@@ -950,13 +950,13 @@ namespace AgateDemo
                         {
                             ScreenBrowser.Refresh();
                         }
-                        cursorX = o_entities[initiative[currentInitiative]].x;
-                        cursorY = o_entities[initiative[currentInitiative]].y;
+//                        cursorX = o_entities[initiative[currentInitiative]].x;
+//                        cursorY = o_entities[initiative[currentInitiative]].y;
                         break;
                     }
                 }
             }
-            if (currentInitiative <= initiative.Keys.Min())
+            if (currentInitiative < initiative.Keys.Min())
             {
                 initiative.Clear();
                 foreach (Cell cl in o_entities.Keys)
@@ -968,9 +968,11 @@ namespace AgateDemo
                         curr = rnd.Next(10000);
                     }
                     initiative[curr] = cl;
+                    
                 }
                 currentInitiative = initiative.Keys.Max();
-                Update();
+               // requestingMove = initiative[currentInitiative];
+                //Update();
                 //requestingMove.x = initiative[currentInitiative].x;
                 //requestingMove.y = initiative[currentInitiative].y;
                 //lockState = true;
@@ -1503,6 +1505,8 @@ namespace AgateDemo
                 highlightingOn = true;
                 int highX = o_entities[requestingMove].x;
                 int highY = o_entities[requestingMove].y;
+                highlightedCells.Clear();
+                doNotStopCells.Clear();
                 doNotStopCells.Add(o_entities[requestingMove].pos, true);
                 calculateAllMoves(highX, highY, o_entities[requestingMove].moveSpeed, true);
             }
@@ -1586,7 +1590,6 @@ namespace AgateDemo
                     map[cursorY, cursorX - 1] = 1194;
                     fixtures[new Cell() { x = cursorX - 1, y = cursorY }].tile = 1188;
                     o_entities[requestingMove].moveList.Add(Direction.None);
-                    highlightedCells.Clear();
                     HighlightMove();
                 }
                 else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1187) && checkPos(cursorX + 1, cursorY) == null && checkFixture(cursorX + 1, cursorY, 1190) != null)
@@ -1594,7 +1597,6 @@ namespace AgateDemo
                     map[cursorY, cursorX + 1] = 1194;
                     fixtures[new Cell() { x = cursorX + 1, y = cursorY }].tile = 1188;
                     o_entities[requestingMove].moveList.Add(Direction.None);
-                    highlightedCells.Clear();
                     HighlightMove();
                 }
                 else if (e.KeyCode == KeyCode.Up && cursorY > 0 && (map[cursorY - 1, cursorX] == 1187) && checkPos(cursorX, cursorY - 1) == null && checkFixture(cursorX, cursorY - 1, 1191) != null)
@@ -1602,7 +1604,6 @@ namespace AgateDemo
                     map[cursorY - 1, cursorX] = 1194;
                     fixtures[new Cell() { x = cursorX, y = cursorY - 1 }].tile = 1189;
                     o_entities[requestingMove].moveList.Add(Direction.None);
-                    highlightedCells.Clear();
                     HighlightMove();
                 }
                 else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1187) && checkPos(cursorX, cursorY + 1) == null && checkFixture(cursorX, cursorY + 1, 1191) != null)
@@ -1610,7 +1611,7 @@ namespace AgateDemo
                     map[cursorY + 1, cursorX] = 1194;
                     fixtures[new Cell() { x = cursorX, y = cursorY + 1 }].tile = 1189;
                     o_entities[requestingMove].moveList.Add(Direction.None);
-                    highlightedCells.Clear();
+                    
                     HighlightMove();
                 }
                 else if (e.KeyCode == ScreenBrowser.backKey)
@@ -1649,7 +1650,7 @@ namespace AgateDemo
                     if (o_entities[requestingMove].actionCount > 1)
                     {
                         mode = InputMode.None;
-                        currentInitiative--;
+                        //currentInitiative--;
                     }
                     else
                     {
@@ -1875,7 +1876,7 @@ namespace AgateDemo
                     if (o_entities.ContainsKey(requestingMove) == false)
                     {
                         mode = InputMode.None;
-                        currentInitiative--;
+                        //currentInitiative--;
                         lockState = false;
                         return;
                     }
@@ -1883,7 +1884,7 @@ namespace AgateDemo
                     if (o_entities[requestingMove].actionCount > 1)
                     {
                         mode = InputMode.None;
-                        currentInitiative--;
+                        //currentInitiative--;
                     }
                     else
                     {
@@ -1910,7 +1911,7 @@ namespace AgateDemo
             lockState = false;
             o_entities[requestingMove].actionCount = 2;
             mode = InputMode.None;
-            currentInitiative--;
+            //currentInitiative--;
             o_entities[requestingMove].moveList.Clear();
 
             ScreenBrowser.HandleFinish();
