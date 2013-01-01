@@ -240,7 +240,6 @@ namespace AgateDemo
         }
         public static void AnimateResults(SkillResult skr)
         {
-
             minVisibleY = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20;
             maxVisibleY = minVisibleY;
             for (int row = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20; row <= mapHeight && row <= cursorY + 20; row++)
@@ -261,7 +260,11 @@ namespace AgateDemo
                 {
                     //currentActor = null;
                     lockForAnimation = true;
-                    displayDamage.Add(c, skr.damages[c]);
+                    try
+                    {
+                        displayDamage.Add(c, skr.damages[c]);
+                    }
+                    catch (Exception) { }
                 }
             }
             double startingTime = Timing.TotalMilliseconds;
@@ -1208,6 +1211,8 @@ namespace AgateDemo
             if (e.KeyCode == KeyCode.Q)
             {
                 Display.CurrentWindow.Dispose();
+                while (!Display.CurrentWindow.IsClosed)
+                    ;
             }
             if (e.KeyCode == KeyCode.S)
             {
