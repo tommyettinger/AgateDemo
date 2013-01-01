@@ -124,7 +124,7 @@ namespace AgateDemo
         }
         public static SortedDictionary<int, Cell> initiative = new SortedDictionary<int, Cell>();
         public static int currentInitiative;
-        public static bool lockState = false, lockForAnimation = false, showHealth = false, highlightingOn = false;
+        public static bool lockState = false, lockForAnimation = false, showHealth = false, highlightingOn = false, hjkl = true;
         //currentlyPerformingMenuEvent = false, 
         static Cell requestingMove = new Cell() { x = -1, y = -1 };
         private static Mob currentActorInternal = null, hoverActorInternal = null;
@@ -1554,7 +1554,7 @@ namespace AgateDemo
                 {
                    // o_entities[requestingMove].moveList.Add(Direction.None);
                 }
-                else if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194) &&
+                else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194) &&
                     (checkPos(cursorX - 1, cursorY) == null || doNotStopCells.ContainsKey(new Cell(cursorX - 1, cursorY))))
                 {
                     if (highlightedCells.ContainsKey(new Cell(cursorX - 1, cursorY)))
@@ -1563,7 +1563,7 @@ namespace AgateDemo
                         o_entities[requestingMove].moveList.Add(Direction.West);
                     }
                 }
-                else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194) &&
+                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194) &&
                     (checkPos(cursorX + 1, cursorY) == null || doNotStopCells.ContainsKey(new Cell(cursorX + 1, cursorY))))
                 {
                     if (highlightedCells.ContainsKey(new Cell(cursorX + 1, cursorY)))
@@ -1572,7 +1572,7 @@ namespace AgateDemo
                         o_entities[requestingMove].moveList.Add(Direction.East);
                     }
                 }
-                else if (e.KeyCode == KeyCode.Up && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194) &&
+                else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194) &&
                     (checkPos(cursorX, cursorY - 1) == null || doNotStopCells.ContainsKey(new Cell(cursorX, cursorY - 1))))
                 {
                     if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY - 1)))
@@ -1581,7 +1581,7 @@ namespace AgateDemo
                         o_entities[requestingMove].moveList.Add(Direction.North);
                     }
                 }
-                else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194) &&
+                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194) &&
                     (checkPos(cursorX, cursorY + 1) == null || doNotStopCells.ContainsKey(new Cell(cursorX, cursorY + 1))))
                 {
                     if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY + 1)))
@@ -1590,28 +1590,28 @@ namespace AgateDemo
                         o_entities[requestingMove].moveList.Add(Direction.South);
                     }
                 }
-                else if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1187) && checkPos(cursorX - 1, cursorY) == null && checkFixture(cursorX - 1, cursorY, 1190) != null)
+                else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (map[cursorY, cursorX - 1] == 1187) && checkPos(cursorX - 1, cursorY) == null && checkFixture(cursorX - 1, cursorY, 1190) != null)
                 {
                     map[cursorY, cursorX - 1] = 1194;
                     fixtures[new Cell() { x = cursorX - 1, y = cursorY }].tile = 1188;
                     o_entities[requestingMove].moveList.Add(Direction.None);
                     HighlightMove();
                 }
-                else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1187) && checkPos(cursorX + 1, cursorY) == null && checkFixture(cursorX + 1, cursorY, 1190) != null)
+                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1187) && checkPos(cursorX + 1, cursorY) == null && checkFixture(cursorX + 1, cursorY, 1190) != null)
                 {
                     map[cursorY, cursorX + 1] = 1194;
                     fixtures[new Cell() { x = cursorX + 1, y = cursorY }].tile = 1188;
                     o_entities[requestingMove].moveList.Add(Direction.None);
                     HighlightMove();
                 }
-                else if (e.KeyCode == KeyCode.Up && cursorY > 0 && (map[cursorY - 1, cursorX] == 1187) && checkPos(cursorX, cursorY - 1) == null && checkFixture(cursorX, cursorY - 1, 1191) != null)
+                else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (map[cursorY - 1, cursorX] == 1187) && checkPos(cursorX, cursorY - 1) == null && checkFixture(cursorX, cursorY - 1, 1191) != null)
                 {
                     map[cursorY - 1, cursorX] = 1194;
                     fixtures[new Cell() { x = cursorX, y = cursorY - 1 }].tile = 1189;
                     o_entities[requestingMove].moveList.Add(Direction.None);
                     HighlightMove();
                 }
-                else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1187) && checkPos(cursorX, cursorY + 1) == null && checkFixture(cursorX, cursorY + 1, 1191) != null)
+                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1187) && checkPos(cursorX, cursorY + 1) == null && checkFixture(cursorX, cursorY + 1, 1191) != null)
                 {
                     map[cursorY + 1, cursorX] = 1194;
                     fixtures[new Cell() { x = cursorX, y = cursorY + 1 }].tile = 1189;
@@ -1686,23 +1686,23 @@ namespace AgateDemo
                 {
                     //o_entities[requestingMove].moveList.Add(Direction.None);
                 }
-                else if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194 || map[cursorY, cursorX - 1] == 1187))   // && checkPos(cursorX - 1, cursorY) == null)
+                else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194 || map[cursorY, cursorX - 1] == 1187))   // && checkPos(cursorX - 1, cursorY) == null)
                 {
                     cursorX--;
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194 || map[cursorY, cursorX + 1] == 1187))
+                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194 || map[cursorY, cursorX + 1] == 1187))
                 {
                     cursorX++;
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if (e.KeyCode == KeyCode.Up && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194 || map[cursorY - 1, cursorX] == 1187))
+                else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194 || map[cursorY - 1, cursorX] == 1187))
                 {
 
                     cursorY--;
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194 || map[cursorY + 1, cursorX] == 1187))
+                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194 || map[cursorY + 1, cursorX] == 1187))
                 {
                     cursorY++;
                     hoverActor = checkPos(cursorX, cursorY);
@@ -1781,7 +1781,7 @@ namespace AgateDemo
                     mode = InputMode.Menu;
 
                 }
-                else if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194))
+                else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194))
                 {
                     if (highlightedCells.ContainsKey(new Cell(cursorX - 1, cursorY)) || nonHighlightedFreeCells.ContainsKey(new Cell(cursorX - 1, cursorY)))
                     {
@@ -1791,7 +1791,7 @@ namespace AgateDemo
                     }
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194))
+                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194))
                 {
                     if (highlightedCells.ContainsKey(new Cell(cursorX + 1, cursorY)) || nonHighlightedFreeCells.ContainsKey(new Cell(cursorX + 1, cursorY)))
                     {
@@ -1801,7 +1801,7 @@ namespace AgateDemo
                     }
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if (e.KeyCode == KeyCode.Up && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194))
+                else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194))
                 {
                     if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY - 1)) || nonHighlightedFreeCells.ContainsKey(new Cell(cursorX, cursorY - 1)))
                     {
@@ -1811,7 +1811,7 @@ namespace AgateDemo
                     }
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194))
+                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194))
                 {
                     if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY + 1)) || nonHighlightedFreeCells.ContainsKey(new Cell(cursorX, cursorY + 1)))
                     {
@@ -1826,7 +1826,7 @@ namespace AgateDemo
 
                 /*
 
-                if (e.KeyCode == KeyCode.Left && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194))// || map[cursorY, cursorX - 1] == 1187))// && checkPos(cursorX - 1, cursorY) == null)
+                if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194))// || map[cursorY, cursorX - 1] == 1187))// && checkPos(cursorX - 1, cursorY) == null)
                 {
                     cursorX--;
                     if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.East)
@@ -1834,7 +1834,7 @@ namespace AgateDemo
                     else
                         o_entities[requestingMove].moveList.Add(Direction.West);
                 }
-                else if (e.KeyCode == KeyCode.Right && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194))// || map[cursorY, cursorX + 1] == 1187))// && checkPos(cursorX + 1, cursorY) == null)
+                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194))// || map[cursorY, cursorX + 1] == 1187))// && checkPos(cursorX + 1, cursorY) == null)
                 {
                     cursorX++;
                     if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.West)
@@ -1842,7 +1842,7 @@ namespace AgateDemo
                     else
                         o_entities[requestingMove].moveList.Add(Direction.East);
                 }
-                else if (e.KeyCode == KeyCode.Up && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194))// || map[cursorY - 1, cursorX] == 1187))// && checkPos(cursorX, cursorY - 1) == null)
+                else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194))// || map[cursorY - 1, cursorX] == 1187))// && checkPos(cursorX, cursorY - 1) == null)
                 {
                     cursorY--;
                     if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.South)
@@ -1850,7 +1850,7 @@ namespace AgateDemo
                     else
                         o_entities[requestingMove].moveList.Add(Direction.North);
                 }
-                else if (e.KeyCode == KeyCode.Down && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194)) // || map[cursorY + 1, cursorX] == 1187// && checkPos(cursorX, cursorY + 1) == null)
+                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194)) // || map[cursorY + 1, cursorX] == 1187// && checkPos(cursorX, cursorY + 1) == null)
                 {
                     cursorY++;
                     if (o_entities[requestingMove].moveList.Count > 0 && o_entities[requestingMove].moveList[o_entities[requestingMove].moveList.Count - 1] == Direction.North)

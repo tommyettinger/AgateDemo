@@ -71,9 +71,9 @@ namespace AgateDemo
             }
             else
             {
-                if (e.KeyCode == KeyCode.Up && currentUI.currentScreen.menu.Count > 1 && currentUI.currentScreen.currentMenuItem > 0)
+                if ((e.KeyCode == KeyCode.Up || (Demo.hjkl && e.KeyCode == KeyCode.K)) && currentUI.currentScreen.menu.Count > 1 && currentUI.currentScreen.currentMenuItem > 0)
                     currentUI.currentScreen.currentMenuItem--;
-                else if (e.KeyCode == KeyCode.Down && currentUI.currentScreen.menu.Count > 1 && currentUI.currentScreen.currentMenuItem < currentUI.currentScreen.menu.Count - 1)
+                else if ((e.KeyCode == KeyCode.Down || (Demo.hjkl && e.KeyCode == KeyCode.J)) && currentUI.currentScreen.menu.Count > 1 && currentUI.currentScreen.currentMenuItem < currentUI.currentScreen.menu.Count - 1)
                     currentUI.currentScreen.currentMenuItem++;
                 else if (e.KeyCode == confirmKey && currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem].enabled &&
                          (currentUI.currentScreen.menu[currentUI.currentScreen.currentMenuItem].linksTo != null ||
