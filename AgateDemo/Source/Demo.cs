@@ -39,7 +39,7 @@ namespace AgateDemo
         public static int minVisibleX = 0, minVisibleY = 0, maxVisibleX = 19, maxVisibleY = 19;
 
         public enum Direction { North, East, South, West, None };
-        public enum InputMode { Menu, Map, None};
+        public enum InputMode { Menu, Map, None, Dialog };
         public static InputMode mode = InputMode.None;
         //public static List<Direction> dirlist = new List<Direction>();
         public class Entity
@@ -695,6 +695,7 @@ namespace AgateDemo
         }
         static void Init()
         {
+            mode = InputMode.Dialog;
             map = new[,]
 			{
 { 1178, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1179}, //0
@@ -914,12 +915,16 @@ namespace AgateDemo
             MessageBrowser.y = mapDisplayHeight + 4;
 
             Keyboard.KeyDown += OnKeyDown_ActionMenu;
+            DialogBrowser.currentUI = new DialogUI(new Dialog("The Narrator", new List<string>() {"Welcome to the Unpleasant Dungeon!", "Navigate through menus with the arrow keys.",
+                "Confirm a selection with the Z key.", "Do you understand?"}, new List<DialogItem>() { new DialogItem("Yes", null, null, DialogBrowser.Hide) }),
+                FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14)));
+            DialogBrowser.currentUI = DialogUI.InitUI();
         }
 
         public static void Update()
         {
 
-            if (lockState || lockForAnimation) //requestingMove.x >= 0 || 
+            if (lockState || lockForAnimation || mode == InputMode.Dialog) //requestingMove.x >= 0 || 
             {
                 return;
             }
@@ -1169,7 +1174,7 @@ namespace AgateDemo
             else if (currentActor != null)
                 UnitInfo.ShowMobInfo(currentActor);
             Display.FillRect(new Rectangle(0, mapDisplayHeight, mapDisplayWidth, 32), (Color.Black));
-
+            DialogBrowser.Show();
             MessageBrowser.Show();
             //mandrillFont.DrawText(32.0, 32.0, "FPS: " + (int)Display.FramesPerSecond);
         }
@@ -1191,9 +1196,9 @@ namespace AgateDemo
                 if (setup.WasCanceled)
                     return;
                 Init();
-
+                
                 Keyboard.KeyDown += new InputEventHandler(OnKeyDown);
-
+                Keyboard.KeyDown += new InputEventHandler(DialogBrowser.OnKeyDown_Dialog);
                 Update();
                 while (!Display.CurrentWindow.IsClosed)
                 {

@@ -220,6 +220,11 @@ namespace AgateDemo
         public List<MenuItem> menu;
         public int currentMenuItem = 0;
         public Screen previousScreen = null;
+        public Screen()
+        {
+            title = "";
+            menu = null;
+        }
         public Screen(string ttl, List<MenuItem> menus)
         {
             title = ttl;
