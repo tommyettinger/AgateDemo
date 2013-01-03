@@ -115,48 +115,48 @@ namespace AgateDemo
         static Point requestingMove = new Point() { X = -1, Y = -1 };
         private static Mob currentActorInternal = null, hoverActorInternal = null;
         public static Mob currentActor
+        {
+            get { return currentActorInternal; }
+            set
             {
-                get { return currentActorInternal ; }
-                set
+                if (value == null && hoverActor == null)
                 {
-                    if (value == null && hoverActor == null)
-                    {
-                        currentActorInternal = null;
-                        UnitInfo.sw.Reset();
-                        UnitInfo.sw.Pause();
-                    }
-                    else if(hoverActor == null)
-                    {
-                        currentActorInternal = value;
-                        UnitInfo.sw.Reset();
-                        UnitInfo.sw.ForceResume();
-                    }
-                    else
-                    {
-                        currentActorInternal = value;
-                    }
+                    currentActorInternal = null;
+                    UnitInfo.sw.Reset();
+                    UnitInfo.sw.Pause();
+                }
+                else if (hoverActor == null)
+                {
+                    currentActorInternal = value;
+                    UnitInfo.sw.Reset();
+                    UnitInfo.sw.ForceResume();
+                }
+                else
+                {
+                    currentActorInternal = value;
                 }
             }
+        }
         public static Mob hoverActor
+        {
+            get { return hoverActorInternal; }
+            set
             {
-                get { return hoverActorInternal; }
-                set
-                {
 
-                    if (value == null && currentActor == null)
-                    {
-                        hoverActorInternal = null;
-                        UnitInfo.sw.Reset();
-                        UnitInfo.sw.Pause();
-                    }
-                    else 
-                    {
-                        hoverActorInternal = value;
-                        UnitInfo.sw.Reset();
-                        UnitInfo.sw.ForceResume();
-                    }
+                if (value == null && currentActor == null)
+                {
+                    hoverActorInternal = null;
+                    UnitInfo.sw.Reset();
+                    UnitInfo.sw.Pause();
+                }
+                else
+                {
+                    hoverActorInternal = value;
+                    UnitInfo.sw.Reset();
+                    UnitInfo.sw.ForceResume();
                 }
             }
+        }
         static Surface tileset;
 
         public static int mapDisplayWidth = 960, mapDisplayHeight = 672;
@@ -164,7 +164,7 @@ namespace AgateDemo
         public static Dictionary<Point, Mob> entities, o_entities, allies;
         public static Dictionary<Point, int> highlightedCells = new Dictionary<Point, int>(), highlightedTargetCells = new Dictionary<Point, int>(), nonHighlightedFreeCells = new Dictionary<Point, int>();
         public static Dictionary<Point, bool> doNotStopCells = new Dictionary<Point, bool>();
-        public static HashSet<Point> visibleCells = new HashSet<Point>();
+        public static HashSet<Point> visibleCells = new HashSet<Point>(), seenCells = new HashSet<Point>();
         public static Dictionary<Point, Entity> fixtures;
 
         public static Dictionary<Point, int> displayDamage = new Dictionary<Point, int>();
@@ -205,6 +205,7 @@ namespace AgateDemo
                 mb.fov.calculateSight();
                 visibleCells.UnionWith(mb.fov.sight);
             }
+            seenCells.UnionWith(visibleCells);
         }
         public static Mob checkPos(int checkX, int checkY)
         {
@@ -462,7 +463,7 @@ namespace AgateDemo
             //Dictionary<Cell, bool> invalidMoves = new Dictionary<Cell, bool>();
             calculateAllMoves(ent.x, ent.y, ent.moveSpeed, true, validMoves, invalidMoves, ent.friendly);
 
-           // Cell targetSquare = validMoves.Keys.Except(invalidMoves.Keys).ToList()[randomPosition]
+            // Cell targetSquare = validMoves.Keys.Except(invalidMoves.Keys).ToList()[randomPosition]
             Point currentSquare = targetSquare;
             if (!validMoves.ContainsKey(targetSquare))
                 return;
@@ -758,7 +759,7 @@ namespace AgateDemo
            new Entity() { tile = 1188, x = 11, y = 17},*/
 
             map = DungeonMap.cleanUp(map);
-//            map = DungeonMap.theme(map);
+            //            map = DungeonMap.theme(map);
             mapColors = DungeonMap.recolor(map);
 
             // map = DungeonMap.geomorph;
@@ -856,14 +857,14 @@ namespace AgateDemo
             entities[nt.pos] = nt;
             o_entities[nt.pos] = nt;
             */
-/*            for (int i = 0, c = 0; i < 222; c++, i++)//= rnd.Next(2, 7)) //check for c to limit number of entities
-            {
-                Spawn(i, mw, mh);
-            }
-            for (int i = 226; i < 434; i++)
-            {
-                Spawn(i, mw, mh);
-            }*/
+            /*            for (int i = 0, c = 0; i < 222; c++, i++)//= rnd.Next(2, 7)) //check for c to limit number of entities
+                        {
+                            Spawn(i, mw, mh);
+                        }
+                        for (int i = 226; i < 434; i++)
+                        {
+                            Spawn(i, mw, mh);
+                        }*/
             for (int i = 473; i < 542; i++)
             {
                 Spawn(i, mw, mh);
@@ -958,13 +959,13 @@ namespace AgateDemo
                         lockState = true;
                         ScreenBrowser.currentUI = ent.ui;
                         ScreenBrowser.UnHide();
-//                        MessageBrowser.AddMessage(ent.name + ": actionCount is " + ent.actionCount, 8000, true);
+                        //                        MessageBrowser.AddMessage(ent.name + ": actionCount is " + ent.actionCount, 8000, true);
                         if (ent.actionCount < 1)
                         {
                             ScreenBrowser.Refresh();
                         }
-//                        cursorX = o_entities[initiative[currentInitiative]].x;
-//                        cursorY = o_entities[initiative[currentInitiative]].y;
+                        //                        cursorX = o_entities[initiative[currentInitiative]].x;
+                        //                        cursorY = o_entities[initiative[currentInitiative]].y;
                         break;
                     }
                 }
@@ -981,10 +982,10 @@ namespace AgateDemo
                         curr = rnd.Next(10000);
                     }
                     initiative[curr] = cl;
-                    
+
                 }
                 currentInitiative = initiative.Keys.Max();
-               // requestingMove = initiative[currentInitiative];
+                // requestingMove = initiative[currentInitiative];
                 //Update();
                 //requestingMove.x = initiative[currentInitiative].x;
                 //requestingMove.y = initiative[currentInitiative].y;
@@ -1008,10 +1009,24 @@ namespace AgateDemo
                 for (var col = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10; col <= mapWidth && (col < cursorX + 10 || col < 20); col++)
                 {
                     // maxVisibleX++;
-                    if (!visibleCells.Contains(new Point(col, row)))
+                    if (!visibleCells.Contains(new Point(col, row)) && !seenCells.Contains(new Point(col, row)))
                     {
                         pX += tileVIncrease;
                         continue;
+                    }
+                    else if (!visibleCells.Contains(new Point(col, row)) && seenCells.Contains(new Point(col, row)))
+                    {
+                        var tile = map[row, col];
+                        Rectangle src;
+
+                        var dest = new Rectangle(pX, pY, tileWidth, tileHeight);
+                        tileset.Color = Chroma.Blend(Color.Gray, mapColors[row, col], 0.2);
+                        src = new Rectangle((tile % 38) * tileWidth, (tile / 38) * tileHeight, tileWidth, tileHeight);
+                        tileset.Draw(src, dest);
+                        tileset.Color = Color.White;
+                        pX += tileVIncrease;
+                        continue;
+
                     }
                     if (map[row, col] == DungeonMap.gr)
                     {
@@ -1068,7 +1083,7 @@ namespace AgateDemo
                         src = new Rectangle((tile % 38) * tileWidth, (tile / 38) * tileHeight, tileWidth, tileHeight);
                         tileset.Draw(src, dest);
                         tileset.Color = Color.White;
-                        
+
                     }
                     if (entity != null)
                     {
@@ -1216,7 +1231,7 @@ namespace AgateDemo
                 if (setup.WasCanceled)
                     return;
                 Init();
-                
+
                 Keyboard.KeyDown += new InputEventHandler(OnKeyDown);
                 Keyboard.KeyDown += new InputEventHandler(DialogBrowser.OnKeyDown_Dialog);
                 Update();
@@ -1263,9 +1278,9 @@ namespace AgateDemo
         public static void OnKeyDown_CorrectEvents(InputEventArgs e)
         {
             if ( //e.KeyCode == KeyCode.Plus && 
-                lockState && !lockForAnimation && 
-//                ScreenBrowser.isHidden == false && 
-                initiative[currentInitiative] == requestingMove && 
+                lockState && !lockForAnimation &&
+                //                ScreenBrowser.isHidden == false && 
+                initiative[currentInitiative] == requestingMove &&
                 o_entities.ContainsKey(requestingMove) && o_entities[requestingMove].friendly)
             {
                 Keyboard.KeyDown -= new InputEventHandler(OnKeyDown_ActionMenu);
@@ -1350,7 +1365,7 @@ namespace AgateDemo
                     return;
                 //if (nonHighlightedFreeCells.Count == 0)// && performEntCheck && checkPos(startX, startY) != null)
                 //    nonHighlightedFreeCells.Add(c, 1);
-                    //return;
+                //return;
                 if (highlightedCells.ContainsKey(c) && !nonHighlightedFreeCells.ContainsKey(c))
                 {
                     highlightedCells.Remove(c);
@@ -1370,7 +1385,7 @@ namespace AgateDemo
             switch (sak)
             {
                 case SkillAreaKind.Ring:
-                    {   
+                    {
                         //assuming targetSquare of 10, 11 and radius 1:
                         int minX = startX - radius; // 9
                         if (minX < 0)
@@ -1488,7 +1503,7 @@ namespace AgateDemo
                                     if (j - startY < -1 * radius ||
                                         j - startY > i - startX ||
                                         j - startY > -1 * (i - startX))// || //-1
-                                       // (i == startX && j == startY))
+                                        // (i == startX && j == startY))
                                         continue;
                                 }
                                 else if (startX - user.x > user.y - startY && startX - user.x > startY - user.y)
@@ -1577,7 +1592,7 @@ namespace AgateDemo
 
                 if (e.KeyCode == KeyCode.Space)
                 {
-                   // o_entities[requestingMove].moveList.Add(Direction.None);
+                    // o_entities[requestingMove].moveList.Add(Direction.None);
                 }
                 else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194) &&
                     (checkPos(cursorX - 1, cursorY) == null || doNotStopCells.ContainsKey(new Point(cursorX - 1, cursorY))))
@@ -1672,7 +1687,7 @@ namespace AgateDemo
                     o_entities[requestingMove].moveList.Clear();
                     MoveDirect(o_entities[requestingMove], new Point(cursorX, cursorY), highlightedCells, doNotStopCells);
 
-//                    MoveMob(o_entities[requestingMove], o_entities[requestingMove].moveList);
+                    //                    MoveMob(o_entities[requestingMove], o_entities[requestingMove].moveList);
                     highlightedCells.Clear();
                     doNotStopCells.Clear();
                     ScreenBrowser.HandleFinish();
@@ -1696,7 +1711,7 @@ namespace AgateDemo
                     cursorY = o_entities[requestingMove].y;
                     //Update();
 
-//                    singleEventLock = false;
+                    //                    singleEventLock = false;
                 }
             }
         }
@@ -1708,7 +1723,7 @@ namespace AgateDemo
             //                             o_entities[requestingMove].moveList.Count <= o_entities[requestingMove].maxMoveDistance)
             {
 
-                
+
                 currentActor = null;
                 if (e.KeyCode == KeyCode.Space)
                 {
@@ -1899,7 +1914,7 @@ namespace AgateDemo
                         return;
                     }
                     o_entities[requestingMove].currentSkill.targetSquare = cursorPos;
-                    
+
                     hoverActor = null;
                     //                    o_entities[requestingMove].hasActed = true;
 
