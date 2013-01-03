@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AgateLib.Geometry;
 
 namespace AgateDemo
 {
@@ -20,15 +21,15 @@ namespace AgateDemo
         public int damage;
         public bool hitsAllies;
         public string name;
-        public Cell targetSquare;
+        public Point targetSquare;
         public Skill(string name, int damage, int dist)
         {
             this.name = name;
             this.damage = damage;
             maxSkillDistance = dist;
             hitsAllies = false;
-            targetSquare.x = -1;
-            targetSquare.y = -1;
+            targetSquare.X = -1;
+            targetSquare.Y = -1;
         }
         public Skill(string name, int damage, int minDist, int maxDist, SkillAreaKind areaKind, int area, bool hitsFriendlies)
         {
@@ -36,8 +37,8 @@ namespace AgateDemo
             this.damage = damage;
             minSkillDistance = minDist;
             maxSkillDistance = maxDist;
-            targetSquare.x = -1;
-            targetSquare.y = -1;
+            targetSquare.X = -1;
+            targetSquare.Y = -1;
             this.areaKind = areaKind;
             radius = area;
             hitsAllies = hitsFriendlies;
@@ -48,19 +49,19 @@ namespace AgateDemo
             {
                 case SkillAreaKind.Ring:
                     {
-                        Dictionary<Cell, int> damages = new Dictionary<Cell, int>();
-                        Dictionary<Cell, bool> kills = new Dictionary<Cell, bool>();
+                        Dictionary<Point, int> damages = new Dictionary<Point, int>();
+                        Dictionary<Point, bool> kills = new Dictionary<Point, bool>();
                         //assuming targetSquare of 10, 11 and radius 1:
-                        int minX = targetSquare.x - radius; // 9
+                        int minX = targetSquare.X - radius; // 9
                         if (minX < 0)
                             minX = 0;
-                        int minY = targetSquare.y - radius; // 10
+                        int minY = targetSquare.Y - radius; // 10
                         if (minY < 0)
                             minY = 0;
-                        int maxX = targetSquare.x + radius; // 11
+                        int maxX = targetSquare.X + radius; // 11
                         if (maxX > Demo.map.GetUpperBound(1))
                             maxX = Demo.map.GetUpperBound(1);
-                        int maxY = targetSquare.y + radius; // 12
+                        int maxY = targetSquare.Y + radius; // 12
                         if (maxY > Demo.map.GetUpperBound(0))
                             maxY = Demo.map.GetUpperBound(0);
 
@@ -68,11 +69,11 @@ namespace AgateDemo
                         {
                             for (int j = minY; j <= maxY; j++)
                             {
-                                if (j - targetSquare.y > i - targetSquare.x + radius ||        // 10 - 10 > 10 - 11 + 1
-                                    j - targetSquare.y > -1 * (i - targetSquare.x) + radius || // 10 - 10 > -10 + 11 + 1
-                                    j - targetSquare.y < i - targetSquare.x - radius ||        // 10 - 10 < 10 - 11 - 1
-                                    j - targetSquare.y < -1 * (i - targetSquare.x) - radius || // 10 - 10 < -10 + 11 - 1
-                                    (i == targetSquare.x && j == targetSquare.y))
+                                if (j - targetSquare.Y > i - targetSquare.X + radius ||        // 10 - 10 > 10 - 11 + 1
+                                    j - targetSquare.Y > -1 * (i - targetSquare.X) + radius || // 10 - 10 > -10 + 11 + 1
+                                    j - targetSquare.Y < i - targetSquare.X - radius ||        // 10 - 10 < 10 - 11 - 1
+                                    j - targetSquare.Y < -1 * (i - targetSquare.X) - radius || // 10 - 10 < -10 + 11 - 1
+                                    (i == targetSquare.X && j == targetSquare.Y))
                                     continue;
 
                                 Demo.Mob tgt = Demo.checkPos(i, j);
@@ -80,8 +81,9 @@ namespace AgateDemo
                                 {
                                     if (hitsAllies == false && tgt.friendly == user.friendly)
                                         continue;
-                                    Cell o_tgt = new Cell(tgt.o_pos.x, tgt.o_pos.y);
-                                    Cell tgt_pos = new Cell(tgt.pos.x, tgt.pos.y);
+                                    
+                                    Point o_tgt = new Point(tgt.o_pos.X, tgt.o_pos.Y);
+                                    Point tgt_pos = new Point(tgt.pos.X, tgt.pos.Y);
                                     tgt.health = tgt.health - this.damage;
                                     bool didKill = false;
                                     if (!Demo.o_entities.ContainsKey(o_tgt))
@@ -148,19 +150,19 @@ namespace AgateDemo
                     }*/
                 case SkillAreaKind.Burst:
                     {
-                        Dictionary<Cell, int> damages = new Dictionary<Cell, int>();
-                        Dictionary<Cell, bool> kills = new Dictionary<Cell, bool>();
+                        Dictionary<Point, int> damages = new Dictionary<Point, int>();
+                        Dictionary<Point, bool> kills = new Dictionary<Point, bool>();
                         //assuming targetSquare of 10, 11 and radius 1:
-                        int minX = targetSquare.x - radius; // 9
+                        int minX = targetSquare.X - radius; // 9
                         if (minX < 0)
                             minX = 0;
-                        int minY = targetSquare.y - radius; // 10
+                        int minY = targetSquare.Y - radius; // 10
                         if (minY < 0)
                             minY = 0;
-                        int maxX = targetSquare.x + radius; // 11
+                        int maxX = targetSquare.X + radius; // 11
                         if (maxX > Demo.map.GetUpperBound(1))
                             maxX = Demo.map.GetUpperBound(1);
-                        int maxY = targetSquare.y + radius; // 12
+                        int maxY = targetSquare.Y + radius; // 12
                         if (maxY > Demo.map.GetUpperBound(0))
                             maxY = Demo.map.GetUpperBound(0);
 
@@ -168,10 +170,10 @@ namespace AgateDemo
                         {
                             for (int j = minY; j <= maxY; j++)
                             {
-                                if (j - targetSquare.y > i - targetSquare.x + radius ||        // 10 - 10 > 10 - 11 + 1
-                                    j - targetSquare.y > -1 * (i - targetSquare.x) + radius || // 10 - 10 > -10 + 11 + 1
-                                    j - targetSquare.y < i - targetSquare.x - radius ||        // 10 - 10 < 10 - 11 - 1
-                                    j - targetSquare.y < -1 * (i - targetSquare.x) - radius)   // 10 - 10 < -10 + 11 - 1
+                                if (j - targetSquare.Y > i - targetSquare.X + radius ||        // 10 - 10 > 10 - 11 + 1
+                                    j - targetSquare.Y > -1 * (i - targetSquare.X) + radius || // 10 - 10 > -10 + 11 + 1
+                                    j - targetSquare.Y < i - targetSquare.X - radius ||        // 10 - 10 < 10 - 11 - 1
+                                    j - targetSquare.Y < -1 * (i - targetSquare.X) - radius)   // 10 - 10 < -10 + 11 - 1
                                     continue;
 
                                 Demo.Mob tgt = Demo.checkPos(i, j);
@@ -179,8 +181,8 @@ namespace AgateDemo
                                 {
                                     if (hitsAllies == false && tgt.friendly == user.friendly)
                                         continue;
-                                    Cell o_tgt = new Cell(tgt.o_pos.x, tgt.o_pos.y);
-                                    Cell tgt_pos = new Cell(tgt.pos.x, tgt.pos.y);
+                                    Point o_tgt = new Point(tgt.o_pos.X, tgt.o_pos.Y);
+                                    Point tgt_pos = new Point(tgt.pos.X, tgt.pos.Y);
                                     tgt.health = tgt.health - this.damage;
                                     bool didKill = false;
                                     if (!Demo.o_entities.ContainsKey(o_tgt))
@@ -195,22 +197,22 @@ namespace AgateDemo
                 case SkillAreaKind.Spray:
                     {
 
-                        Dictionary<Cell, int> damages = new Dictionary<Cell, int>();
-                        Dictionary<Cell, bool> kills = new Dictionary<Cell, bool>();
+                        Dictionary<Point, int> damages = new Dictionary<Point, int>();
+                        Dictionary<Point, bool> kills = new Dictionary<Point, bool>();
                         //assuming targetSquare of 10, 11 and radius 2:
-                        int minX = targetSquare.x - (radius - 1); // 8
+                        int minX = targetSquare.X - (radius - 1); // 8
                         if (minX < 0)
                             minX = 0;
-                        int minY = targetSquare.y - (radius - 1); // 9
+                        int minY = targetSquare.Y - (radius - 1); // 9
                         if (minY < 0)
                             minY = 0;
-                        int maxX = targetSquare.x + (radius - 1); // 12
+                        int maxX = targetSquare.X + (radius - 1); // 12
                         if (maxX > Demo.map.GetUpperBound(1))
                             maxX = Demo.map.GetUpperBound(1);
-                        int maxY = targetSquare.y + (radius - 1); // 13
+                        int maxY = targetSquare.Y + (radius - 1); // 13
                         if (maxY > Demo.map.GetUpperBound(0))
                             maxY = Demo.map.GetUpperBound(0);
-                        if (targetSquare.y == user.y && targetSquare.x == user.x)
+                        if (targetSquare.Y == user.y && targetSquare.X == user.x)
                         {
                             minY++;
                             maxY++;
@@ -219,43 +221,43 @@ namespace AgateDemo
                         {
                             for (int j = minY; j <= maxY; j++)
                             {
-                                if (targetSquare.y == user.y && targetSquare.x == user.x)
+                                if (targetSquare.Y == user.y && targetSquare.X == user.x)
                                 {
-                                    if (j - targetSquare.y > radius + 1 ||
-                                        j - targetSquare.y < i - targetSquare.x + 1 ||
-                                        j - targetSquare.y < -1 * (i - targetSquare.x) + 1 ||
-                                        (i == targetSquare.x && j == targetSquare.y))
+                                    if (j - targetSquare.Y > radius + 1 ||
+                                        j - targetSquare.Y < i - targetSquare.X + 1 ||
+                                        j - targetSquare.Y < -1 * (i - targetSquare.X) + 1 ||
+                                        (i == targetSquare.X && j == targetSquare.Y))
                                         continue;
                                 }
-                                else if (targetSquare.y - user.y >= user.x - targetSquare.x && targetSquare.y - user.y >= targetSquare.x - user.x)
+                                else if (targetSquare.Y - user.y >= user.x - targetSquare.X && targetSquare.Y - user.y >= targetSquare.X - user.x)
                                 {
-                                    if (j - targetSquare.y > radius ||
-                                        j - targetSquare.y < i - targetSquare.x ||
-                                        j - targetSquare.y < -1 * (i - targetSquare.x)) //|| //+ 1 
+                                    if (j - targetSquare.Y > radius ||
+                                        j - targetSquare.Y < i - targetSquare.X ||
+                                        j - targetSquare.Y < -1 * (i - targetSquare.X)) //|| //+ 1 
 //                                        (i == targetSquare.x && j == targetSquare.y))
                                         continue;
                                 }
-                                else if (user.y - targetSquare.y >= user.x - targetSquare.x && user.y - targetSquare.y >= targetSquare.x - user.x)
+                                else if (user.y - targetSquare.Y >= user.x - targetSquare.X && user.y - targetSquare.Y >= targetSquare.X - user.x)
                                 {
-                                    if (j - targetSquare.y < -1 * radius ||
-                                        j - targetSquare.y > i - targetSquare.x ||
-                                        j - targetSquare.y > -1 * (i - targetSquare.x)) //|| //- 1 
+                                    if (j - targetSquare.Y < -1 * radius ||
+                                        j - targetSquare.Y > i - targetSquare.X ||
+                                        j - targetSquare.Y > -1 * (i - targetSquare.X)) //|| //- 1 
                   //                      (i == targetSquare.x && j == targetSquare.y))
                                         continue;
                                 }
-                                else if (targetSquare.x - user.x > user.y - targetSquare.y && targetSquare.x - user.x > targetSquare.y - user.y)
+                                else if (targetSquare.X - user.x > user.y - targetSquare.Y && targetSquare.X - user.x > targetSquare.Y - user.y)
                                 {
-                                    if (i - targetSquare.x > radius ||
-                                        i - targetSquare.x < j - targetSquare.y ||
-                                        i - targetSquare.x < -1 * (j - targetSquare.y)) //|| //+ 1 
+                                    if (i - targetSquare.X > radius ||
+                                        i - targetSquare.X < j - targetSquare.Y ||
+                                        i - targetSquare.X < -1 * (j - targetSquare.Y)) //|| //+ 1 
   //                                      (i == targetSquare.x && j == targetSquare.y))
                                         continue;
                                 }
-                                else if (user.x - targetSquare.x > user.y - targetSquare.y && user.x - targetSquare.x > targetSquare.y - user.y)
+                                else if (user.x - targetSquare.X > user.y - targetSquare.Y && user.x - targetSquare.X > targetSquare.Y - user.y)
                                 {
-                                    if (i - targetSquare.x < -1 * radius ||
-                                        i - targetSquare.x > j - targetSquare.y ||
-                                        i - targetSquare.x > -1 * (j - targetSquare.y)) //- 1 
+                                    if (i - targetSquare.X < -1 * radius ||
+                                        i - targetSquare.X > j - targetSquare.Y ||
+                                        i - targetSquare.X > -1 * (j - targetSquare.Y)) //- 1 
 //                                        (i == targetSquare.x && j == targetSquare.y))
                                         continue;
                                 }
@@ -264,8 +266,8 @@ namespace AgateDemo
                                 {
                                     if (hitsAllies == false && tgt.friendly == user.friendly)
                                         continue;
-                                    Cell o_tgt = new Cell(tgt.o_pos.x, tgt.o_pos.y);
-                                    Cell tgt_pos = new Cell(tgt.pos.x, tgt.pos.y);
+                                    Point o_tgt = new Point(tgt.o_pos.X, tgt.o_pos.Y);
+                                    Point tgt_pos = new Point(tgt.pos.X, tgt.pos.Y);
                                     tgt.health = tgt.health - this.damage;
                                     bool didKill = false;
                                     if (!Demo.o_entities.ContainsKey(o_tgt))
@@ -281,18 +283,18 @@ namespace AgateDemo
                 case SkillAreaKind.SingleTarget:
                 default:
                     {
-                        Demo.Mob tgt = Demo.checkPos(targetSquare.x, targetSquare.y);
+                        Demo.Mob tgt = Demo.checkPos(targetSquare.X, targetSquare.Y);
                         if (tgt == null)
                             return new SkillResult();
                         if (hitsAllies == false && tgt.friendly == user.friendly)
                             return new SkillResult();
-                        Cell o_tgt = new Cell(tgt.o_pos.x, tgt.o_pos.y);
-                        Cell tgt_pos = new Cell(tgt.pos.x, tgt.pos.y);
+                        Point o_tgt = new Point(tgt.o_pos.X, tgt.o_pos.Y);
+                        Point tgt_pos = new Point(tgt.pos.X, tgt.pos.Y);
                         tgt.health = tgt.health - this.damage;
                         bool didKill = false;
                         if (!Demo.o_entities.ContainsKey(o_tgt))
                             didKill = true;
-                        return new SkillResult(new Dictionary<Cell, int>() { { tgt_pos, this.damage } }, new Dictionary<Cell, bool>() { { tgt_pos, didKill } });
+                        return new SkillResult(new Dictionary<Point, int>() { { tgt_pos, this.damage } }, new Dictionary<Point, bool>() { { tgt_pos, didKill } });
                     }
             }
         }
@@ -300,12 +302,12 @@ namespace AgateDemo
 
     public class SkillResult
     {
-        public Dictionary<Cell, int> damages = new Dictionary<Cell, int>();
-        public Dictionary<Cell, bool> kills = new Dictionary<Cell, bool>();
+        public Dictionary<Point, int> damages = new Dictionary<Point, int>();
+        public Dictionary<Point, bool> kills = new Dictionary<Point, bool>();
         public SkillResult()
         {
         }
-        public SkillResult(Dictionary<Cell, int> cellsToDamage, Dictionary<Cell, bool> cellsKilled)
+        public SkillResult(Dictionary<Point, int> cellsToDamage, Dictionary<Point, bool> cellsKilled)
         {
             damages = cellsToDamage;
             kills = cellsKilled;

@@ -9,33 +9,10 @@ using AgateLib.InputLib;
 
 namespace AgateDemo
 {
-    public struct Cell
-    {
-        public int x, y;
-        public Cell(int x, int y)
-        {
-            this.x = x; this.y = y;
-        }
-        public override bool Equals(Object obj)
-        {
-            return obj is Cell && this == (Cell)obj;
-        }
-        public override int GetHashCode()
-        {
-            return x.GetHashCode() ^ y.GetHashCode();
-        }
-        public static bool operator ==(Cell a, Cell b)
-        {
-            return a.x == b.x && a.y == b.y;
-        }
-        public static bool operator !=(Cell a, Cell b)
-        {
-            return !(a == b);
-        }
-    }
     public static class Demo
     {
-        static Random rnd = new Random();
+        public static Color[,] mapColors;
+        public static Random rnd = new Random();
         public static int minVisibleX = 0, minVisibleY = 0, maxVisibleX = 19, maxVisibleY = 19;
 
         public enum Direction { North, East, South, West, None };
@@ -45,16 +22,16 @@ namespace AgateDemo
         public class Entity
         {
             public int tile;
-            public Cell pos;
+            public Point pos;
             public int x
             {
-                get { return pos.x; }
-                set { pos.x = value; }
+                get { return pos.X; }
+                set { pos.X = value; }
             }
             public int y
             {
-                get { return pos.y; }
-                set { pos.y = value; }
+                get { return pos.Y; }
+                set { pos.Y = value; }
             }
         }
         public class Mob : Entity
@@ -74,24 +51,27 @@ namespace AgateDemo
                 }
             }
             public bool friendly;
-            public Cell o_pos;
+            public Point o_pos;
             public string name;
             public List<Direction> moveList = new List<Direction>();
             public int moveSpeed = 3, actionCount = 0;
             public List<Skill> skillList;
             public Skill currentSkill;
             public SimpleUI ui = null;
-
+            public Vision fov = null;
             public Mob(int tileNumber, int xPos, int yPos, bool isFriendly)
             {
                 tile = tileNumber;
                 name = TileData.tilesToNames[tileNumber];
                 x = xPos;
                 y = yPos;
-                o_pos = new Cell() { x = this.x, y = this.y };
+                o_pos = new Point() { X = this.x, Y = this.y };
                 friendly = isFriendly;
                 if (friendly)
                 {
+                    fov = new Vision(this);
+                    allies.Add(o_pos, this);
+                    recalculateVision();
                     moveSpeed = 6;
                 }
                 ui = SimpleUI.InitUI();
@@ -101,6 +81,7 @@ namespace AgateDemo
                 currentSkill = null;
                 //initiative = rnd.Next(1000);
             }
+
             public Mob Clone()
             {
                 Mob mb = new Mob(this.tile, this.x, this.y, this.friendly);
@@ -114,6 +95,11 @@ namespace AgateDemo
             {
                 entities.Remove(this.pos);
                 o_entities.Remove(this.o_pos);
+                if (this.friendly)
+                {
+                    allies.Remove(this.o_pos);
+                    recalculateVision();
+                }
                 try
                 {
                     initiative.Remove(initiative.First(e => e.Value == this.o_pos).Key);
@@ -122,11 +108,11 @@ namespace AgateDemo
                 { }
             }
         }
-        public static SortedDictionary<int, Cell> initiative = new SortedDictionary<int, Cell>();
+        public static SortedDictionary<int, Point> initiative = new SortedDictionary<int, Point>();
         public static int currentInitiative;
         public static bool lockState = false, lockForAnimation = false, showHealth = false, highlightingOn = false, hjkl = true;
         //currentlyPerformingMenuEvent = false, 
-        static Cell requestingMove = new Cell() { x = -1, y = -1 };
+        static Point requestingMove = new Point() { X = -1, Y = -1 };
         private static Mob currentActorInternal = null, hoverActorInternal = null;
         public static Mob currentActor
             {
@@ -175,13 +161,14 @@ namespace AgateDemo
 
         public static int mapDisplayWidth = 960, mapDisplayHeight = 672;
         public static int[,] map, map2;
-        public static Dictionary<Cell, Mob> entities, o_entities;
-        public static Dictionary<Cell, int> highlightedCells = new Dictionary<Cell, int>(), highlightedTargetCells = new Dictionary<Cell, int>(), nonHighlightedFreeCells = new Dictionary<Cell, int>();
-        public static Dictionary<Cell, bool> doNotStopCells = new Dictionary<Cell, bool>();
-        public static Dictionary<Cell, Entity> fixtures;
+        public static Dictionary<Point, Mob> entities, o_entities, allies;
+        public static Dictionary<Point, int> highlightedCells = new Dictionary<Point, int>(), highlightedTargetCells = new Dictionary<Point, int>(), nonHighlightedFreeCells = new Dictionary<Point, int>();
+        public static Dictionary<Point, bool> doNotStopCells = new Dictionary<Point, bool>();
+        public static HashSet<Point> visibleCells = new HashSet<Point>();
+        public static Dictionary<Point, Entity> fixtures;
 
-        public static Dictionary<Cell, int> displayDamage = new Dictionary<Cell, int>();
-        public static Dictionary<Cell, bool> displayKills = new Dictionary<Cell, bool>();
+        public static Dictionary<Point, int> displayDamage = new Dictionary<Point, int>();
+        public static Dictionary<Point, bool> displayKills = new Dictionary<Point, bool>();
         // public static SimpleUI basicUI;
 
         static int tileWidth = 48;
@@ -210,16 +197,25 @@ namespace AgateDemo
             }
         }
 
+        public static void recalculateVision()
+        {
+            visibleCells.Clear();
+            foreach (Mob mb in allies.Values)
+            {
+                mb.fov.calculateSight();
+                visibleCells.UnionWith(mb.fov.sight);
+            }
+        }
         public static Mob checkPos(int checkX, int checkY)
         {
             Mob ret = null;
-            entities.TryGetValue(new Cell() { x = checkX, y = checkY }, out ret);
+            entities.TryGetValue(new Point() { X = checkX, Y = checkY }, out ret);
             return ret;
         }
         public static Mob checkPos(int checkX, int checkY, int checkTile)
         {
             Mob ret = null;
-            entities.TryGetValue(new Cell() { x = checkX, y = checkY }, out ret);
+            entities.TryGetValue(new Point() { X = checkX, Y = checkY }, out ret);
             if (ret != null && ret.tile != checkTile)
                 ret = null;
             return ret;
@@ -227,19 +223,19 @@ namespace AgateDemo
         public static Entity checkFixture(int checkX, int checkY)
         {
             Entity ret = null;
-            fixtures.TryGetValue(new Cell() { x = checkX, y = checkY }, out ret);
+            fixtures.TryGetValue(new Point() { X = checkX, Y = checkY }, out ret);
             return ret;
         }
         public static Entity checkFixture(int checkX, int checkY, int checkTile)
         {
             Entity ret = null;
-            fixtures.TryGetValue(new Cell() { x = checkX, y = checkY }, out ret);
+            fixtures.TryGetValue(new Point() { X = checkX, Y = checkY }, out ret);
             if (ret != null && ret.tile != checkTile)
                 ret = null;
             return ret;
         }
         public static void AnimateResults(SkillResult skr)
-        {
+        {/*
             minVisibleY = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20;
             maxVisibleY = minVisibleY;
             for (int row = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20; row <= mapHeight && row <= cursorY + 20; row++)
@@ -252,11 +248,12 @@ namespace AgateDemo
             for (var col = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10; col <= mapWidth && (col < cursorX + 10 || col < 20); col++)
             {
                 maxVisibleX++;
-            }
-            foreach (Cell c in skr.damages.Keys)
+            }*/
+            foreach (Point c in skr.damages.Keys)
             {
                 //while (Timing.TotalMilliseconds - startingTime < 200 && (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)) ;
-                if (c.x >= minVisibleX && c.x <= maxVisibleX && c.y >= minVisibleY && c.y <= maxVisibleY)
+                if (visibleCells.Contains(c))
+                //if (c.X >= minVisibleX && c.X <= maxVisibleX && c.Y >= minVisibleY && c.Y <= maxVisibleY)
                 {
                     //currentActor = null;
                     lockForAnimation = true;
@@ -283,10 +280,10 @@ namespace AgateDemo
                 displayDamage.Clear();
             }
             startingTime = Timing.TotalMilliseconds;
-            foreach (Cell c in skr.kills.Keys)
+            foreach (Point c in skr.kills.Keys)
             {
                 //while (Timing.TotalMilliseconds - startingTime < 200 && (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)) ;
-                if (c.x >= minVisibleX && c.x <= maxVisibleX && c.y >= minVisibleY && c.y <= maxVisibleY)
+                if (c.X >= minVisibleX && c.X <= maxVisibleX && c.Y >= minVisibleY && c.Y <= maxVisibleY)
                 {
                     //currentActor = null;
                     lockForAnimation = true;
@@ -320,7 +317,8 @@ namespace AgateDemo
         }
         public static void MoveMob(Mob ent, IEnumerable<Direction> movepath)
         {
-            Dictionary<Cell, Mob> displaced = new Dictionary<Cell, Mob>();
+            Dictionary<Point, Mob> displaced = new Dictionary<Point, Mob>();
+            /*
             minVisibleY = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20;
             maxVisibleY = minVisibleY;
             for (int row = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20; row <= mapHeight && row <= cursorY + 20; row++)
@@ -333,13 +331,14 @@ namespace AgateDemo
             for (var col = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10; col <= mapWidth && (col < cursorX + 10 || col < 20); col++)
             {
                 maxVisibleX++;
-            }
+            }*/
             double startingTime = Timing.TotalMilliseconds;
             foreach (Direction currMove in movepath)
             {
 
                 //while (Timing.TotalMilliseconds - startingTime < 200 && (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)) ;
-                if (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)
+                if (visibleCells.Contains(ent.pos))
+                //if (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)
                 {
                     currentActor = ent;
                     lockForAnimation = true;
@@ -368,7 +367,7 @@ namespace AgateDemo
                         else if (ent.x > 0 && (map[ent.y, ent.x - 1] == 1187) && checkFixture(ent.x - 1, ent.y, 1190) != null)
                         {
                             map[ent.y, ent.x - 1] = 1194;
-                            fixtures[new Cell() { x = ent.x - 1, y = ent.y }].tile = 1188;
+                            fixtures[new Point() { X = ent.x - 1, Y = ent.y }].tile = 1188;
                         }
                         else if (ent.x > 0 && (map[ent.y, ent.x - 1] == 1194) && checkPos(ent.x - 1, ent.y) != null && checkPos(ent.x - 1, ent.y).friendly == ent.friendly)
                         {
@@ -387,7 +386,7 @@ namespace AgateDemo
                         else if (ent.y > 0 && (map[ent.y - 1, ent.x] == 1187) && checkFixture(ent.x, ent.y - 1, 1191) != null)
                         {
                             map[ent.y - 1, ent.x] = 1194;
-                            fixtures[new Cell() { x = ent.x, y = ent.y - 1 }].tile = 1189;
+                            fixtures[new Point() { X = ent.x, Y = ent.y - 1 }].tile = 1189;
                             //                        fixtures.FirstOrDefault(e => e.x == ent.x && e.y == ent.y - 1 && e.tile == 1191).tile = 1189;
                         }
                         else if (ent.y > 0 && (map[ent.y - 1, ent.x] == 1194) && checkPos(ent.x, ent.y - 1) != null && checkPos(ent.x, ent.y - 1).friendly == ent.friendly)
@@ -407,7 +406,7 @@ namespace AgateDemo
                         else if (ent.x < mapWidth && (map[ent.y, ent.x + 1] == 1187) && checkFixture(ent.x + 1, ent.y, 1190) != null)
                         {
                             map[ent.y, ent.x + 1] = 1194;
-                            fixtures[new Cell() { x = ent.x + 1, y = ent.y }].tile = 1188;
+                            fixtures[new Point() { X = ent.x + 1, Y = ent.y }].tile = 1188;
                         }
                         else if (ent.x < mapWidth && (map[ent.y, ent.x + 1] == 1194) && checkPos(ent.x + 1, ent.y) != null && checkPos(ent.x + 1, ent.y).friendly == ent.friendly)
                         {
@@ -426,7 +425,7 @@ namespace AgateDemo
                         else if (ent.y < mapHeight && (map[ent.y + 1, ent.x] == 1187) && checkFixture(ent.x, ent.y + 1, 1191) != null)
                         {
                             map[ent.y + 1, ent.x] = 1194;
-                            fixtures[new Cell() { x = ent.x, y = ent.y + 1 }].tile = 1189;
+                            fixtures[new Point() { X = ent.x, Y = ent.y + 1 }].tile = 1189;
                         }
                         else if (ent.y < mapHeight && (map[ent.y + 1, ent.x] == 1194) && checkPos(ent.x, ent.y + 1) != null && checkPos(ent.x, ent.y + 1).friendly == ent.friendly)
                         {
@@ -438,8 +437,12 @@ namespace AgateDemo
                         break;
                 }
                 entities[ent.pos] = ent;
-                requestingMove.x = ent.o_pos.x;
-                requestingMove.y = ent.o_pos.y;
+                if (ent.friendly)
+                {
+                    ent.fov.calculateSight();
+                    recalculateVision();
+                } requestingMove.X = ent.o_pos.X;
+                requestingMove.Y = ent.o_pos.Y;
                 if (Display.CurrentWindow.IsClosed)
                     return;
                 Display.BeginFrame();
@@ -452,7 +455,7 @@ namespace AgateDemo
             lockForAnimation = false;
         }
 
-        public static void MoveDirect(Mob ent, Cell targetSquare, Dictionary<Cell, int> validMoves, Dictionary<Cell, bool> invalidMoves)
+        public static void MoveDirect(Mob ent, Point targetSquare, Dictionary<Point, int> validMoves, Dictionary<Point, bool> invalidMoves)
         {
             //entities.Remove(ent.pos);
             //Dictionary<Cell, int> validMoves = new Dictionary<Cell, int>() { };
@@ -460,7 +463,7 @@ namespace AgateDemo
             calculateAllMoves(ent.x, ent.y, ent.moveSpeed, true, validMoves, invalidMoves, ent.friendly);
 
            // Cell targetSquare = validMoves.Keys.Except(invalidMoves.Keys).ToList()[randomPosition]
-            Cell currentSquare = targetSquare;
+            Point currentSquare = targetSquare;
             if (!validMoves.ContainsKey(targetSquare))
                 return;
             int currentDist = validMoves[targetSquare];
@@ -475,9 +478,9 @@ namespace AgateDemo
                     {
                         case Direction.East:
                             {
-                                if (validMoves.ContainsKey(new Cell(currentSquare.x + 1, currentSquare.y)) && validMoves[new Cell(currentSquare.x + 1, currentSquare.y)] > currentDist)
+                                if (validMoves.ContainsKey(new Point(currentSquare.X + 1, currentSquare.Y)) && validMoves[new Point(currentSquare.X + 1, currentSquare.Y)] > currentDist)
                                 {
-                                    currentSquare = new Cell(currentSquare.x + 1, currentSquare.y);
+                                    currentSquare = new Point(currentSquare.X + 1, currentSquare.Y);
                                     currentDist = validMoves[currentSquare];
                                     ent.moveList.Insert(0, Direction.West);
                                 }
@@ -485,9 +488,9 @@ namespace AgateDemo
                             }
                         case Direction.West:
                             {
-                                if (validMoves.ContainsKey(new Cell(currentSquare.x - 1, currentSquare.y)) && validMoves[new Cell(currentSquare.x - 1, currentSquare.y)] > currentDist)
+                                if (validMoves.ContainsKey(new Point(currentSquare.X - 1, currentSquare.Y)) && validMoves[new Point(currentSquare.X - 1, currentSquare.Y)] > currentDist)
                                 {
-                                    currentSquare = new Cell(currentSquare.x - 1, currentSquare.y);
+                                    currentSquare = new Point(currentSquare.X - 1, currentSquare.Y);
                                     currentDist = validMoves[currentSquare];
                                     ent.moveList.Insert(0, Direction.East);
                                 }
@@ -495,9 +498,9 @@ namespace AgateDemo
                             }
                         case Direction.North:
                             {
-                                if (validMoves.ContainsKey(new Cell(currentSquare.x, currentSquare.y - 1)) && validMoves[new Cell(currentSquare.x, currentSquare.y - 1)] > currentDist)
+                                if (validMoves.ContainsKey(new Point(currentSquare.X, currentSquare.Y - 1)) && validMoves[new Point(currentSquare.X, currentSquare.Y - 1)] > currentDist)
                                 {
-                                    currentSquare = new Cell(currentSquare.x, currentSquare.y - 1);
+                                    currentSquare = new Point(currentSquare.X, currentSquare.Y - 1);
                                     currentDist = validMoves[currentSquare];
                                     ent.moveList.Insert(0, Direction.South);
                                 }
@@ -505,9 +508,9 @@ namespace AgateDemo
                             }
                         case Direction.South:
                             {
-                                if (validMoves.ContainsKey(new Cell(currentSquare.x, currentSquare.y + 1)) && validMoves[new Cell(currentSquare.x, currentSquare.y + 1)] > currentDist)
+                                if (validMoves.ContainsKey(new Point(currentSquare.X, currentSquare.Y + 1)) && validMoves[new Point(currentSquare.X, currentSquare.Y + 1)] > currentDist)
                                 {
-                                    currentSquare = new Cell(currentSquare.x, currentSquare.y + 1);
+                                    currentSquare = new Point(currentSquare.X, currentSquare.Y + 1);
                                     currentDist = validMoves[currentSquare];
                                     ent.moveList.Insert(0, Direction.North);
                                 }
@@ -525,11 +528,11 @@ namespace AgateDemo
         public static void MoveRandom(Mob ent)
         {
             //entities.Remove(ent.pos);
-            Dictionary<Cell, int> validMoves = new Dictionary<Cell, int>() { };
-            Dictionary<Cell, bool> invalidMoves = new Dictionary<Cell, bool>();
+            Dictionary<Point, int> validMoves = new Dictionary<Point, int>() { };
+            Dictionary<Point, bool> invalidMoves = new Dictionary<Point, bool>();
             calculateAllMoves(ent.x, ent.y, ent.moveSpeed, true, validMoves, invalidMoves, ent.friendly);
             int randomPosition = rnd.Next(validMoves.Keys.Except(invalidMoves.Keys).ToList().Count);
-            Cell targetSquare = validMoves.Keys.Except(invalidMoves.Keys).ToList()[randomPosition], currentSquare = targetSquare;
+            Point targetSquare = validMoves.Keys.Except(invalidMoves.Keys).ToList()[randomPosition], currentSquare = targetSquare;
             int currentDist = validMoves[targetSquare];
 
             Direction[] randir = { Direction.East, Direction.North, Direction.West, Direction.South };
@@ -542,9 +545,9 @@ namespace AgateDemo
                     {
                         case Direction.East:
                             {
-                                if (validMoves.ContainsKey(new Cell(currentSquare.x + 1, currentSquare.y)) && validMoves[new Cell(currentSquare.x + 1, currentSquare.y)] > currentDist)
+                                if (validMoves.ContainsKey(new Point(currentSquare.X + 1, currentSquare.Y)) && validMoves[new Point(currentSquare.X + 1, currentSquare.Y)] > currentDist)
                                 {
-                                    currentSquare = new Cell(currentSquare.x + 1, currentSquare.y);
+                                    currentSquare = new Point(currentSquare.X + 1, currentSquare.Y);
                                     currentDist = validMoves[currentSquare];
                                     ent.moveList.Insert(0, Direction.West);
                                 }
@@ -552,9 +555,9 @@ namespace AgateDemo
                             }
                         case Direction.West:
                             {
-                                if (validMoves.ContainsKey(new Cell(currentSquare.x - 1, currentSquare.y)) && validMoves[new Cell(currentSquare.x - 1, currentSquare.y)] > currentDist)
+                                if (validMoves.ContainsKey(new Point(currentSquare.X - 1, currentSquare.Y)) && validMoves[new Point(currentSquare.X - 1, currentSquare.Y)] > currentDist)
                                 {
-                                    currentSquare = new Cell(currentSquare.x - 1, currentSquare.y);
+                                    currentSquare = new Point(currentSquare.X - 1, currentSquare.Y);
                                     currentDist = validMoves[currentSquare];
                                     ent.moveList.Insert(0, Direction.East);
                                 }
@@ -562,9 +565,9 @@ namespace AgateDemo
                             }
                         case Direction.North:
                             {
-                                if (validMoves.ContainsKey(new Cell(currentSquare.x, currentSquare.y - 1)) && validMoves[new Cell(currentSquare.x, currentSquare.y - 1)] > currentDist)
+                                if (validMoves.ContainsKey(new Point(currentSquare.X, currentSquare.Y - 1)) && validMoves[new Point(currentSquare.X, currentSquare.Y - 1)] > currentDist)
                                 {
-                                    currentSquare = new Cell(currentSquare.x, currentSquare.y - 1);
+                                    currentSquare = new Point(currentSquare.X, currentSquare.Y - 1);
                                     currentDist = validMoves[currentSquare];
                                     ent.moveList.Insert(0, Direction.South);
                                 }
@@ -572,9 +575,9 @@ namespace AgateDemo
                             }
                         case Direction.South:
                             {
-                                if (validMoves.ContainsKey(new Cell(currentSquare.x, currentSquare.y + 1)) && validMoves[new Cell(currentSquare.x, currentSquare.y + 1)] > currentDist)
+                                if (validMoves.ContainsKey(new Point(currentSquare.X, currentSquare.Y + 1)) && validMoves[new Point(currentSquare.X, currentSquare.Y + 1)] > currentDist)
                                 {
-                                    currentSquare = new Cell(currentSquare.x, currentSquare.y + 1);
+                                    currentSquare = new Point(currentSquare.X, currentSquare.Y + 1);
                                     currentDist = validMoves[currentSquare];
                                     ent.moveList.Insert(0, Direction.North);
                                 }
@@ -644,8 +647,8 @@ namespace AgateDemo
                 }
             }*/
             MoveMob(ent, ent.moveList);
-            Cell c = ent.pos;
-            Cell[] dCells = { new Cell(c.x + 1, c.y), new Cell(c.x - 1, c.y), new Cell(c.x, c.y - 1), new Cell(c.x, c.y + 1) };
+            Point c = ent.pos;
+            Point[] dCells = { new Point(c.X + 1, c.Y), new Point(c.X - 1, c.Y), new Point(c.X, c.Y - 1), new Point(c.X, c.Y + 1) };
             Shuffle(dCells);
             if (entities.ContainsKey(dCells[0]))
             {
@@ -721,17 +724,17 @@ namespace AgateDemo
 };
             int numMorphs = DungeonMap.geomorphs.Count;
             map = DungeonMap.merge(DungeonMap.geomorphs[0], DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
-            for (int eh = 2; eh < 3; eh++)
+            for (int eh = 2; eh < 5; eh++)
             {
                 if (rnd.Next(2) == 0)
                     map = DungeonMap.merge(map, DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
                 else
                     map = DungeonMap.merge(map, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(numMorphs)]), false);
             }
-            for (int ah = 1; ah < 3; ah++)
+            for (int ah = 1; ah < 5; ah++)
             {
                 map2 = DungeonMap.merge(DungeonMap.geomorphs[rnd.Next(numMorphs)], DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
-                for (int eh = 2; eh < 3; eh++)
+                for (int eh = 2; eh < 5; eh++)
                 {
                     if (rnd.Next(2) == 0)
                         map2 = DungeonMap.merge(map2, DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
@@ -741,12 +744,12 @@ namespace AgateDemo
                 map = DungeonMap.merge(map, map2, true);
             }
 
-            fixtures = new Dictionary<Cell, Entity>()
+            fixtures = new Dictionary<Point, Entity>()
             {
             };
-            fixtures.Add(new Cell() { x = 10, y = 10 }, new Entity() { tile = 1203, x = 10, y = 10 });
-            fixtures.Add(new Cell() { x = 12, y = 11 }, new Entity() { tile = 1206, x = 12, y = 11 });
-            fixtures.Add(new Cell() { x = 14, y = 10 }, new Entity() { tile = 1197, x = 14, y = 10 });
+            fixtures.Add(new Point() { X = 10, Y = 10 }, new Entity() { tile = 1203, x = 10, y = 10 });
+            fixtures.Add(new Point() { X = 12, Y = 11 }, new Entity() { tile = 1206, x = 12, y = 11 });
+            fixtures.Add(new Point() { X = 14, Y = 10 }, new Entity() { tile = 1197, x = 14, y = 10 });
 
             /*,
            new Entity() { tile = 1189, x = 2, y = 4},
@@ -755,14 +758,16 @@ namespace AgateDemo
            new Entity() { tile = 1188, x = 11, y = 17},*/
 
             map = DungeonMap.cleanUp(map);
-            map = DungeonMap.theme(map);
+//            map = DungeonMap.theme(map);
+            mapColors = DungeonMap.recolor(map);
 
             // map = DungeonMap.geomorph;
             int mw = map.GetLength(1), mh = map.GetLength(0);
-            entities = new Dictionary<Cell, Mob>()
+            allies = new Dictionary<Point, Mob>();
+            entities = new Dictionary<Point, Mob>()
             {
             };
-            o_entities = new Dictionary<Cell, Mob>()
+            o_entities = new Dictionary<Point, Mob>()
             {
             };
 
@@ -851,20 +856,20 @@ namespace AgateDemo
             entities[nt.pos] = nt;
             o_entities[nt.pos] = nt;
             */
-            for (int i = 0, c = 0; i < 222; c++, i++)//= rnd.Next(2, 7)) //check for c to limit number of entities
+/*            for (int i = 0, c = 0; i < 222; c++, i++)//= rnd.Next(2, 7)) //check for c to limit number of entities
             {
                 Spawn(i, mw, mh);
             }
             for (int i = 226; i < 434; i++)
             {
                 Spawn(i, mw, mh);
-            }
+            }*/
             for (int i = 473; i < 542; i++)
             {
                 Spawn(i, mw, mh);
             }
 
-            foreach (Cell cl in entities.Keys)
+            foreach (Point cl in entities.Keys)
             {
                 int curr = rnd.Next(10000);
                 while (initiative.ContainsKey(curr))
@@ -948,8 +953,8 @@ namespace AgateDemo
                         currentActor = ent;
                         cursorX = ent.x;
                         cursorY = ent.y;
-                        requestingMove.x = ent.o_pos.x;
-                        requestingMove.y = ent.o_pos.y;
+                        requestingMove.X = ent.o_pos.X;
+                        requestingMove.Y = ent.o_pos.Y;
                         lockState = true;
                         ScreenBrowser.currentUI = ent.ui;
                         ScreenBrowser.UnHide();
@@ -967,7 +972,7 @@ namespace AgateDemo
             if (currentInitiative < initiative.Keys.Min())
             {
                 initiative.Clear();
-                foreach (Cell cl in o_entities.Keys)
+                foreach (Point cl in o_entities.Keys)
                 {
                     o_entities[cl].actionCount = 0;
                     int curr = rnd.Next(10000);
@@ -1003,15 +1008,22 @@ namespace AgateDemo
                 for (var col = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10; col <= mapWidth && (col < cursorX + 10 || col < 20); col++)
                 {
                     // maxVisibleX++;
+                    if (!visibleCells.Contains(new Point(col, row)))
+                    {
+                        pX += tileVIncrease;
+                        continue;
+                    }
                     if (map[row, col] == DungeonMap.gr)
                     {
+
+                        tileset.Color = mapColors[row, col];
                         if (highlightingOn)
                         {
-                            if (highlightedTargetCells.ContainsKey(new Cell(col, row)))
+                            if (highlightedTargetCells.ContainsKey(new Point(col, row)))
                             {
                                 tileset.Color = Color.FromHsv(10.0, 0.7, 0.70 + (((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 4000 : (2000 - (Timing.TotalMilliseconds % 2000)) / 4000));
                             }
-                            else if (highlightedCells.ContainsKey(new Cell(col, row)) && !doNotStopCells.ContainsKey(new Cell(col, row)))
+                            else if (highlightedCells.ContainsKey(new Point(col, row)) && !doNotStopCells.ContainsKey(new Point(col, row)))
                             {
                                 tileset.Color = Color.FromHsv(190.0, 0.5, 0.75 + (((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 4000 : (2000 - (Timing.TotalMilliseconds % 2000)) / 4000));
                             }
@@ -1027,6 +1039,11 @@ namespace AgateDemo
                 pX = tileHIncrease * (20 - 1 - ((cursorY <= 10) ? row : (cursorY > mapHeight - 10) ? row - (mapHeight - 19) : row - (cursorY - 10)));
                 for (var col = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10; col <= mapWidth && (col < cursorX + 10 || col < 20); col++)
                 {
+                    if (!visibleCells.Contains(new Point(col, row)))
+                    {
+                        pX += tileVIncrease;
+                        continue;
+                    }
                     var dest = new Rectangle(pX, pY, tileWidth, tileHeight);
                     var entity = checkPos(col, row);
                     var fixture = checkFixture(col, row);
@@ -1047,15 +1064,18 @@ namespace AgateDemo
                     Rectangle src;
                     if (tile != DungeonMap.gr)
                     {
+                        tileset.Color = mapColors[row, col];
                         src = new Rectangle((tile % 38) * tileWidth, (tile / 38) * tileHeight, tileWidth, tileHeight);
                         tileset.Draw(src, dest);
+                        tileset.Color = Color.White;
+                        
                     }
                     if (entity != null)
                     {
                         tile = entity.tile;
                         src = new Rectangle((tile % 38) * tileWidth, (tile / 38) * tileHeight, tileWidth, tileHeight);
                         Color tsc;// = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 0.5, 1.0);
-                        if (lockState && entity.friendly && requestingMove.x == entity.o_pos.x && requestingMove.y == entity.o_pos.y)
+                        if (lockState && entity.friendly && requestingMove.X == entity.o_pos.X && requestingMove.Y == entity.o_pos.Y)
                         {
                             //tileset.Color = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 0.5, 1.0);
                             tileset.Draw(src, dest);
@@ -1132,9 +1152,9 @@ namespace AgateDemo
                     }
                     //     mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1000.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1000;
                     //       mandrillFont.Alpha = ((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 1700.0 : (2000 - (Timing.TotalMilliseconds % 2000)) / 1700;
-                    foreach (Cell cl in displayDamage.Keys)
+                    foreach (Point cl in displayDamage.Keys)
                     {
-                        if (cl.y == row && cl.x == col)
+                        if (cl.Y == row && cl.X == col)
                         {
                             if (displayDamage[cl] < 10)
                             {
@@ -1152,9 +1172,9 @@ namespace AgateDemo
                             }
                         }
                     }
-                    foreach (Cell cl in displayKills.Keys)
+                    foreach (Point cl in displayKills.Keys)
                     {
-                        if (cl.y == row && cl.x == col && displayKills[cl])
+                        if (cl.Y == row && cl.X == col && displayKills[cl])
                         {
                             int offset = (int)(((Timing.TotalMilliseconds % 4000) < 2000) ? (Timing.TotalMilliseconds % 4000) / 100 : (4000 - (Timing.TotalMilliseconds % 4000)) / 100);
                             mandrillFont.Color = (Timing.TotalMilliseconds % 100 < 50) ? Color.Black : Color.White;
@@ -1277,13 +1297,13 @@ namespace AgateDemo
 
             }*/
         }
-        public static void calculateAllMoves(int startX, int startY, int numMoves, bool performEntCheck, Dictionary<Cell, int> cellStore, Dictionary<Cell, bool> invalidCells, bool moverIsFriendly)
+        public static void calculateAllMoves(int startX, int startY, int numMoves, bool performEntCheck, Dictionary<Point, int> cellStore, Dictionary<Point, bool> invalidCells, bool moverIsFriendly)
         {
             if (numMoves == -1)
                 return;
             else
             {
-                Cell c = new Cell(startX, startY);
+                Point c = new Point(startX, startY);
 
                 if (map[startY, startX] != DungeonMap.gr)
                     return;
@@ -1324,7 +1344,7 @@ namespace AgateDemo
                 return;
             else
             {
-                Cell c = new Cell(startX, startY);
+                Point c = new Point(startX, startY);
 
                 if (map[startY, startX] != DungeonMap.gr)
                     return;
@@ -1378,15 +1398,15 @@ namespace AgateDemo
                                 if (sk.hitsAllies == false && checkPos(i, j) != null && checkPos(i, j).friendly == user.friendly)
                                     continue;
                                 if (map[j, i] == DungeonMap.gr)
-                                    highlightedTargetCells.Add(new Cell(i, j), 1);
+                                    highlightedTargetCells.Add(new Point(i, j), 1);
                             }
                         }
                         break;
                     }
                 case SkillAreaKind.Burst:
                     {
-                        Dictionary<Cell, int> damages = new Dictionary<Cell, int>();
-                        Dictionary<Cell, bool> kills = new Dictionary<Cell, bool>();
+                        Dictionary<Point, int> damages = new Dictionary<Point, int>();
+                        Dictionary<Point, bool> kills = new Dictionary<Point, bool>();
                         //assuming targetSquare of 10, 11 and radius 1:
                         int minX = startX - radius; // 9
                         if (minX < 0)
@@ -1414,7 +1434,7 @@ namespace AgateDemo
                                 if (sk.hitsAllies == false && checkPos(i, j) != null && checkPos(i, j).friendly == user.friendly)
                                     continue;
                                 if (map[j, i] == DungeonMap.gr)
-                                    highlightedTargetCells.Add(new Cell(i, j), 1);
+                                    highlightedTargetCells.Add(new Point(i, j), 1);
                             }
                         }
                         break;
@@ -1422,8 +1442,8 @@ namespace AgateDemo
                 case SkillAreaKind.Spray:
                     {
 
-                        Dictionary<Cell, int> damages = new Dictionary<Cell, int>();
-                        Dictionary<Cell, bool> kills = new Dictionary<Cell, bool>();
+                        Dictionary<Point, int> damages = new Dictionary<Point, int>();
+                        Dictionary<Point, bool> kills = new Dictionary<Point, bool>();
                         //assuming targetSquare of 10, 11 and radius 2:
                         int minX = startX - (radius - 1); // 8
                         if (minX < 0)
@@ -1491,7 +1511,7 @@ namespace AgateDemo
                                 if (sk.hitsAllies == false && checkPos(i, j) != null && checkPos(i, j).friendly == user.friendly)
                                     continue;
                                 if (map[j, i] == DungeonMap.gr)
-                                    highlightedTargetCells.Add(new Cell(i, j), 1);
+                                    highlightedTargetCells.Add(new Point(i, j), 1);
                             }
                         }
                     }
@@ -1501,7 +1521,7 @@ namespace AgateDemo
                     {
                         if (sk.hitsAllies == false && checkPos(startX, startY) != null && checkPos(startX, startY).friendly == user.friendly)
                             break;
-                        highlightedTargetCells.Add(new Cell(startX, startY), 1);
+                        highlightedTargetCells.Add(new Point(startX, startY), 1);
                         break;
                     }
             }
@@ -1543,7 +1563,7 @@ namespace AgateDemo
             {
                 highlightingOn = true;
                 o_entities[requestingMove].currentSkill = o_entities[requestingMove].skillList[o_entities[requestingMove].ui.currentScreen.currentMenuItem];
-                if (!nonHighlightedFreeCells.ContainsKey(new Cell(cursorX, cursorY)))
+                if (!nonHighlightedFreeCells.ContainsKey(new Point(cursorX, cursorY)))
                     calculateAllTargets(o_entities[requestingMove], cursorX, cursorY, o_entities[requestingMove].currentSkill);
             }
         }
@@ -1560,36 +1580,36 @@ namespace AgateDemo
                    // o_entities[requestingMove].moveList.Add(Direction.None);
                 }
                 else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194) &&
-                    (checkPos(cursorX - 1, cursorY) == null || doNotStopCells.ContainsKey(new Cell(cursorX - 1, cursorY))))
+                    (checkPos(cursorX - 1, cursorY) == null || doNotStopCells.ContainsKey(new Point(cursorX - 1, cursorY))))
                 {
-                    if (highlightedCells.ContainsKey(new Cell(cursorX - 1, cursorY)))
+                    if (highlightedCells.ContainsKey(new Point(cursorX - 1, cursorY)))
                     {
                         cursorX--;
                         o_entities[requestingMove].moveList.Add(Direction.West);
                     }
                 }
                 else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194) &&
-                    (checkPos(cursorX + 1, cursorY) == null || doNotStopCells.ContainsKey(new Cell(cursorX + 1, cursorY))))
+                    (checkPos(cursorX + 1, cursorY) == null || doNotStopCells.ContainsKey(new Point(cursorX + 1, cursorY))))
                 {
-                    if (highlightedCells.ContainsKey(new Cell(cursorX + 1, cursorY)))
+                    if (highlightedCells.ContainsKey(new Point(cursorX + 1, cursorY)))
                     {
                         cursorX++;
                         o_entities[requestingMove].moveList.Add(Direction.East);
                     }
                 }
                 else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194) &&
-                    (checkPos(cursorX, cursorY - 1) == null || doNotStopCells.ContainsKey(new Cell(cursorX, cursorY - 1))))
+                    (checkPos(cursorX, cursorY - 1) == null || doNotStopCells.ContainsKey(new Point(cursorX, cursorY - 1))))
                 {
-                    if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY - 1)))
+                    if (highlightedCells.ContainsKey(new Point(cursorX, cursorY - 1)))
                     {
                         cursorY--;
                         o_entities[requestingMove].moveList.Add(Direction.North);
                     }
                 }
                 else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194) &&
-                    (checkPos(cursorX, cursorY + 1) == null || doNotStopCells.ContainsKey(new Cell(cursorX, cursorY + 1))))
+                    (checkPos(cursorX, cursorY + 1) == null || doNotStopCells.ContainsKey(new Point(cursorX, cursorY + 1))))
                 {
-                    if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY + 1)))
+                    if (highlightedCells.ContainsKey(new Point(cursorX, cursorY + 1)))
                     {
                         cursorY++;
                         o_entities[requestingMove].moveList.Add(Direction.South);
@@ -1598,30 +1618,33 @@ namespace AgateDemo
                 else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (map[cursorY, cursorX - 1] == 1187) && checkPos(cursorX - 1, cursorY) == null && checkFixture(cursorX - 1, cursorY, 1190) != null)
                 {
                     map[cursorY, cursorX - 1] = 1194;
-                    fixtures[new Cell() { x = cursorX - 1, y = cursorY }].tile = 1188;
+                    fixtures[new Point() { X = cursorX - 1, Y = cursorY }].tile = 1188;
                     o_entities[requestingMove].moveList.Add(Direction.None);
+                    recalculateVision();
                     HighlightMove();
                 }
                 else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1187) && checkPos(cursorX + 1, cursorY) == null && checkFixture(cursorX + 1, cursorY, 1190) != null)
                 {
                     map[cursorY, cursorX + 1] = 1194;
-                    fixtures[new Cell() { x = cursorX + 1, y = cursorY }].tile = 1188;
+                    fixtures[new Point() { X = cursorX + 1, Y = cursorY }].tile = 1188;
                     o_entities[requestingMove].moveList.Add(Direction.None);
+                    recalculateVision();
                     HighlightMove();
                 }
                 else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (map[cursorY - 1, cursorX] == 1187) && checkPos(cursorX, cursorY - 1) == null && checkFixture(cursorX, cursorY - 1, 1191) != null)
                 {
                     map[cursorY - 1, cursorX] = 1194;
-                    fixtures[new Cell() { x = cursorX, y = cursorY - 1 }].tile = 1189;
+                    fixtures[new Point() { X = cursorX, Y = cursorY - 1 }].tile = 1189;
                     o_entities[requestingMove].moveList.Add(Direction.None);
+                    recalculateVision();
                     HighlightMove();
                 }
                 else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1187) && checkPos(cursorX, cursorY + 1) == null && checkFixture(cursorX, cursorY + 1, 1191) != null)
                 {
                     map[cursorY + 1, cursorX] = 1194;
-                    fixtures[new Cell() { x = cursorX, y = cursorY + 1 }].tile = 1189;
+                    fixtures[new Point() { X = cursorX, Y = cursorY + 1 }].tile = 1189;
                     o_entities[requestingMove].moveList.Add(Direction.None);
-                    
+                    recalculateVision();
                     HighlightMove();
                 }
                 else if (e.KeyCode == ScreenBrowser.backKey)
@@ -1647,7 +1670,7 @@ namespace AgateDemo
                     lockState = false;
                     highlightingOn = false;
                     o_entities[requestingMove].moveList.Clear();
-                    MoveDirect(o_entities[requestingMove], new Cell(cursorX, cursorY), highlightedCells, doNotStopCells);
+                    MoveDirect(o_entities[requestingMove], new Point(cursorX, cursorY), highlightedCells, doNotStopCells);
 
 //                    MoveMob(o_entities[requestingMove], o_entities[requestingMove].moveList);
                     highlightedCells.Clear();
@@ -1691,23 +1714,27 @@ namespace AgateDemo
                 {
                     //o_entities[requestingMove].moveList.Add(Direction.None);
                 }
-                else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194 || map[cursorY, cursorX - 1] == 1187))   // && checkPos(cursorX - 1, cursorY) == null)
+                else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194 || map[cursorY, cursorX - 1] == 1187)
+                    && visibleCells.Contains(new Point(cursorX - 1, cursorY)))   // && checkPos(cursorX - 1, cursorY) == null)
                 {
                     cursorX--;
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194 || map[cursorY, cursorX + 1] == 1187))
+                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194 || map[cursorY, cursorX + 1] == 1187)
+                     && visibleCells.Contains(new Point(cursorX + 1, cursorY)))
                 {
                     cursorX++;
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194 || map[cursorY - 1, cursorX] == 1187))
+                else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194 || map[cursorY - 1, cursorX] == 1187)
+                     && visibleCells.Contains(new Point(cursorX, cursorY - 1)))
                 {
 
                     cursorY--;
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194 || map[cursorY + 1, cursorX] == 1187))
+                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194 || map[cursorY + 1, cursorX] == 1187)
+                     && visibleCells.Contains(new Point(cursorX, cursorY + 1)))
                 {
                     cursorY++;
                     hoverActor = checkPos(cursorX, cursorY);
@@ -1788,7 +1815,7 @@ namespace AgateDemo
                 }
                 else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (map[cursorY, cursorX - 1] == 1194))
                 {
-                    if (highlightedCells.ContainsKey(new Cell(cursorX - 1, cursorY)) || nonHighlightedFreeCells.ContainsKey(new Cell(cursorX - 1, cursorY)))
+                    if (highlightedCells.ContainsKey(new Point(cursorX - 1, cursorY)) || nonHighlightedFreeCells.ContainsKey(new Point(cursorX - 1, cursorY)))
                     {
                         cursorX--;
                         o_entities[requestingMove].moveList.Add(Direction.West);
@@ -1798,7 +1825,7 @@ namespace AgateDemo
                 }
                 else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (map[cursorY, cursorX + 1] == 1194))
                 {
-                    if (highlightedCells.ContainsKey(new Cell(cursorX + 1, cursorY)) || nonHighlightedFreeCells.ContainsKey(new Cell(cursorX + 1, cursorY)))
+                    if (highlightedCells.ContainsKey(new Point(cursorX + 1, cursorY)) || nonHighlightedFreeCells.ContainsKey(new Point(cursorX + 1, cursorY)))
                     {
                         cursorX++;
                         o_entities[requestingMove].moveList.Add(Direction.East);
@@ -1808,7 +1835,7 @@ namespace AgateDemo
                 }
                 else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (map[cursorY - 1, cursorX] == 1194))
                 {
-                    if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY - 1)) || nonHighlightedFreeCells.ContainsKey(new Cell(cursorX, cursorY - 1)))
+                    if (highlightedCells.ContainsKey(new Point(cursorX, cursorY - 1)) || nonHighlightedFreeCells.ContainsKey(new Point(cursorX, cursorY - 1)))
                     {
                         cursorY--;
                         o_entities[requestingMove].moveList.Add(Direction.North);
@@ -1818,7 +1845,7 @@ namespace AgateDemo
                 }
                 else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (map[cursorY + 1, cursorX] == 1194))
                 {
-                    if (highlightedCells.ContainsKey(new Cell(cursorX, cursorY + 1)) || nonHighlightedFreeCells.ContainsKey(new Cell(cursorX, cursorY + 1)))
+                    if (highlightedCells.ContainsKey(new Point(cursorX, cursorY + 1)) || nonHighlightedFreeCells.ContainsKey(new Point(cursorX, cursorY + 1)))
                     {
                         cursorY++;
                         o_entities[requestingMove].moveList.Add(Direction.South);
@@ -1865,7 +1892,7 @@ namespace AgateDemo
                 }*/
                 else if (e.KeyCode == ScreenBrowser.confirmKey)// && o_entities[requestingMove].moveList.Count >= o_entities[requestingMove].currentSkill.minSkillDistance)
                 {
-                    Cell cursorPos = new Cell() { x = cursorX, y = cursorY };
+                    Point cursorPos = new Point() { X = cursorX, Y = cursorY };
                     if (nonHighlightedFreeCells.ContainsKey(cursorPos))
                     {
                         MessageBrowser.AddMessage("Minimum range not met, move the cursor into a highlighted area.", 5000.0, true);

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using AgateLib.Geometry;
 namespace AgateDemo
 {
     class DungeonMap
@@ -239,6 +239,39 @@ new int[,] {
                             }
                         }
                     }
+                }
+            }
+            return geolocal;
+        }
+        public static Color[,] recolor(int[,] geo)
+        {
+            Color[,] geolocal = new Color[geo.GetLength(0), geo.GetLength(1)];
+            Random rn = new Random();
+            for (int t1 = 0; t1 < geolocal.GetLength(0) / 20; t1++)
+            {
+                for (int t2 = 0; t2 < geolocal.GetLength(1) / 20; t2++)
+                {
+                    
+                       // int currTheme = (rn.Next(3) * 11) + (rn.Next(2) * 38);
+                       // if (currTheme == 2 * 11 || currTheme == 11 + 38)
+                         //   break;
+                        double hue = rn.Next(60) - 15;
+                        hue = (Math.Abs(hue * 360) + hue) % 360;
+                        for (int i = 0; i < 20; i++)
+                        {
+                            for (int j = 0; j < 20; j++)
+                            {
+                                if (geo[i + (t1 * 20), j + (t2 * 20)] == gr)
+                                {
+                                    geolocal[i + (t1 * 20), j + (t2 * 20)] = Chroma.RandomBlend(Color.White, Color.FromHsv(hue, rn.NextDouble() / 2.5 + 0.2, 0.8), 0.05, 0.2);
+                                }
+                                else if (geo[i + (t1 * 20), j + (t2 * 20)] != da)// && geo[i + (t1 * 20), j + (t2 * 20)] != 1187)
+                                {
+                                    geolocal[i + (t1 * 20), j + (t2 * 20)] = Chroma.RandomBlend(Color.White, Color.FromHsv(hue, rn.NextDouble() / 2.5 + 0.2, 0.8), 0.15, 0.3);
+                                }
+                            }
+                        }
+                    
                 }
             }
             return geolocal;

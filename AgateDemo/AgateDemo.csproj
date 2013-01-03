@@ -86,6 +86,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Source\Chroma.cs" />
     <Compile Include="Source\Demo.cs" />
     <Compile Include="Source\Dialog.cs" />
     <Compile Include="Source\DungeonMap.cs" />
@@ -96,6 +97,7 @@
     <Compile Include="Source\SimpleUI.cs" />
     <Compile Include="Source\Skill.cs" />
     <Compile Include="Source\TileData.cs" />
+    <Compile Include="Source\Vision.cs" />
     <Content Include="AgateLib.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
