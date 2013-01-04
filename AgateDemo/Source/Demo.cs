@@ -1001,12 +1001,14 @@ namespace AgateDemo
             for (int row = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20; row <= mapHeight && row <= cursorY + 20; row++)
             {
                 // maxVisibleY++;
-                var pY = tileVIncrease * ((cursorY <= 10) ? row : (cursorY > mapHeight - 10) ? row - (mapHeight - 19) : row - (cursorY - 10)); //   //(cursorY > mapHeight - 10) ? mapHeight - (cursorY - 10) : cursorY - 10)
-                var pX = tileHIncrease * (20 - 1 - ((cursorY <= 10) ? row : (cursorY > mapHeight - 10) ? row - (mapHeight - 19) : row - (cursorY - 10)));// +tileHIncrease; //row - (cursorY - 10)
+                var pY = tileVIncrease * ((cursorY <= 10) ? row : (cursorY > mapHeight - 10) ? row - (mapHeight - 19) : row - (cursorY - 10));
+                var pX = tileHIncrease * (20 - 1 - ((cursorY <= 10) ? row : (cursorY > mapHeight - 10) ? row - (mapHeight - 19) : row - (cursorY - 10)));
+                //   //(cursorY > mapHeight - 10) ? mapHeight - (cursorY - 10) : cursorY - 10)
+                // +tileHIncrease; //row - (cursorY - 10)
 
                 //minVisibleX = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10;
                 //maxVisibleX = minVisibleX;
-                for (var col = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10; col <= mapWidth && (col < cursorX + 10 || col < 20); col++)
+                for (int col = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10; col <= mapWidth && (col < cursorX + 10 || col < 20); col++)
                 {
                     // maxVisibleX++;
                     if (!visibleCells.Contains(new Point(col, row)) && !seenCells.Contains(new Point(col, row)))
@@ -1525,7 +1527,7 @@ namespace AgateDemo
 
                                 if (sk.hitsAllies == false && checkPos(i, j) != null && checkPos(i, j).friendly == user.friendly)
                                     continue;
-                                if (map[j, i] == DungeonMap.gr)
+                                if (map[j, i] == DungeonMap.gr && user.fov.sight.Contains(new Point(i, j)))
                                     highlightedTargetCells.Add(new Point(i, j), 1);
                             }
                         }

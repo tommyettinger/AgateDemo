@@ -1,4 +1,31 @@
-﻿using System;
+﻿/* This file contains code originally from MRPAS.  That project's license is as follows:
+* MRPAS.NET
+* Copyright (c) 2010 Dominik Marczuk
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*     * Redistributions of source code must retain the above copyright
+*       notice, this list of conditions and the following disclaimer.
+*     * Redistributions in binary form must reproduce the above copyright
+*       notice, this list of conditions and the following disclaimer in the
+*       documentation and/or other materials provided with the distribution.
+*     * The name of Dominik Marczuk may not be used to endorse or promote products
+*       derived from this software without specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY DOMINIK MARCZUK ``AS IS'' AND ANY
+* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+* DISCLAIMED. IN NO EVENT SHALL DOMINIK MARCZUK BE LIABLE FOR ANY
+* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,540 +50,224 @@ namespace AgateDemo
         /// </summary>
         public void calculateSight()
         {
-            sight = new HashSet<Point>() { viewer.pos};
+            sight = new HashSet<Point>() { viewer.pos };
             //start at the left
-            foreach (Demo.Direction d in new Demo.Direction[] {Demo.Direction.East, Demo.Direction.West, Demo.Direction.North, Demo.Direction.South})
+            /*foreach (Demo.Direction d in new Demo.Direction[] {Demo.Direction.East, Demo.Direction.West, Demo.Direction.North, Demo.Direction.South})
             {
-                scanVision(d, viewer.pos, visualRange);
-            }
+                scanVisionOld(d, viewer.pos, visualRange);
+            }*/
+            computeFov(ref Demo.map, viewer.x, viewer.y, visualRange, true);
+            //scanVision(viewer.pos, visualRange);
         }
-        public void scanVision(Demo.Direction dir, Point pos, int range)
+        public Point normalizeCell(Point pt)
         {
-            if (range <= 0)
-                return;
-            switch (dir)
-            {
-                case Demo.Direction.East:
-                    {
-                        Point p = new Point(pos.X + 1, pos.Y);
-                        if (!sight.Contains(p))
-                            sight.Add(p);
-                        if (Demo.map[pos.Y, pos.X + 1] == DungeonMap.gr)
-                        {
-                            scanVision(Demo.Direction.East, p, range - 1);
-                            scanVision(Demo.Direction.North, p, range - 1);
-                            scanVision(Demo.Direction.South, p, range - 1);
-                        }
-                        else
-                        {
-                            p = new Point(pos.X + 1, pos.Y + 1);
-                            if (!sight.Contains(p) && Demo.map[pos.Y + 1, pos.X + 1] != DungeonMap.gr)
-                                sight.Add(p);
-                            p = new Point(pos.X + 1, pos.Y - 1);
-                            if (!sight.Contains(p) && Demo.map[pos.Y - 1, pos.X + 1] != DungeonMap.gr)
-                                sight.Add(p);
-                        }
-                        break;
-                    }
-                case Demo.Direction.West:
-                    {
-                        Point p = new Point(pos.X - 1, pos.Y);
-                        if (!sight.Contains(p))
-                            sight.Add(p);
-                        if (Demo.map[pos.Y, pos.X - 1] == DungeonMap.gr)
-                        {
-                            scanVision(Demo.Direction.West, p, range - 1);
-                            scanVision(Demo.Direction.North, p, range - 1);
-                            scanVision(Demo.Direction.South, p, range - 1);
-                        }
-                        else
-                        {
-                            p = new Point(pos.X - 1, pos.Y + 1);
-                            if (!sight.Contains(p) && Demo.map[pos.Y + 1, pos.X - 1] != DungeonMap.gr)
-                                sight.Add(p);
-                            p = new Point(pos.X - 1, pos.Y - 1);
-                            if (!sight.Contains(p) && Demo.map[pos.Y - 1, pos.X - 1] != DungeonMap.gr)
-                                sight.Add(p);
-                        }
-                        break;
-                    }
-                case Demo.Direction.North:
-                    {
-                        Point p = new Point(pos.X, pos.Y - 1);
-                        if (!sight.Contains(p))
-                            sight.Add(p);
-                        if (Demo.map[pos.Y - 1, pos.X] == DungeonMap.gr)
-                        {
-                            scanVision(Demo.Direction.East, p, range - 1);
-                            scanVision(Demo.Direction.North, p, range - 1);
-                            scanVision(Demo.Direction.West, p, range - 1);
-                        }
-                        else
-                        {
-                            p = new Point(pos.X + 1, pos.Y - 1);
-                            if (!sight.Contains(p) && Demo.map[pos.Y - 1, pos.X + 1] != DungeonMap.gr)
-                                sight.Add(p);
-                            p = new Point(pos.X - 1, pos.Y - 1);
-                            if (!sight.Contains(p) && Demo.map[pos.Y - 1, pos.X - 1] != DungeonMap.gr)
-                                sight.Add(p);
-                        }
-                        break;
-                    }
-                case Demo.Direction.South:
-                    {
-                        Point p = new Point(pos.X, pos.Y + 1);
-                        if (!sight.Contains(p))
-                            sight.Add(p);
-                        if (Demo.map[pos.Y + 1, pos.X] == DungeonMap.gr)
-                        {
-                            scanVision(Demo.Direction.East, p, range - 1);
-                            scanVision(Demo.Direction.West, p, range - 1);
-                            scanVision(Demo.Direction.South, p, range - 1);
-                        }
-                        else
-                        {
-                            p = new Point(pos.X + 1, pos.Y + 1);
-                            if (!sight.Contains(p) && Demo.map[pos.Y + 1, pos.X + 1] != DungeonMap.gr)
-                                sight.Add(p);
-                            p = new Point(pos.X - 1, pos.Y + 1);
-                            if (!sight.Contains(p) && Demo.map[pos.Y + 1, pos.X - 1] != DungeonMap.gr)
-                                sight.Add(p);
-                        }
-                        break;
-                    }
-            }
-        }
-        public void calculateSightOld()
-        {
-            sight = new HashSet<Point>();
 
-            for (int octant = 1; octant < 9; octant++)
-            {
-                scan(1, octant, 1.0, 0.0);
-            }
+            int betterX = pt.X, betterY = pt.Y;
 
+            if (betterY < 0 || betterX < 0 || Demo.map.GetLength(0) < betterY || Demo.map.GetLength(1) < betterX)
+            {
+                if (betterX < 0) betterX = 0;
+                if (betterY < 0) betterY = 0;
+                if (betterX > Demo.map.GetUpperBound(1)) betterX = Demo.map.GetUpperBound(1);
+                if (betterY > Demo.map.GetUpperBound(0)) betterY = Demo.map.GetUpperBound(0);
+                return new Point(betterX, betterY);
+            }
+            return pt;
         }
 
-        //is the cell within vision distance and does it match the provided state
-        private bool testCellOpen(int _x, int _y, int _cellState, int _depth)
+        private void computeQuadrant(ref int[,] m, int playerX, int playerY, int maxRadius, bool lightWalls, int maxObstacles, int dx, int dy)
         {
-            try
+            double[] startAngle, endAngle;
+            int angleArraySize;
+            angleArraySize = maxObstacles;
+            startAngle = new double[maxObstacles * 2];
+            endAngle = new double[maxObstacles];
+            //octant: vertical edge:
             {
-                if (!isVisible(viewer.pos.X, viewer.pos.Y, _x, _y)) throw new Exception();
-                return Demo.map[_y, _x] == DungeonMap.gr;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-        //is the cell within vision distance and does it match the provided state
-        private bool testCellClosed(int _x, int _y, int _cellState, int _depth)
-        {
-            try
-            {
-                if (!isVisible(viewer.pos.X, viewer.pos.Y, _x, _y)) throw new Exception();
-                return Demo.map[_y, _x] != DungeonMap.gr;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public int getMapPoint(int _x, int _y)
-        {
-            return Demo.map[_y, _x];
-        }
-
-
-        private double getSlope(double _x1, double _y1, double _x2, double _y2)
-        {
-            return (_x1 - _x2) / (_y1 - _y2);
-        }
-
-        private double getSlopeInv(double _x1, double _y1, double _x2, double _y2)
-        {
-            return (_y1 - _y2) / (_x1 - _x2);
-        }
-
-        protected void scan(int _depth, int _octant, double _startSlope, double _endSlope)
-        {
-            int x = 0;
-            int y = 0;
-
-            switch (_octant)
-            {
-                case 1:
-                    y = viewer.pos.Y - _depth;
-                    x = viewer.pos.X - Convert.ToInt32((_startSlope * Convert.ToDouble(_depth)));
-
-                    if (x < 0) break;
-                    if (x >= Demo.map.GetLength(1)) break;
-                    if (y < 0) break;
-                    if (y >= Demo.map.GetLength(0)) break;
-
-                    while (getSlope(x, y, viewer.pos.X, viewer.pos.Y) >= _endSlope)
-                    {
-                        if (isVisible(viewer.pos.X, viewer.pos.Y, x, y))
-                        {
-
-                            if (Demo.map[y, x] != DungeonMap.gr) //cell blocked
-                            {
-
-                                //if prior open AND within range
-                                if (testCellOpen(x - 1, y, 0, _depth))
-                                {
-                                    //recursion
-                                    scan(_depth + 1, _octant, _startSlope, getSlope(x - .5, y + 0.5, viewer.pos.X, viewer.pos.Y));
-                                }
-
-                            }
-                            else //not blocked
-                            {
-                                //if prior closed AND within range
-                                if (testCellClosed(x - 1, y, 1, _depth))
-                                {
-                                    _startSlope = getSlope(x - .5, y - 0.5, viewer.pos.X, viewer.pos.Y);
-                                }
-                                sight.Add(new Point(x, y));
-                            }
-
-                        }
-                        x++;
-
-                    }
-                    x--; //we step back as the last step of the while has taken us past the limit
-
-                    break;
-
-                case 2:
-
-                    y = viewer.pos.Y - _depth;
-                    x = viewer.pos.X + Convert.ToInt32((_startSlope * Convert.ToDouble(_depth)));
-
-                    if (x < 0) break;
-                    if (x >= Demo.map.GetLength(1)) break;
-                    if (y < 0) break;
-                    if (y >= Demo.map.GetLength(0)) break;
-
-                    while (getSlope(x, y, viewer.pos.X, viewer.pos.Y) <= _endSlope)
-                    {
-                        if (isVisible(viewer.pos.X, viewer.pos.Y, x, y))
-                        {
-
-                            if (Demo.map[y, x] != DungeonMap.gr)
-                            {
-                                if (testCellOpen(x + 1, y, 0, _depth))
-                                {
-                                    scan(_depth + 1, _octant, _startSlope, getSlope(x + 0.5, y + 0.5, viewer.pos.X, viewer.pos.Y));
-                                }
-                            }
-                            else
-                            {
-                                if (testCellClosed(x + 1, y, 1, _depth))
-                                {
-                                    _startSlope = -getSlope(x + 0.5, y - 0.5, viewer.pos.X, viewer.pos.Y);
-                                }
-                                sight.Add(new Point(x, y));
-                            }
-
-                        }
-                        x--;
-
-                    }
-                    x++;
-
-                    break;
-
-
-                case 3:
-
-                    x = viewer.pos.X + _depth;
-                    y = viewer.pos.Y - Convert.ToInt32((_startSlope * Convert.ToDouble(_depth)));
-
-                    if (x < 0) break;
-                    if (x >= Demo.map.GetLength(1)) break;
-                    if (y < 0) break;
-                    if (y >= Demo.map.GetLength(0)) break;
-
-                    while (getSlopeInv(x, y, viewer.pos.X, viewer.pos.Y) <= _endSlope)
-                    {
-
-                        if (isVisible(viewer.pos.X, viewer.pos.Y, x, y))
-                        {
-
-                            if (Demo.map[y, x] != DungeonMap.gr) //cell blocked
-                            {
-                                //if prior open AND within range
-                                if (testCellOpen(x, y - 1, 0, _depth))
-                                {
-                                    scan(_depth + 1, _octant, _startSlope, getSlopeInv(x - 0.5, y - 0.5, viewer.pos.X, viewer.pos.Y));
-                                }
-                            }
-                            else //not blocked
-                            {
-                                //if prior closed AND within range
-                                if (testCellClosed(x, y - 1, 1, _depth))
-                                {
-                                    _startSlope = -getSlopeInv(x + 0.5, y - 0.5, viewer.pos.X, viewer.pos.Y);
-                                }
-                                sight.Add(new Point(x, y));
-                            }
-
-                        }
-                        y++;
-
-                    }
-                    y--; //we step back as the last step of the while has taken us past the limit
-
-                    break;
-
-                case 4:
-
-                    x = viewer.pos.X + _depth;
-                    y = viewer.pos.Y + Convert.ToInt32((_startSlope * Convert.ToDouble(_depth)));
-
-                    if (x < 0) break;
-                    if (x >= Demo.map.GetLength(1)) break;
-                    if (y < 0) break;
-                    if (y >= Demo.map.GetLength(0)) break; ;
-
-                    while (getSlopeInv(x, y, viewer.pos.X, viewer.pos.Y) >= _endSlope)
-                    {
-
-                        if (isVisible(viewer.pos.X, viewer.pos.Y, x, y))
-                        {
-
-                            if (Demo.map[y, x] != DungeonMap.gr)
-                            {
-
-                                if (testCellOpen(x, y + 1, 0, _depth))
-                                {
-                                    scan(_depth + 1, _octant, _startSlope, getSlopeInv(x - 0.5, y + 0.5, viewer.pos.X, viewer.pos.Y));
-                                }
-                            }
-                            else
-                            {
-
-                                if (testCellClosed(x, y + 1, 1, _depth))
-                                {
-                                    _startSlope = getSlopeInv(x + 0.5, y + 0.5, viewer.pos.X, viewer.pos.Y);
-                                }
-                                sight.Add(new Point(x, y));
-                            }
-
-                        }
-                        y--;
-
-                    }
-                    y++;
-
-                    break;
-
-                case 5:
-
-                    y = viewer.pos.Y + _depth;
-                    x = viewer.pos.X + Convert.ToInt32((_startSlope * Convert.ToDouble(_depth)));
-
-                    if (x < 0) break;
-                    if (x >= Demo.map.GetLength(1)) break;
-                    if (y < 0) break;
-                    if (y >= Demo.map.GetLength(0)) break;
-
-                    while (getSlope(x, y, viewer.pos.X, viewer.pos.Y) >= _endSlope)
-                    {
-                        if (isVisible(viewer.pos.X, viewer.pos.Y, x, y))
-                        {
-
-                            if (Demo.map[y, x] != DungeonMap.gr)
-                            {
-
-                                if (testCellOpen(x + 1, y, 0, _depth))
-                                {
-                                    scan(_depth + 1, _octant, _startSlope, getSlope(x + 0.5, y - 0.5, viewer.pos.X, viewer.pos.Y));
-                                }
-                            }
-                            else
-                            {
-                                if (testCellClosed(x + 1, y, 1, _depth))
-                                {
-                                    _startSlope = getSlope(x + 0.5, y + 0.5, viewer.pos.X, viewer.pos.Y);
-                                }
-                                sight.Add(new Point(x, y));
-                            }
-
-                        }
-                        x--;
-
-                    }
-                    x++;
-
-                    break;
-
-                case 6:
-
-                    y = viewer.pos.Y + _depth;
-                    x = viewer.pos.X - Convert.ToInt32((_startSlope * Convert.ToDouble(_depth)));
-
-                    if (x < 0) break;
-                    if (x >= Demo.map.GetLength(1)) break;
-                    if (y < 0) break;
-                    if (y >= Demo.map.GetLength(0)) break;
-
-                    while (getSlope(x, y, viewer.pos.X, viewer.pos.Y) <= _endSlope)
-                    {
-                        if (isVisible(viewer.pos.X, viewer.pos.Y, x, y))
-                        {
-
-                            if (Demo.map[y, x] != DungeonMap.gr)
-                            {
-
-                                if (testCellOpen(x - 1, y, 0, _depth))
-                                {
-                                    scan(_depth + 1, _octant, _startSlope, getSlope(x - 0.5, y - 0.5, viewer.pos.X, viewer.pos.Y));
-                                }
-                            }
-                            else
-                            {
-                                if (testCellClosed(x - 1, y, 1, _depth))
-                                {
-                                    _startSlope = -getSlope(x - 0.5, y + 0.5, viewer.pos.X, viewer.pos.Y);
-                                }
-                                sight.Add(new Point(x, y));
-                            }
-
-                        }
-                        x++;
-
-                    }
-                    x--;
-
-                    break;
-
-                case 7:
-
-                    x = viewer.pos.X - _depth;
-                    y = viewer.pos.Y + Convert.ToInt32((_startSlope * Convert.ToDouble(_depth)));
-
-                    if (x < 0) break;
-                    if (x >= Demo.map.GetLength(1)) break;
-                    if (y < 0) break;
-                    if (y >= Demo.map.GetLength(0)) break;
-
-                    while (getSlopeInv(x, y, viewer.pos.X, viewer.pos.Y) <= _endSlope)
-                    {
-                       // Console.WriteLine(String.Format("x:{0}, y:{1}", x, y));
-
-                        if (isVisible(viewer.pos.X, viewer.pos.Y, x, y))
-                        {
-
-                            if (Demo.map[y, x] != DungeonMap.gr)
-                            {
-                                if (testCellOpen(x, y + 1, 0, _depth))
-                                {
-                                    scan(_depth + 1, _octant, _startSlope, getSlopeInv(x + 0.5, y + 0.5, viewer.pos.X, viewer.pos.Y));
-                                }
-                            }
-                            else
-                            {
-                                if (testCellClosed(x, y + 1, 1, _depth))
-                                {
-                                    _startSlope = getSlopeInv(x - 0.5, y + 0.5, viewer.pos.X, viewer.pos.Y);
-                                }
-                                sight.Add(new Point(x, y));
-                            }
-
-                        }
-                        y--;
-
-                    }
-                    y++;
-                    break;
-
-                case 8:
-
-                    x = viewer.pos.X - _depth;
-                    y = viewer.pos.Y - Convert.ToInt32((_startSlope * Convert.ToDouble(_depth)));
-
-                    if (x < 0) break;
-                    if (x >= Demo.map.GetLength(1)) break;
-                    if (y < 0) break;
-                    if (y >= Demo.map.GetLength(0)) break;
-
-                    while (getSlopeInv(x, y, viewer.pos.X, viewer.pos.Y) >= _endSlope)
-                    {
-
-                        if (isVisible(viewer.pos.X, viewer.pos.Y, x, y))
-                        {
-
-                            if (Demo.map[y, x] != DungeonMap.gr)
-                            {
-                                if (testCellOpen(x, y - 1, 0, _depth))
-                                {
-                                    scan(_depth + 1, _octant, _startSlope, getSlopeInv(x + 0.5, y - 0.5, viewer.pos.X, viewer.pos.Y));
-                                }
-                            }
-                            else
-                            {
-                                if (testCellClosed(x, y - 1, 1, _depth))
-                                {
-                                    _startSlope = getSlopeInv(x - 0.5, y - 0.5, viewer.pos.X, viewer.pos.Y);
-                                }
-                                sight.Add(new Point(x, y));
-                            }
-
-                        }
-                        y++;
-
-                    }
-                    y--;
-
-                    break;
-
-
-            }
-
-
-            if (x < 0) x = 0;
-            if (x >= Demo.map.GetLength(1)) x = Demo.map.GetLength(1) - 1;
-            if (y < 0) y = 0;
-            if (y >= Demo.map.GetLength(0)) y = Demo.map.GetLength(0) - 1;
-
-
-            if (isVisible(viewer.pos.X, viewer.pos.Y, x, y) & Demo.map[y, x] == DungeonMap.gr)
-            {
-                scan(_depth + 1, _octant, _startSlope, _endSlope);
-            }
-
-
-        }
-
-        //See if the provided points are within visual range
-        protected bool isVisible(int _x1, int _y1, int _x2, int _y2)
-        {
-            try
-            {
-                int i = Demo.map[_y1, _x1];  //illegal values throw an error
-                i = Demo.map[_y2, _x2];
-
-                if (_x1 == _x2) //if they're on the same axis, we only need to test one
-                //value, which is computationally cheaper than what we do below
+                int iteration = 1;
+                bool done = false;
+                int totalObstacles = 0;
+                int obstaclesInLastLine = 0;
+                double minAngle = 0.0;
+                int x, y;
+                //do while there are unblocked slopes left and the algo is within the map's boundaries
+                //scan progressive lines/columns from the PC outwards
+                y = playerY + dy;
+                if (y < 0 || y >= m.GetLength(0))
+                    done = true;
+                while (!done)
                 {
-                    return Math.Abs(_y1 - _y2) <= visualRange;
+                    //process cells in the line
+                    double slopesPerCell = 1.0 / (double)(iteration + 1);
+                    double halfSlopes = slopesPerCell * 0.5;
+                    int processedCell = (int)(minAngle / slopesPerCell);
+                    int minx = Math.Max(0, playerX - iteration), maxx = Math.Min(m.GetLength(1) - 1, playerX + iteration);
+                    done = true;
+                    for (x = playerX + (processedCell * dx); x >= minx && x <= maxx; x += dx)
+                    {
+                        //int c = x + (y * m.GetLength(1));
+                        //calculate slopes per cell
+                        bool visible = true;
+                        double startSlope = (double)processedCell * slopesPerCell;
+                        double centreSlope = startSlope + halfSlopes;
+                        double endSlope = startSlope + slopesPerCell;
+                        if (obstaclesInLastLine > 0 && sight.Contains(new Point(x, y)) == false)
+                        {
+                            int idx = 0;
+                            while (visible && idx < obstaclesInLastLine)
+                            {
+                                if (m[y, x] == DungeonMap.gr) //transparent is true
+                                {
+                                    if (centreSlope > startAngle[idx] && centreSlope < endAngle[idx])
+                                        visible = false;
+                                }
+                                else
+                                {
+                                    if (startSlope >= startAngle[idx] && endSlope <= endAngle[idx])
+                                        visible = false;
+                                }
+                                if (visible && (sight.Contains(new Point(x, y - dy)) == false || m[y - dy, x] != DungeonMap.gr) && (x - dx >= 0 && x - dx < m.GetLength(1) && (sight.Contains(new Point(x - dx, y - dy)) == false || m[y - dy, x - dx] != DungeonMap.gr)))
+                                    visible = false;
+                                idx++;
+                            }
+                        }
+                        if (visible)
+                        {
+                            if(!sight.Contains(new Point(x, y)) && Math.Abs(playerX - x) + Math.Abs(playerY - y) <= maxRadius)
+                                sight.Add(new Point(x, y));
+                            done = false;
+                            //if the cell is opaque, block the adjacent slopes
+                            if (m[y, x] != DungeonMap.gr)
+                            {
+                                if (minAngle >= startSlope)
+                                    minAngle = endSlope;
+                                else
+                                {
+                                    startAngle[totalObstacles] = startSlope;
+                                    endAngle[totalObstacles++] = endSlope;
+                                }
+                                if (!lightWalls)
+                                    sight.Remove (new Point(x, y));
+                            }
+                        }
+                        processedCell++;
+                    }
+                    if (iteration == maxRadius)
+                        done = true;
+                    iteration++;
+                    obstaclesInLastLine = totalObstacles;
+                    y += dy;
+                    if (y < 0 || y >= m.GetLength(0))
+                        done = true;
+                    if (minAngle == 1.0)
+                        done = true;
                 }
-
-                if (_y1 == _y2)
-                {
-                    return Math.Abs(_x1 - _x2) <= visualRange;
-                }
-
-                return (Math.Pow((_x1 - _x2), 2) + Math.Pow((_y1 - _y2), 2)) <= Math.Pow(visualRange, 2);
             }
-            catch
+            //octant: horizontal edge
             {
-                return false;
+                int iteration = 1; //iteration of the algo for this octant
+                bool done = false;
+                int totalObstacles = 0;
+                int obstaclesInLastLine = 0;
+                double minAngle = 0.0;
+                int x, y;
+                //do while there are unblocked slopes left and the algo is within the map's boundaries
+                //scan progressive lines/columns from the PC outwards
+                x = playerX + dx; //the outer slope's coordinates (first processed line)
+                if (x < 0 || x >= m.GetLength(1))
+                    done = true;
+                while (!done)
+                {
+                    //process cells in the line
+                    double slopesPerCell = 1.0 / (double)(iteration + 1);
+                    double halfSlopes = slopesPerCell * 0.5;
+                    int processedCell = (int)(minAngle / slopesPerCell);
+                    int miny = Math.Max(0, playerY - iteration), maxy = Math.Min(m.GetLength(0) - 1, playerY + iteration);
+                    done = true;
+                    for (y = playerY + (processedCell * dy); y >= miny && y <= maxy; y += dy)
+                    {
+                        int c = x + (y * m.GetLength(1));
+                        //calculate slopes per cell
+                        bool visible = true;
+                        double startSlope = (double)(processedCell * slopesPerCell);
+                        double centreSlope = startSlope + halfSlopes;
+                        double endSlope = startSlope + slopesPerCell;
+                        if (obstaclesInLastLine > 0 && !sight.Contains(new Point(x, y)))
+                        {
+                            int idx = 0;
+                            while (visible && idx < obstaclesInLastLine)
+                            {
+                                if (m[y, x] == DungeonMap.gr)
+                                {
+                                    if (centreSlope > startAngle[idx] && centreSlope < endAngle[idx])
+                                        visible = false;
+                                }
+                                else
+                                {
+                                    if (startSlope >= startAngle[idx] && endSlope <= endAngle[idx])
+                                        visible = false;
+                                }
+                                if (visible && (sight.Contains(new Point(x - dx, y)) == false || m[y, x - dx] != DungeonMap.gr) && (y - dy >= 0 && y - dy < m.GetLength(0) && (sight.Contains(new Point(x - dx, y - dy)) == false || m[y - dy, x - dx] != DungeonMap.gr)))
+                                    visible = false;
+                                idx++;
+                            }
+                        }
+                        if (visible)
+                        {
+                            if (!sight.Contains(new Point(x, y)) && Math.Abs(playerX - x) + Math.Abs(playerY - y) <= maxRadius)
+                                sight.Add(new Point(x, y));
+                            done = false;
+                            //if the cell is opaque, block the adjacent slopes
+                            if (m[y, x] != DungeonMap.gr)
+                            {
+                                if (minAngle >= startSlope)
+                                    minAngle = endSlope;
+                                else
+                                {
+                                    startAngle[totalObstacles] = startSlope;
+                                    endAngle[totalObstacles++] = endSlope;
+                                }
+                                if (!lightWalls)
+                                    sight.Remove(new Point(x, y));
+                            }
+                        }
+                        processedCell++;
+                    }
+                    if (iteration == maxRadius)
+                        done = true;
+                    iteration++;
+                    obstaclesInLastLine = totalObstacles;
+                    x += dx;
+                    if (x < 0 || x >= m.GetLength(1))
+                        done = true;
+                    if (minAngle == 1.0)
+                        done = true;
+                }
             }
         }
+        public void computeFov(ref int[,] m, int playerX, int playerY, int maxRadius, bool lightWalls)
+        {
+            //                int c;
+            int maxObstacles;
+            //first, zero the FOV map
+            /*for (c = m.Length - 1; c >= 0; c--)
+            {
+                m.cells[c].fov = false;
+            }*/
+
+            //calculate an approximated (excessive, just in case) maximum number of obstacles per octant
+            maxObstacles = m.Length / 7;
+
+            //set PC's position as visible
+            //sight.Add(new Point(playerX, playerY)); //unnecessary
+
+            //compute the 4 quadrants of the map
+            computeQuadrant(ref m, playerX, playerY, maxRadius, lightWalls, maxObstacles, 1, 1);
+            computeQuadrant(ref m, playerX, playerY, maxRadius, lightWalls, maxObstacles, 1, -1);
+            computeQuadrant(ref m, playerX, playerY, maxRadius, lightWalls, maxObstacles, -1, 1);
+            computeQuadrant(ref m, playerX, playerY, maxRadius, lightWalls, maxObstacles, -1, -1);
+        }
+
+
     }
 }
