@@ -353,7 +353,35 @@ namespace AgateDemo
         y2 = Math.Min(height - 1, y2);
 
         //find largest emmitted light in direction of source
-        double light = Math.Max(Math.Max(lightMap[y,x2] * (1 - map[y,x2]),
+        double light = 0;
+        int lit = 0;
+        if (map[y2, x2] < 1f && lightMap[y2, x2] > 0)
+        {
+            light = Math.Max(light, lightMap[y2, x2] * (1 - map[y2, x2]));
+            lit++;
+        }
+        if (map[y2, x] < 1f && lightMap[y2, x] > 0)
+        {
+            light = Math.Max(light, lightMap[y2, x] * (1 - map[y2, x]));
+            lit++;
+        }
+        if (map[y, x2] < 1f && lightMap[y, x2] > 0)
+        {
+            light = Math.Max(light, lightMap[y, x2] * (1 - map[y, x2]));
+            lit++;
+        }
+        if (lit < 2)
+        {
+            light = 0;
+        }
+
+        double distance = 1;
+        if (!simplified && x2 != x && y2 != y)
+        {//it's a diagonal
+            distance = Math.Sqrt(2);
+        }
+        /*
+        light = Math.Max(Math.Max(lightMap[y, x2] * (1 - map[y, x2]),
                 lightMap[y2,x] * (1 - map[y2,x])),
                 lightMap[y2,x2] * (1 - map[y2,x2]));
 
@@ -361,7 +389,7 @@ namespace AgateDemo
         if (!simplified && x2 != x && y2 != y) {//it's a diagonal
             distance = Math.Sqrt(2);
         }
-
+        */
         distance = Math.Max(0, distance);
         light = light - decay * distance;
         return light;
