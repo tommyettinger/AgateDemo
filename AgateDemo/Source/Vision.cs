@@ -342,7 +342,65 @@ namespace AgateDemo
      * @param y
      * @return
      */
-    private double getNearLight(int x, int y) {
+    private double getNearLight(int x, int y)
+    {
+        int x2 = x - (int)Math.Sign(x - startx);
+        int y2 = y - (int)Math.Sign(y - starty);
+
+        //clamp x2 and y2 to bound within map
+        x2 = Math.Max(0, x2);
+        x2 = Math.Min(width - 1, x2);
+        y2 = Math.Max(0, y2);
+        y2 = Math.Min(height - 1, y2);
+
+        //find largest emmitted light in direction of source
+        double light = 0 ;
+        int xDominant = Math.Abs(x - startx) - Math.Abs(y - starty);
+
+        int lit = 0;
+        if (map[y2, x2] < 1 && lightMap[y2, x2] > 0)
+        {
+            light = Math.Max(light, lightMap[y2, x2] * (1 - map[y2, x2]));
+            lit++;
+            if (xDominant == 0)
+            {
+                lit++;
+            }
+        }
+        if (map[y2, x] < 1 && lightMap[y2, x] > 0)
+        {
+            light = Math.Max(light, lightMap[y2, x] * (1 - map[y2, x]));
+            lit++;
+            if (xDominant < 0)
+            {
+                lit++;
+            }
+        }
+        if (map[y, x2] < 1 && lightMap[y, x2] > 0)
+        {
+            light = Math.Max(light, lightMap[y, x2] * (1 - map[y, x2]));
+            lit++;
+            if (xDominant > 0)
+            {
+                lit++;
+            }
+        }
+        if (lit < 2 && !(map[y2, x2] < 1 && map[y, x2] >= 1 && map[y2, x] >= 1))
+        {
+            light = 0;
+        }
+
+        double distance = 1;
+        if (!simplified && x2 != x && y2 != y)
+        {//it's a diagonal
+            distance = Math.Sqrt(2);
+        }
+
+        distance = Math.Max(0, distance);
+        light = light - decay * distance;
+        return light;
+    }
+    private double getNearLightOld(int x, int y) {
         int x2 = x - (int) Math.Sign(x - startx);
         int y2 = y - (int) Math.Sign(y - starty);
 
