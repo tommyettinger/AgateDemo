@@ -77,7 +77,7 @@ namespace AgateDemo
                                     continue;
 
                                 Demo.Mob tgt = Demo.checkPos(i, j);
-                                if (tgt != null)
+                                if (tgt != null && user.fov.sight[j,i] > 0)
                                 {
                                     if (hitsAllies == false && tgt.friendly == user.friendly)
                                         continue;
@@ -177,7 +177,7 @@ namespace AgateDemo
                                     continue;
 
                                 Demo.Mob tgt = Demo.checkPos(i, j);
-                                if (tgt != null)
+                                if (tgt != null && user.fov.sight[j, i] > 0)
                                 {
                                     if (hitsAllies == false && tgt.friendly == user.friendly)
                                         continue;
@@ -262,7 +262,7 @@ namespace AgateDemo
                                         continue;
                                 }
                                 Demo.Mob tgt = Demo.checkPos(i, j);
-                                if (tgt != null)
+                                if (tgt != null && user.fov.sight[j, i] > 0)
                                 {
                                     if (hitsAllies == false && tgt.friendly == user.friendly)
                                         continue;
@@ -287,6 +287,8 @@ namespace AgateDemo
                         if (tgt == null)
                             return new SkillResult();
                         if (hitsAllies == false && tgt.friendly == user.friendly)
+                            return new SkillResult();
+                        if (user.fov.sight[tgt.y, tgt.x] <= 0)
                             return new SkillResult();
                         Point o_tgt = new Point(tgt.o_pos.X, tgt.o_pos.Y);
                         Point tgt_pos = new Point(tgt.pos.X, tgt.pos.Y);

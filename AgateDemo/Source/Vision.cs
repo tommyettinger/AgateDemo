@@ -33,24 +33,49 @@ using AgateDemo;
 using AgateLib.Geometry;
 namespace AgateDemo
 {
+    public static class ArrayExtensions
+    {
+        public static void Fill<T>(this Array array, Func<int[], T> func)
+        {
+            var indices = new int[array.Rank];
+            array.Fill(indices, 0, func);
+        }
+
+        private static void Fill<T>(this Array array, int[] indices, int rank,
+            Func<int[], T> func)
+        {
+            for (int index = array.GetLowerBound(rank); index <= array.GetUpperBound(rank);
+                index++)
+            {
+                indices[rank] = index;
+
+                if (rank < array.Rank - 1)
+                {
+                    array.Fill(indices, rank + 1, func);
+                }
+                else
+                {
+                    array.SetValue(func(indices), indices);
+                }
+            }
+        }
+    }
     public class Vision
     {
         public Demo.Mob viewer;
         public Boolean vision = true;
 
-        public HashSet<Point> sight;
-
+        public HashSet<Point> sightSet;
+        public double[,] sight;
         public int visualRange = 10;
         public Vision(Demo.Mob viewer)
         {
             this.viewer = viewer;
+            //sightSet = new HashSet<Point>() { this.viewer.pos };
         }
-        /// <summary>
-        /// Go through all the octants
-        /// </summary>
-        public void calculateSight()
+        public void calculateSightOld()
         {
-            sight = new HashSet<Point>() { viewer.pos };
+            sightSet = new HashSet<Point>() { viewer.pos };
             //start at the left
             /*foreach (Demo.Direction d in new Demo.Direction[] {Demo.Direction.East, Demo.Direction.West, Demo.Direction.North, Demo.Direction.South})
             {
@@ -111,7 +136,7 @@ namespace AgateDemo
                         double startSlope = (double)processedCell * slopesPerCell;
                         double centreSlope = startSlope + halfSlopes;
                         double endSlope = startSlope + slopesPerCell;
-                        if (obstaclesInLastLine > 0 && sight.Contains(new Point(x, y)) == false)
+                        if (obstaclesInLastLine > 0 && sightSet.Contains(new Point(x, y)) == false)
                         {
                             int idx = 0;
                             while (visible && idx < obstaclesInLastLine)
@@ -126,15 +151,15 @@ namespace AgateDemo
                                     if (startSlope >= startAngle[idx] && endSlope <= endAngle[idx])
                                         visible = false;
                                 }
-                                if (visible && (sight.Contains(new Point(x, y - dy)) == false || m[y - dy, x] != DungeonMap.gr) && (x - dx >= 0 && x - dx < m.GetLength(1) && (sight.Contains(new Point(x - dx, y - dy)) == false || m[y - dy, x - dx] != DungeonMap.gr)))
+                                if (visible && (sightSet.Contains(new Point(x, y - dy)) == false || m[y - dy, x] != DungeonMap.gr) && (x - dx >= 0 && x - dx < m.GetLength(1) && (sightSet.Contains(new Point(x - dx, y - dy)) == false || m[y - dy, x - dx] != DungeonMap.gr)))
                                     visible = false;
                                 idx++;
                             }
                         }
                         if (visible)
                         {
-                            if(!sight.Contains(new Point(x, y)) && Math.Abs(playerX - x) + Math.Abs(playerY - y) <= maxRadius)
-                                sight.Add(new Point(x, y));
+                            if(!sightSet.Contains(new Point(x, y)) && Math.Abs(playerX - x) + Math.Abs(playerY - y) <= maxRadius)
+                                sightSet.Add(new Point(x, y));
                             done = false;
                             //if the cell is opaque, block the adjacent slopes
                             if (m[y, x] != DungeonMap.gr)
@@ -147,7 +172,7 @@ namespace AgateDemo
                                     endAngle[totalObstacles++] = endSlope;
                                 }
                                 if (!lightWalls)
-                                    sight.Remove (new Point(x, y));
+                                    sightSet.Remove (new Point(x, y));
                             }
                         }
                         processedCell++;
@@ -192,7 +217,7 @@ namespace AgateDemo
                         double startSlope = (double)(processedCell * slopesPerCell);
                         double centreSlope = startSlope + halfSlopes;
                         double endSlope = startSlope + slopesPerCell;
-                        if (obstaclesInLastLine > 0 && !sight.Contains(new Point(x, y)))
+                        if (obstaclesInLastLine > 0 && !sightSet.Contains(new Point(x, y)))
                         {
                             int idx = 0;
                             while (visible && idx < obstaclesInLastLine)
@@ -207,15 +232,15 @@ namespace AgateDemo
                                     if (startSlope >= startAngle[idx] && endSlope <= endAngle[idx])
                                         visible = false;
                                 }
-                                if (visible && (sight.Contains(new Point(x - dx, y)) == false || m[y, x - dx] != DungeonMap.gr) && (y - dy >= 0 && y - dy < m.GetLength(0) && (sight.Contains(new Point(x - dx, y - dy)) == false || m[y - dy, x - dx] != DungeonMap.gr)))
+                                if (visible && (sightSet.Contains(new Point(x - dx, y)) == false || m[y, x - dx] != DungeonMap.gr) && (y - dy >= 0 && y - dy < m.GetLength(0) && (sightSet.Contains(new Point(x - dx, y - dy)) == false || m[y - dy, x - dx] != DungeonMap.gr)))
                                     visible = false;
                                 idx++;
                             }
                         }
                         if (visible)
                         {
-                            if (!sight.Contains(new Point(x, y)) && Math.Abs(playerX - x) + Math.Abs(playerY - y) <= maxRadius)
-                                sight.Add(new Point(x, y));
+                            if (!sightSet.Contains(new Point(x, y)) && Math.Abs(playerX - x) + Math.Abs(playerY - y) <= maxRadius)
+                                sightSet.Add(new Point(x, y));
                             done = false;
                             //if the cell is opaque, block the adjacent slopes
                             if (m[y, x] != DungeonMap.gr)
@@ -228,7 +253,7 @@ namespace AgateDemo
                                     endAngle[totalObstacles++] = endSlope;
                                 }
                                 if (!lightWalls)
-                                    sight.Remove(new Point(x, y));
+                                    sightSet.Remove(new Point(x, y));
                             }
                         }
                         processedCell++;
@@ -268,6 +293,130 @@ namespace AgateDemo
             computeQuadrant(ref m, playerX, playerY, maxRadius, lightWalls, maxObstacles, -1, -1);
         }
 
+        /**
+ * Performs FOV by pushing values outwards from the source location.
+ *
+ * This algorithm does perform bounds checking.
+ *
+ * @author Eben Howard - http://squidpony.com - eben@squidpony.com
+ */
 
+        public void calculateSight()
+        {
+        //    sight = new HashSet<Point>() { viewer.pos };
+            //start at the left
+            /*foreach (Demo.Direction d in new Demo.Direction[] {Demo.Direction.East, Demo.Direction.West, Demo.Direction.North, Demo.Direction.South})
+            {
+                scanVisionOld(d, viewer.pos, visualRange);
+            }*/
+
+            sight = calculateFOV(calculateVisionMap(Demo.map), viewer.x, viewer.y, visualRange);
+            //scanVision(viewer.pos, visualRange);
+        }
+        private double[,] calculateVisionMap(int[,] dungeon)
+        {
+            double[,] vmap = new double[dungeon.GetLength(0), dungeon.GetLength(1)];
+            for (int j = 0; j < dungeon.GetLength(0); j++)
+            {
+                for (int i = 0; i < dungeon.GetLength(1); i++)
+                {
+                    switch (dungeon[j, i])
+                    {
+                        case 1194: { vmap[j, i] = 0.0; break; }
+                        default: { vmap[j, i] = 1.0; break; }
+                    }
+                }
+            }
+            return vmap;
+        }
+        private double[,] lightMap;
+    private double[,] map;
+    private double radius, decay;
+    private int startx, starty, width, height;
+    private bool simplified;
+
+    /**
+     * Find the light let through by the nearest square.
+     *
+     * @param x
+     * @param y
+     * @return
+     */
+    private double getNearLight(int x, int y) {
+        int x2 = x - (int) Math.Sign(x - startx);
+        int y2 = y - (int) Math.Sign(y - starty);
+
+        //clamp x2 and y2 to bound within map
+        x2 = Math.Max(0, x2);
+        x2 = Math.Min(width - 1, x2);
+        y2 = Math.Max(0, y2);
+        y2 = Math.Min(height - 1, y2);
+
+        //find largest emmitted light in direction of source
+        double light = Math.Max(Math.Max(lightMap[y,x2] * (1 - map[y,x2]),
+                lightMap[y2,x] * (1 - map[y2,x])),
+                lightMap[y2,x2] * (1 - map[y2,x2]));
+
+        double distance = 1;
+        if (!simplified && x2 != x && y2 != y) {//it's a diagonal
+            distance = Math.Sqrt(2);
+        }
+
+        distance = Math.Max(0, distance);
+        light = light - decay * distance;
+        return light;
+    }
+        
+    public double[,] calculateFOV(double[,] map, int startx, int starty, double force, double decay, bool simplifiedDiagonals) {
+        this.map = map;
+        this.decay = decay;
+        this.startx = startx;
+        this.starty = starty;
+        this.simplified = simplifiedDiagonals;
+        radius = force / decay;//assume worst case of no resistance in tiles
+        width = map.GetLength(1);
+        height = map.GetLength(0);
+        lightMap = new double[height,width];
+
+        lightMap[starty,startx] = force;//make the starting space full power
+
+        lightSurroundings(startx, starty);
+
+        return lightMap;
+    }
+
+    private void lightSurroundings(int x, int y) {
+        if (lightMap[y, x] <= 0) {
+            return;//no light to spread
+        }
+
+        for (int dx = x - 1; dx <= x + 1; dx++) {
+            for (int dy = y - 1; dy <= y + 1; dy++) {
+                //ensure in bounds
+                if (dx < 0 || dx >= width || dy < 0 || dy >= height) {
+                    continue;
+                }
+
+                double r2;
+                if (simplified) {
+                    r2 = Math.Sqrt((dx - startx) * (dx - startx) + (dy - starty) * (dy - starty));
+                } else {
+                    r2 = Math.Abs(dx - startx) + Math.Abs(dy - starty);
+                }
+                if (r2 <= radius) {
+                    double surroundingLight = getNearLight(dx, dy);
+                    if (lightMap[dy,dx] < surroundingLight) {
+                        lightMap[dy,dx] = surroundingLight;
+                        lightSurroundings(dx, dy);//redo neighbors since this one's light changed
+                    }
+                }
+            }
+        }
+    }
+
+    
+    public double[,] calculateFOV(double[,] map, int startx, int starty, double radius) {
+        return calculateFOV(map, startx, starty, 1, 1 / radius, true);
+    }
     }
 }
