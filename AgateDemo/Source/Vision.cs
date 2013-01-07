@@ -81,7 +81,7 @@ namespace AgateDemo
             {
                 scanVisionOld(d, viewer.pos, visualRange);
             }*/
-            computeFov(ref Demo.map, viewer.x, viewer.y, visualRange, true);
+            computeFov(ref Demo.currentLevel.map, viewer.x, viewer.y, visualRange, true);
             //scanVision(viewer.pos, visualRange);
         }
         public Point normalizeCell(Point pt)
@@ -89,12 +89,12 @@ namespace AgateDemo
 
             int betterX = pt.X, betterY = pt.Y;
 
-            if (betterY < 0 || betterX < 0 || Demo.map.GetLength(0) < betterY || Demo.map.GetLength(1) < betterX)
+            if (betterY < 0 || betterX < 0 || Demo.currentLevel.map.GetLength(0) < betterY || Demo.currentLevel.map.GetLength(1) < betterX)
             {
                 if (betterX < 0) betterX = 0;
                 if (betterY < 0) betterY = 0;
-                if (betterX > Demo.map.GetUpperBound(1)) betterX = Demo.map.GetUpperBound(1);
-                if (betterY > Demo.map.GetUpperBound(0)) betterY = Demo.map.GetUpperBound(0);
+                if (betterX > Demo.currentLevel.map.GetUpperBound(1)) betterX = Demo.currentLevel.map.GetUpperBound(1);
+                if (betterY > Demo.currentLevel.map.GetUpperBound(0)) betterY = Demo.currentLevel.map.GetUpperBound(0);
                 return new Point(betterX, betterY);
             }
             return pt;
@@ -310,7 +310,7 @@ namespace AgateDemo
                 scanVisionOld(d, viewer.pos, visualRange);
             }*/
 
-            sight = calculateFOV(calculateVisionMap(Demo.map), viewer.x, viewer.y, visualRange);
+            sight = calculateFOV(calculateVisionMap(Demo.currentLevel.map), viewer.x, viewer.y, visualRange);
             //scanVision(viewer.pos, visualRange);
         }
         private double[,] calculateVisionMap(int[,] dungeon)

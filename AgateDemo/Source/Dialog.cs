@@ -98,7 +98,7 @@ namespace AgateDemo
             else if (eventLink != null)
             {
                 ScreenBrowser.Hide();
-                Demo.mode = Demo.InputMode.Map;
+                Demo.mode = InputMode.Map;
                 Keyboard.KeyDown -= eventLink;
                 Keyboard.KeyDown += eventLink;
             }
@@ -114,7 +114,7 @@ namespace AgateDemo
                 //DialogBrowser.Navigate(DialogBrowser.currentUI.initialDialog);
                // enabled = false;
                 Keyboard.KeyDown -= eventLink;
-                Demo.mode = Demo.InputMode.Menu; //NOTE: switches to SimpleUI
+                Demo.mode = InputMode.Menu; //NOTE: switches to SimpleUI
             }
             else if (actionLink != null)
             {
@@ -130,7 +130,7 @@ namespace AgateDemo
                // DialogBrowser.Navigate(DialogBrowser.currentUI.currentDialog.previousDialog);
                 //enabled = true;
                 Keyboard.KeyDown -= eventLink;
-                Demo.mode = Demo.InputMode.Menu;
+                Demo.mode = InputMode.Menu;
             }
             else if (linksTo != null)
             {
@@ -174,7 +174,7 @@ namespace AgateDemo
         public static void Hide()
         {
             isHidden = true;
-            Demo.mode = Demo.InputMode.None;
+            Demo.mode = InputMode.None;
         }
         public static void UnHide()
         {
@@ -230,7 +230,7 @@ namespace AgateDemo
 
         public static void OnKeyDown_Dialog(InputEventArgs e)
         {
-            if (isHidden || Demo.mode != Demo.InputMode.Dialog)
+            if (isHidden || Demo.mode != InputMode.Dialog)
             {
                 return;
             }
@@ -311,7 +311,7 @@ namespace AgateDemo
         }
         public void Show()
         {
-            if (Demo.mode != Demo.InputMode.Dialog || currentDialog == null)
+            if (Demo.mode != InputMode.Dialog || currentDialog == null)
                 return;
             isHidden = false;
             Dictionary<char, char> mandrillDict = SimpleUI.mandrillDict;

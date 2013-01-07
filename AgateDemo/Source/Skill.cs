@@ -59,11 +59,11 @@ namespace AgateDemo
                         if (minY < 0)
                             minY = 0;
                         int maxX = targetSquare.X + radius; // 11
-                        if (maxX > Demo.map.GetUpperBound(1))
-                            maxX = Demo.map.GetUpperBound(1);
+                        if (maxX > Demo.currentLevel.map.GetUpperBound(1))
+                            maxX = Demo.currentLevel.map.GetUpperBound(1);
                         int maxY = targetSquare.Y + radius; // 12
-                        if (maxY > Demo.map.GetUpperBound(0))
-                            maxY = Demo.map.GetUpperBound(0);
+                        if (maxY > Demo.currentLevel.map.GetUpperBound(0))
+                            maxY = Demo.currentLevel.map.GetUpperBound(0);
 
                         for (int i = minX; i <= maxX; i++)
                         {
@@ -86,7 +86,7 @@ namespace AgateDemo
                                     Point tgt_pos = new Point(tgt.pos.X, tgt.pos.Y);
                                     tgt.health = tgt.health - this.damage;
                                     bool didKill = false;
-                                    if (!Demo.o_entities.ContainsKey(o_tgt))
+                                    if (!Demo.currentLevel.o_entities.ContainsKey(o_tgt))
                                         didKill = true;
                                     damages.Add(tgt_pos, this.damage);
                                     kills.Add(tgt_pos, didKill);
@@ -160,11 +160,11 @@ namespace AgateDemo
                         if (minY < 0)
                             minY = 0;
                         int maxX = targetSquare.X + radius; // 11
-                        if (maxX > Demo.map.GetUpperBound(1))
-                            maxX = Demo.map.GetUpperBound(1);
+                        if (maxX > Demo.currentLevel.map.GetUpperBound(1))
+                            maxX = Demo.currentLevel.map.GetUpperBound(1);
                         int maxY = targetSquare.Y + radius; // 12
-                        if (maxY > Demo.map.GetUpperBound(0))
-                            maxY = Demo.map.GetUpperBound(0);
+                        if (maxY > Demo.currentLevel.map.GetUpperBound(0))
+                            maxY = Demo.currentLevel.map.GetUpperBound(0);
 
                         for (int i = minX; i <= maxX; i++)
                         {
@@ -185,7 +185,7 @@ namespace AgateDemo
                                     Point tgt_pos = new Point(tgt.pos.X, tgt.pos.Y);
                                     tgt.health = tgt.health - this.damage;
                                     bool didKill = false;
-                                    if (!Demo.o_entities.ContainsKey(o_tgt))
+                                    if (!Demo.currentLevel.o_entities.ContainsKey(o_tgt))
                                         didKill = true;
                                     damages.Add(tgt_pos, this.damage);
                                     kills.Add(tgt_pos, didKill);
@@ -207,11 +207,11 @@ namespace AgateDemo
                         if (minY < 0)
                             minY = 0;
                         int maxX = targetSquare.X + (radius - 1); // 12
-                        if (maxX > Demo.map.GetUpperBound(1))
-                            maxX = Demo.map.GetUpperBound(1);
+                        if (maxX > Demo.currentLevel.map.GetUpperBound(1))
+                            maxX = Demo.currentLevel.map.GetUpperBound(1);
                         int maxY = targetSquare.Y + (radius - 1); // 13
-                        if (maxY > Demo.map.GetUpperBound(0))
-                            maxY = Demo.map.GetUpperBound(0);
+                        if (maxY > Demo.currentLevel.map.GetUpperBound(0))
+                            maxY = Demo.currentLevel.map.GetUpperBound(0);
                         if (targetSquare.Y == user.y && targetSquare.X == user.x)
                         {
                             minY++;
@@ -270,7 +270,7 @@ namespace AgateDemo
                                     Point tgt_pos = new Point(tgt.pos.X, tgt.pos.Y);
                                     tgt.health = tgt.health - this.damage;
                                     bool didKill = false;
-                                    if (!Demo.o_entities.ContainsKey(o_tgt))
+                                    if (!Demo.currentLevel.o_entities.ContainsKey(o_tgt))
                                         didKill = true;
                                     damages.Add(tgt_pos, this.damage);
                                     kills.Add(tgt_pos, didKill);
@@ -294,7 +294,7 @@ namespace AgateDemo
                         Point tgt_pos = new Point(tgt.pos.X, tgt.pos.Y);
                         tgt.health = tgt.health - this.damage;
                         bool didKill = false;
-                        if (!Demo.o_entities.ContainsKey(o_tgt))
+                        if (!Demo.currentLevel.o_entities.ContainsKey(o_tgt))
                             didKill = true;
                         return new SkillResult(new Dictionary<Point, int>() { { tgt_pos, this.damage } }, new Dictionary<Point, bool>() { { tgt_pos, didKill } });
                     }

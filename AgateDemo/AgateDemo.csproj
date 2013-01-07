@@ -86,9 +86,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OldDemo.cs" />
     <Compile Include="Source\Chroma.cs" />
     <Compile Include="Source\Demo.cs" />
     <Compile Include="Source\Dialog.cs" />
+    <Compile Include="Source\Dungeon.cs" />
     <Compile Include="Source\DungeonMap.cs" />
     <Compile Include="Source\Geometry.cs" />
     <Compile Include="Source\OldProgram.cs">

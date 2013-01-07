@@ -174,7 +174,7 @@ namespace AgateDemo
             else if (eventLink != null)
             {
                 ScreenBrowser.Hide();
-                Demo.mode = Demo.InputMode.Map;
+                Demo.mode = InputMode.Map;
                 Keyboard.KeyDown -= eventLink;
                 Keyboard.KeyDown += eventLink;
             }
@@ -190,7 +190,7 @@ namespace AgateDemo
                 ScreenBrowser.Navigate(ScreenBrowser.currentUI.initialScreen);
                 enabled = false;
                 Keyboard.KeyDown -= eventLink;
-                Demo.mode = Demo.InputMode.Menu;
+                Demo.mode = InputMode.Menu;
             }
             else if (actionLink != null)
             {
@@ -206,7 +206,7 @@ namespace AgateDemo
                 ScreenBrowser.Navigate(ScreenBrowser.currentUI.initialScreen);
                 enabled = true;
                 Keyboard.KeyDown -= eventLink;
-                Demo.mode = Demo.InputMode.Menu;
+                Demo.mode = InputMode.Menu;
             }
             else if (linksTo != null)
             {

@@ -312,13 +312,13 @@ new int[,] {
                         {
                             geolocal[i, j] = 1187;
                             Demo.Entity fx = new Demo.Entity() { x = j, y = i, tile = 1191 };
-                            Demo.fixtures.Add(fx.pos, fx);
+                            Demo.currentLevel.fixtures.Add(fx.pos, fx);
                         }
                         else if (!left && !right && top && bottom)
                         {
                             geolocal[i, j] = 1187;
                             Demo.Entity fx = new Demo.Entity() { x = j, y = i, tile = 1190 };
-                            Demo.fixtures.Add(fx.pos, fx);
+                            Demo.currentLevel.fixtures.Add(fx.pos, fx);
                         }
 
                     }
