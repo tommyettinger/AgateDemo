@@ -11,9 +11,11 @@ namespace AgateDemo
         public class Level
         {
             public static Random rnd = new Random();
+            public static bool safeStart = true;
+
             public Color[,] mapColors;
             public int minVisibleX = 0, minVisibleY = 0, maxVisibleX = 19, maxVisibleY = 19;
-
+            
             //public enum Direction { North, East, South, West, None };
            // public enum InputMode { Menu, Map, None, Dialog };
            // public static InputMode mode = InputMode.None;
@@ -88,7 +90,7 @@ namespace AgateDemo
             //public static int Demo.cursorY = 3;
             static FontSurface mandrillFont;
 
-            static DisplayWindow wind;
+//            static DisplayWindow wind;
 
             public void recalculateVision()
             {
@@ -128,13 +130,82 @@ namespace AgateDemo
                     ret = null;
                 return ret;
             }
-
+            private Dictionary<Point, int> grStore = new Dictionary<Point, int>();
+            public List<Point> safeUpCells = new List<Point>(), safeDownCells = new List<Point>();
+            private Dictionary<Point, bool> ivStore = new Dictionary<Point, bool>();
+            public HashSet<Point> enemyBlockedCells = new HashSet<Point>();
+            public void addStairs(bool isBottom)
+            {
+                int j = rnd.Next(map.GetLength(0));
+                int i = rnd.Next(map.GetLength(1));
+                while (map[j, i] != DungeonMap.gr || checkFixture(i, j) != null)
+                {
+                    j = rnd.Next(map.GetLength(0));
+                    i = rnd.Next(map.GetLength(1));
+                }
+                grStore = new Dictionary<Point, int>();
+                if (map[j, i] == DungeonMap.gr && checkFixture(i, j) == null)
+                    Demo.calculateAllMoves(this, i, j, 7, false, grStore, ivStore, true);
+                if (grStore.Count > 8)
+                {
+                    fixtures.Add(new Point(i, j), new Demo.Entity(1197,i,j));
+                    safeUpCells = grStore.Keys.Where((k, e) => grStore[k] == 6).ToList();
+                    safeUpCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 5));
+                    safeUpCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 4));
+                    safeUpCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 3));
+                    safeUpCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 2));
+                    safeUpCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 1));
+                    safeUpCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 0));
+                    enemyBlockedCells.Add(new Point(i, j));
+                    enemyBlockedCells.UnionWith(safeUpCells); //Add(new Point(i, j))
+                }
+                else
+                {
+//                    grStore.Clear();
+                    addStairs(isBottom);
+                }
+                if (isBottom)
+                    return;
+                j = rnd.Next(map.GetLength(0));
+                i = rnd.Next(map.GetLength(1));
+                grStore = new Dictionary<Point, int>();
+                while (map[j, i] != DungeonMap.gr || checkFixture(i, j) != null)
+                {
+                    j = rnd.Next(map.GetLength(0));
+                    i = rnd.Next(map.GetLength(1));
+                }
+                if (map[j, i] == DungeonMap.gr)
+                {
+                    Demo.calculateAllMoves(this, i, j, 7, false, grStore, ivStore, true);
+                }
+                if (grStore.Count > 8)
+                {
+                    fixtures.Add(new Point(i, j), new Demo.Entity(1198, i, j));
+                    safeDownCells = grStore.Keys.Where((k, e) => grStore[k] == 6).ToList();
+                    safeDownCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 5));
+                    safeDownCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 4));
+                    safeDownCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 3));
+                    safeDownCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 2));
+                    safeDownCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 1));
+                    safeDownCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 0));
+                    enemyBlockedCells.Add(new Point(i, j));
+                    enemyBlockedCells.UnionWith(safeDownCells);//Add(new Point(i, j));
+                }
+                else
+                {
+                    grStore.Clear();
+                    safeUpCells.Clear();
+                    safeDownCells.Clear();
+                    addStairs(isBottom);
+                }
+                
+            }
 
             public Demo.Mob Spawn(int tileNo, int width, int height)
             {
                 int rx = rnd.Next(width);
                 int ry = rnd.Next(height);
-                if (map[ry, rx] == DungeonMap.gr)
+                if (map[ry, rx] == DungeonMap.gr && enemyBlockedCells.Contains(new Point(rx, ry)) == false)
                 {
                     Demo.Mob nt = new Demo.Mob(tileNo, rx, ry, false, this);
 
@@ -149,34 +220,15 @@ namespace AgateDemo
                 }
                 return Spawn(tileNo, width, height);
             }
-            public void Init()
+            public void Init(bool isBottom)
             {
+                
                 //mode = InputMode.Dialog;
-                map = new[,]
-			{
-{ 1178, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1179}, //0
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176}, //4
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176}, //9
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1186, 1177, 1194, 1177, 1177, 1177, 1179, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1186, 1177, 1177, 1177, 1194, 1179, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1176, 1194, 1194, 1194, 1194, 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176}, //14
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1176, 1194, 1194, 1194, 1194, 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1176, 1194, 1194, 1194, 1194, 1194, 1176, 1194, 1194, 1194, 1194, 1176, 1194, 1194, 1194, 1194, 1194, 1194, 1194, 1176},
-{ 1180, 1177, 1177, 1177, 1177, 1177, 1183, 1177, 1177, 1177, 1177, 1183, 1177, 1177, 1177, 1177, 1177, 1177, 1177, 1181}  //19
-};
                 int numMorphs = DungeonMap.geomorphs.Count;
-                map = DungeonMap.merge(DungeonMap.geomorphs[0], DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
+                if (safeStart)
+                    map = DungeonMap.merge(DungeonMap.geomorphs[0], DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
+                else
+                    map = DungeonMap.merge(DungeonMap.geomorphs[rnd.Next(numMorphs)], DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
                 for (int eh = 2; eh < 3; eh++)
                 {
                     if (rnd.Next(2) == 0)
@@ -199,10 +251,10 @@ namespace AgateDemo
 
                 fixtures = new Dictionary<Point, Demo.Entity>()
                 {
-                };
+                };/*
                 fixtures.Add(new Point() { X = 10, Y = 10 }, new Demo.Entity() { tile = 1203, x = 10, y = 10 });
                 fixtures.Add(new Point() { X = 12, Y = 11 }, new Demo.Entity() { tile = 1206, x = 12, y = 11 });
-                fixtures.Add(new Point() { X = 14, Y = 10 }, new Demo.Entity() { tile = 1197, x = 14, y = 10 });
+                */
 
                 /*,
                new Entity() { tile = 1189, x = 2, y = 4},
@@ -210,7 +262,8 @@ namespace AgateDemo
                new Entity() { tile = 1188, x = 6, y = 15},
                new Entity() { tile = 1188, x = 11, y = 17},*/
 
-                map = DungeonMap.cleanUp(map);
+                map = DungeonMap.cleanUp(map, this);
+                addStairs(isBottom);
                 //            map = DungeonMap.theme(map);
                 mapColors = DungeonMap.recolor(map);
 
@@ -226,15 +279,17 @@ namespace AgateDemo
                 };
                 o_entities = new Dictionary<Point, Demo.Mob>()
                 {
-                }; for (int i = 0, c = 0; i < 222; c++, i++)//= rnd.Next(2, 7)) //check for c to limit number of entities
+                };
+                
+                for (int i = 0, c = 0; i < 222 && c < 50; c++, i+= rnd.Next(2, 7))//= rnd.Next(2, 7)) //check for c to limit number of entities
                 {
                     Spawn(i, mw, mh);
-                }/*
-                for (int i = 226; i < 434; i++)
+                }
+                for (int i = 226, c = 0; i < 434 && c < 50; i += rnd.Next(2, 7), c++)
                 {
                     Spawn(i, mw, mh);
-                }*/
-                for (int i = 473; i < 542; i++)
+                }
+                for (int i = 473, c = 0; i < 542 && c < 20; i += rnd.Next(2, 7), c++)
                 {
                     Spawn(i, mw, mh);
                 }
@@ -438,6 +493,7 @@ namespace AgateDemo
                             tile = fixture.tile;
                             src = new Rectangle((tile % 38) * tileWidth, (tile / 38) * tileHeight, tileWidth, tileHeight);
                             tileset.Draw(src, dest);
+                            tileset.Color = Color.White;
                             if (Demo.cursorX == col && Demo.cursorY == row && Demo.lockState)
                             {
                                 if (Demo.lockState)
@@ -486,14 +542,14 @@ namespace AgateDemo
                     }
                     //pY += tileHIncrease;
                 }
-                ScreenBrowser.Show();
+                /*ScreenBrowser.Show();
                 if (Demo.hoverActor != null)
                     UnitInfo.ShowMobInfo(Demo.hoverActor);
                 else if (Demo.currentActor != null)
                     UnitInfo.ShowMobInfo(Demo.currentActor);
                 Display.FillRect(new Rectangle(0, Demo.mapDisplayHeight, Demo.mapDisplayWidth, 32), (Color.Black));
                 DialogBrowser.Show();
-                MessageBrowser.Show();
+                MessageBrowser.Show();*/
                 //mandrillFont.DrawText(32.0, 32.0, "FPS: " + (int)Display.FramesPerSecond);
             }
 

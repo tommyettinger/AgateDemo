@@ -276,7 +276,7 @@ new int[,] {
             }
             return geolocal;
         }
-        public static int[,] cleanUp(int[,] geo)
+        public static int[,] cleanUp(int[,] geo, Level lvl)
         {
             int[,] geolocal = (int[,])geo.Clone();
                 for (int i = 0; i < geolocal.GetLength(0); i++)
@@ -311,14 +311,14 @@ new int[,] {
                         if (left && right && !top && !bottom)
                         {
                             geolocal[i, j] = 1187;
-                            Demo.Entity fx = new Demo.Entity() { x = j, y = i, tile = 1191 };
-                            Demo.currentLevel.fixtures.Add(fx.pos, fx);
+                            Demo.Entity fx = new Demo.Entity(1191, j, i);
+                            lvl.fixtures.Add(fx.pos, fx);
                         }
                         else if (!left && !right && top && bottom)
                         {
                             geolocal[i, j] = 1187;
-                            Demo.Entity fx = new Demo.Entity() { x = j, y = i, tile = 1190 };
-                            Demo.currentLevel.fixtures.Add(fx.pos, fx);
+                            Demo.Entity fx = new Demo.Entity(1190, j, i);
+                            lvl.fixtures.Add(fx.pos, fx);
                         }
 
                     }

@@ -409,7 +409,7 @@ namespace AgateDemo
             Dialog initialDialog = new Dialog("The Narrator", new List<String>() {"Welcome to the Unpleasant Dungeon!", "Navigate through menus with the arrow keys.",
                 "Confirm a selection with the Z key.", "Do you understand?"}, new List<DialogItem>()),
                 yesDialog = new Dialog("The Narrator", new List<String>() { "Great!", "You can press X to go back in menus and dialogs.", "Are you ready to start?" }, new List<DialogItem>()),
-                noDialog = new Dialog("The Narrator", new List<String>() { "Then how did you get here?"}, new List<DialogItem>());
+                noDialog = new Dialog("The Narrator", new List<String>() { "Then how did you get here?" }, new List<DialogItem>());
             DialogItem yesItem = new DialogItem("Yes", yesDialog, null),
                 noItem = new DialogItem("No", noDialog, null),
                 endOKItem = new DialogItem("OK!", null, null, DialogBrowser.Hide),
@@ -423,6 +423,21 @@ namespace AgateDemo
             noDialog.setSize();
             yesDialog.previousDialog = initialDialog;
             noDialog.previousDialog = initialDialog;
+            //attackChoices.menu.Add(new DialogItem("Scorch", null, Demo.OnKeyDown_SelectSkill));
+            DialogUI dui = new DialogUI(initialDialog, fnt);
+            dui.allDialogItems.Add(yesItem);
+            dui.allDialogItems.Add(noItem);
+            return dui;
+        }
+        public static DialogUI CreateYesNoDialog(string speaker, List<string> startText, LinkedAction yesAction, LinkedAction noAction)
+        {
+            FontSurface fnt = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
+            Dialog initialDialog = new Dialog(speaker, startText, new List<DialogItem>());
+            DialogItem yesItem = new DialogItem("Yes", null, null, yesAction),
+                noItem = new DialogItem("No", null, null, noAction);
+            initialDialog.options.Add(yesItem);
+            initialDialog.options.Add(noItem);
+            initialDialog.setSize();
             //attackChoices.menu.Add(new DialogItem("Scorch", null, Demo.OnKeyDown_SelectSkill));
             DialogUI dui = new DialogUI(initialDialog, fnt);
             dui.allDialogItems.Add(yesItem);

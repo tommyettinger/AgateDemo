@@ -86,16 +86,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OldDemo.cs" />
+    <None Include="OldDemo.cs" />
     <Compile Include="Source\Chroma.cs" />
     <Compile Include="Source\Demo.cs" />
     <Compile Include="Source\Dialog.cs" />
     <Compile Include="Source\Dungeon.cs" />
     <Compile Include="Source\DungeonMap.cs" />
     <Compile Include="Source\Geometry.cs" />
-    <Compile Include="Source\OldProgram.cs">
+    <None Include="Source\OldProgram.cs">
       <SubType>Code</SubType>
-    </Compile>
+    </None>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\SimpleUI.cs" />
     <Compile Include="Source\Skill.cs" />

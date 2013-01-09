@@ -190,7 +190,8 @@ namespace AgateDemo
                 ScreenBrowser.Navigate(ScreenBrowser.currentUI.initialScreen);
                 enabled = false;
                 Keyboard.KeyDown -= eventLink;
-                Demo.mode = InputMode.Menu;
+                if(Demo.mode != InputMode.Dialog)
+                    Demo.mode = InputMode.Menu;
             }
             else if (actionLink != null)
             {

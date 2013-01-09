@@ -310,7 +310,7 @@ namespace AgateDemo
                 scanVisionOld(d, viewer.pos, visualRange);
             }*/
 
-            sight = calculateFOV(calculateVisionMap(Demo.currentLevel.map), viewer.x, viewer.y, visualRange);
+            sight = calculateFOV(calculateVisionMap(viewer.dlevel.map), viewer.x, viewer.y, visualRange);
             //scanVision(viewer.pos, visualRange);
         }
         private double[,] calculateVisionMap(int[,] dungeon)
