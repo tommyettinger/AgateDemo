@@ -6,15 +6,23 @@ using System.Text;
 using AgateLib;
 using AgateLib.DisplayLib;
 using AgateLib.Geometry;
+//using Newtonsoft.Json;
+using System.Runtime.Serialization;
+using ProtoBuf;
+using System.ComponentModel;
+using ProtoBuf.Meta;
+
 namespace AgateDemo
 {
         public class Level
         {
+            public int floor;
             public static Random rnd = new Random();
             public static bool safeStart = true;
 
+            //[JsonIgnore]
             public Color[,] mapColors;
-            public int minVisibleX = 0, minVisibleY = 0, maxVisibleX = 19, maxVisibleY = 19;
+            //public int minVisibleX = 0, minVisibleY = 0, maxVisibleX = 19, maxVisibleY = 19;
             
             //public enum Direction { North, East, South, West, None };
            // public enum InputMode { Menu, Map, None, Dialog };
@@ -70,13 +78,25 @@ namespace AgateDemo
 
            // public const int mapDisplayWidth = 960, mapDisplayHeight = 672;
             public int[,] map, map2;
+            public int[] map1D;
             public Dictionary<Point, Demo.Mob> entities, o_entities, allies;
-            public Dictionary<Point, int> highlightedCells = new Dictionary<Point, int>(), highlightedTargetCells = new Dictionary<Point, int>(), nonHighlightedFreeCells = new Dictionary<Point, int>();
+            //[JsonIgnore]
+            public Dictionary<Point, int> highlightedCells = new Dictionary<Point, int>();
+            //[JsonIgnore]
+            public Dictionary<Point, int> highlightedTargetCells = new Dictionary<Point, int>();
+            //[JsonIgnore]
+            public Dictionary<Point, int> nonHighlightedFreeCells = new Dictionary<Point, int>();
             public Dictionary<Point, bool> doNotStopCells = new Dictionary<Point, bool>();
-            public double[,] visibleCells, seenCells;
-            public Dictionary<Point, Demo.Entity> fixtures;
 
+            //[JsonIgnore]
+            public double[,] visibleCells;
+
+            //[JsonIgnore]
+            public double[,] seenCells;
+            public Dictionary<Point, Demo.Entity> fixtures;
+            //[JsonIgnore]
             public Dictionary<Point, int> displayDamage = new Dictionary<Point, int>();
+            //[JsonIgnore]
             public Dictionary<Point, bool> displayKills = new Dictionary<Point, bool>();
             // public static SimpleUI basicUI;
 
@@ -84,14 +104,23 @@ namespace AgateDemo
             static int tileHeight = 64;
             static int tileHIncrease = 16;
             static int tileVIncrease = 32;
-            public static int mapWidth;
-            public static int mapHeight;
+            public int mapWidthBound;
+            public int mapHeightBound;
             //public static int Demo.cursorX = 3;
             //public static int Demo.cursorY = 3;
             static FontSurface mandrillFont;
 
 //            static DisplayWindow wind;
 
+            [OnDeserialized]
+            internal void OnDeserializedMethod(StreamingContext context)
+            {
+                int mw = map.GetLength(1), mh = map.GetLength(0);
+
+                visibleCells = new double[mh, mw];
+                seenCells = new double[mh, mw];
+                mapColors = DungeonMap.recolor(map);
+            }
             public void recalculateVision()
             {
                 visibleCells.Fill(indices => 0.0);
@@ -130,8 +159,10 @@ namespace AgateDemo
                     ret = null;
                 return ret;
             }
+            //[JsonIgnore]
             private Dictionary<Point, int> grStore = new Dictionary<Point, int>();
             public List<Point> safeUpCells = new List<Point>(), safeDownCells = new List<Point>();
+            //[JsonIgnore]
             private Dictionary<Point, bool> ivStore = new Dictionary<Point, bool>();
             public HashSet<Point> enemyBlockedCells = new HashSet<Point>();
             public void addStairs(bool isBottom)
@@ -207,7 +238,7 @@ namespace AgateDemo
                 int ry = rnd.Next(height);
                 if (map[ry, rx] == DungeonMap.gr && enemyBlockedCells.Contains(new Point(rx, ry)) == false)
                 {
-                    Demo.Mob nt = new Demo.Mob(tileNo, rx, ry, false, this);
+                    Demo.Mob nt = new Demo.Mob(tileNo, rx, ry, false, floor);
 
                     if (checkPos(nt.x, nt.y) != null)
                         return Spawn(tileNo, width, height);
@@ -229,17 +260,17 @@ namespace AgateDemo
                     map = DungeonMap.merge(DungeonMap.geomorphs[0], DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
                 else
                     map = DungeonMap.merge(DungeonMap.geomorphs[rnd.Next(numMorphs)], DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
-                for (int eh = 2; eh < 3; eh++)
+                for (int eh = 2; eh < 2; eh++)
                 {
                     if (rnd.Next(2) == 0)
                         map = DungeonMap.merge(map, DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
                     else
                         map = DungeonMap.merge(map, DungeonMap.rotateCW(DungeonMap.geomorphs[rnd.Next(numMorphs)]), false);
                 }
-                for (int ah = 1; ah < 3; ah++)
+                for (int ah = 1; ah < 2; ah++)
                 {
                     map2 = DungeonMap.merge(DungeonMap.geomorphs[rnd.Next(numMorphs)], DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
-                    for (int eh = 2; eh < 3; eh++)
+                    for (int eh = 2; eh < 2; eh++)
                     {
                         if (rnd.Next(2) == 0)
                             map2 = DungeonMap.merge(map2, DungeonMap.geomorphs[rnd.Next(numMorphs)], false);
@@ -297,8 +328,8 @@ namespace AgateDemo
                 tileHeight = 64;
                 tileHIncrease = 16;
                 tileVIncrease = 32;
-                mapWidth = map.GetUpperBound(1);
-                mapHeight = map.GetUpperBound(0);
+                mapWidthBound = map.GetUpperBound(1);
+                mapHeightBound = map.GetUpperBound(0);
                 /*var alphaMatrix = new ColorMatrix();
                 alphaMatrix.Matrix33 = 0.5f;
                 alphaAttributes = new ImageAttributes();
@@ -310,27 +341,29 @@ namespace AgateDemo
 
                // Display.RenderState.WaitForVerticalBlank = true;
                // wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", Demo.mapDisplayWidth, Demo.mapDisplayHeight + 32, false);      //(19 * tileVIncrease) + tileHeight); //((20) * 32) + (tileHIncrease * (20))
+            }
+            static Level()
+            {
                 mandrillFont = FontSurface.BitmapMonospace("Resources" + "/" + "monkey_x2.png", new Size(12, 28));
                 tileset = new Surface("Resources" + "/" + "slashem-revised.png"); //System.IO.Path.DirectorySeparatorChar
             }
-
             public void Show()
             {
                 //Display.Clear(Color.FromArgb(32, 32, 32));
                 // (cursorY <= 10) (cursorY > mapHeight - 10)    if cursorY <= 10, (vals < 20); 
                 //minVisibleY = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20;
                 //maxVisibleY = minVisibleY;
-                for (int row = (Demo.cursorY < 20) ? 0 : (Demo.cursorY > mapHeight - 10) ? mapHeight - 20 : Demo.cursorY - 20; row <= mapHeight && row <= Demo.cursorY + 20; row++)
+                for (int row = (Demo.cursorY < 20) ? 0 : (Demo.cursorY > mapHeightBound - 10) ? mapHeightBound - 20 : Demo.cursorY - 20; row <= mapHeightBound && row <= Demo.cursorY + 20; row++)
                 {
                     // maxVisibleY++;
-                    var pY = tileVIncrease * ((Demo.cursorY <= 10) ? row : (Demo.cursorY > mapHeight - 10) ? row - (mapHeight - 19) : row - (Demo.cursorY - 10));
-                    var pX = tileHIncrease * (20 - 1 - ((Demo.cursorY <= 10) ? row : (Demo.cursorY > mapHeight - 10) ? row - (mapHeight - 19) : row - (Demo.cursorY - 10)));
+                    var pY = tileVIncrease * ((Demo.cursorY <= 10) ? row : (Demo.cursorY > mapHeightBound - 10) ? row - (mapHeightBound - 19) : row - (Demo.cursorY - 10));
+                    var pX = tileHIncrease * (20 - 1 - ((Demo.cursorY <= 10) ? row : (Demo.cursorY > mapHeightBound - 10) ? row - (mapHeightBound - 19) : row - (Demo.cursorY - 10)));
                     //   //(cursorY > mapHeight - 10) ? mapHeight - (cursorY - 10) : cursorY - 10)
                     // +tileHIncrease; //row - (cursorY - 10)
 
                     //minVisibleX = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10;
                     //maxVisibleX = minVisibleX;
-                    for (int col = (Demo.cursorX <= 10) ? 0 : (Demo.cursorX > mapWidth - 10) ? mapWidth - 19 : Demo.cursorX - 10; col <= mapWidth && (col < Demo.cursorX + 10 || col < 20); col++)
+                    for (int col = (Demo.cursorX <= 10) ? 0 : (Demo.cursorX > mapWidthBound - 10) ? mapWidthBound - 19 : Demo.cursorX - 10; col <= mapWidthBound && (col < Demo.cursorX + 10 || col < 20); col++)
                     {
                         // maxVisibleX++;
                         /*
@@ -382,8 +415,8 @@ namespace AgateDemo
                         }
                         pX += tileVIncrease;
                     }
-                    pX = tileHIncrease * (20 - 1 - ((Demo.cursorY <= 10) ? row : (Demo.cursorY > mapHeight - 10) ? row - (mapHeight - 19) : row - (Demo.cursorY - 10)));
-                    for (var col = (Demo.cursorX <= 10) ? 0 : (Demo.cursorX > mapWidth - 10) ? mapWidth - 19 : Demo.cursorX - 10; col <= mapWidth && (col < Demo.cursorX + 10 || col < 20); col++)
+                    pX = tileHIncrease * (20 - 1 - ((Demo.cursorY <= 10) ? row : (Demo.cursorY > mapHeightBound - 10) ? row - (mapHeightBound - 19) : row - (Demo.cursorY - 10)));
+                    for (var col = (Demo.cursorX <= 10) ? 0 : (Demo.cursorX > mapWidthBound - 10) ? mapWidthBound - 19 : Demo.cursorX - 10; col <= mapWidthBound && (col < Demo.cursorX + 10 || col < 20); col++)
                     {/*
                     if (!visibleCells.Contains(new Point(col, row)))
                     {

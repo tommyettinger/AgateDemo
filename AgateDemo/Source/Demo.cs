@@ -6,6 +6,13 @@ using AgateLib;
 using AgateLib.DisplayLib;
 using AgateLib.Geometry;
 using AgateLib.InputLib;
+using System.Runtime.Serialization;
+/*using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;*/
+
+using ProtoBuf;
+using System.ComponentModel;
+using ProtoBuf.Meta;
 
 namespace AgateDemo
 {
@@ -47,18 +54,18 @@ namespace AgateDemo
         }
         public class Mob : Entity
         {
-            private int hp;
+            public int hp_internal;
             public int maxHP = 10;
             public int health
             {
-                get { return hp; }
+                get { return hp_internal; }
                 set
                 {
-                    hp = value;
-                    if (hp <= 0)
+                    hp_internal = value;
+                    if (hp_internal <= 0)
                         this.Kill();
-                    else if (hp > maxHP)
-                        hp = maxHP;
+                    else if (hp_internal > maxHP)
+                        hp_internal = maxHP;
                 }
             }
             public bool friendly;
@@ -68,10 +75,15 @@ namespace AgateDemo
             public int moveSpeed = 3, actionCount = 0;
             public List<Skill> skillList;
             public Skill currentSkill;
+            //[JsonIgnore]
             public SimpleUI ui = null;
+            //[JsonIgnore]
             public Vision fov = null;
+            //[JsonIgnore]
             public Level dlevel = null;
-            public Mob(int tileNumber, int xPos, int yPos, bool isFriendly, Level floor)
+            public int dlevelIndex = 0;
+            public Intellect intel = null;
+            public Mob(int tileNumber, int xPos, int yPos, bool isFriendly, int floor)
             {
                 base.tile = tileNumber;
                 base.pos = new Point(xPos, yPos);
@@ -81,7 +93,8 @@ namespace AgateDemo
                 y = yPos;
                 o_pos = new Point() { X = this.x, Y = this.y };
                 friendly = isFriendly;
-                dlevel = floor;
+                dlevelIndex = floor;
+                dlevel = fullDungeon[floor];
                 fov = new Vision(this);
                 fov.calculateSight();
 
@@ -89,7 +102,11 @@ namespace AgateDemo
                 {
                     //allies.Add(o_pos, this);
                     //recalculateVision();
-                    moveSpeed = 20;
+                    moveSpeed = 6;
+                }
+                else
+                {
+                    intel = new Intellect(this);
                 }
                 ui = SimpleUI.InitUI();
                 //hasActed = false;
@@ -101,9 +118,9 @@ namespace AgateDemo
 
             public Mob Clone()
             {
-                Mob mb = new Mob(this.tile, this.x, this.y, this.friendly, this.dlevel);
+                Mob mb = new Mob(this.tile, this.x, this.y, this.friendly, this.dlevelIndex);
                 //mb.initiative = this.initiative;
-                mb.hp = this.hp;
+                mb.hp_internal = this.hp_internal;
                 mb.o_pos = this.o_pos;
                 mb.actionCount = 2;
                 return mb;
@@ -123,6 +140,16 @@ namespace AgateDemo
                 }
                 catch (Exception)
                 { }
+            }
+
+            [OnDeserialized]
+            internal void OnDeserializedMethod(StreamingContext context)
+            {
+                dlevel = fullDungeon[dlevelIndex];
+                fov = new Vision(this);
+                fov.calculateSight();
+
+                ui = SimpleUI.InitUI();
             }
         }
         public static SortedDictionary<int, Point> initiative = new SortedDictionary<int, Point>();
@@ -180,6 +207,115 @@ namespace AgateDemo
         public static Level currentLevel;
         public static List<Level> fullDungeon;
         public static int levelIndex = 0;
+
+        public class GameState
+        {
+            public SortedDictionary<int, Point> initiative;
+            public int currentInitiative;
+//            public Level currentLevel;
+            public List<Level> fullDungeon;
+            public int levelIndex;
+            public int cursorX;
+            public int cursorY;
+        }
+
+        public static SortedDictionary<DateTime, GameState> getState()
+        {
+            SortedDictionary<DateTime, GameState> ds;
+
+            if (System.IO.File.Exists("save.mobsav"))
+            {
+                System.IO.FileStream fl = new System.IO.FileStream("save.mobsav", System.IO.FileMode.Open);
+                ds = (SortedDictionary<DateTime, GameState>)Serializer.model.Deserialize(fl, null, typeof(SortedDictionary<DateTime, GameState>));
+
+                fl.Close();
+            }
+            else
+            {
+                ds = new SortedDictionary<DateTime, GameState>();
+                System.IO.File.Create("save.mobsav").Close();
+            }
+            ds.Add(DateTime.Now, new GameState()
+            {
+                initiative = initiative,
+                currentInitiative = currentInitiative,
+                fullDungeon = fullDungeon,
+                levelIndex = levelIndex,
+                cursorX = cursorX,
+                cursorY = cursorY
+            });
+            return ds;
+        }
+        public static void LoadGame()
+        {/*
+            var jsonSerializerSettings = new JsonSerializerSettings
+            {
+                PreserveReferencesHandling = PreserveReferencesHandling.All
+            };*/
+            /*
+            RuntimeTypeModel rttm = RuntimeTypeModel.Create();
+            rttm.AutoAddMissingTypes = true;
+            rttm.Add(typeof(GameState), true);*/
+            //GameState s = null;
+            SortedDictionary<DateTime, GameState> ds = (SortedDictionary<DateTime, GameState>)Serializer.model.Deserialize(new System.IO.FileStream("save.mobsav", System.IO.FileMode.Open), null, typeof(SortedDictionary<DateTime, GameState>));
+           // GameState s = //JsonConvert.DeserializeObject<GameState>(System.IO.File.ReadAllText("save.mobsav"), jsonSerializerSettings);
+            GameState s = ds.Last().Value;
+            initiative = s.initiative;
+            currentInitiative = s.currentInitiative;
+
+            fullDungeon = s.fullDungeon;
+            foreach (Level l in fullDungeon)
+            {
+                l.map = new int[l.mapHeightBound + 1, l.mapWidthBound + 1];
+                for (int i = 0; i <= l.mapHeightBound; i++)
+                {
+                    for (int j = 0; j <= l.mapWidthBound; j++)
+                    {
+                        l.map[i, j] = l.map1D[i * (1 + l.mapWidthBound) + j];
+                    }
+                }
+
+                int mw = l.map.GetLength(1), mh = l.map.GetLength(0);
+
+                l.visibleCells = new double[mh, mw];
+                l.seenCells = new double[mh, mw];
+                l.mapColors = DungeonMap.recolor(l.map);
+            }
+            foreach(Level l in fullDungeon)
+            {
+                l.allies = new Dictionary<Point, Mob>();
+                foreach (Mob mb in l.entities.Values)
+                {
+                    mb.dlevel = l;
+                    mb.moveList = new List<Direction>();
+                    mb.currentSkill = mb.skillList[0];
+                    mb.fov = new Vision(mb);
+                    mb.fov.calculateSight();
+
+                    mb.ui = SimpleUI.InitUI();
+                    mb.ui.addSkills(mb);
+                    
+                    l.o_entities[mb.o_pos] = mb;
+                    if (mb.friendly)
+                    {
+                        l.allies.Add(mb.pos, mb);
+                    }
+                    else
+                    {
+                        mb.intel = new Intellect(mb);
+                    }
+                }
+            }
+            foreach (Level l in fullDungeon)
+            {
+                l.recalculateVision();
+            }
+            levelIndex = s.levelIndex;
+            currentLevel = fullDungeon[levelIndex];
+            cursorX = s.cursorX;
+            cursorY = s.cursorY;
+            
+        }
         //public static int[,] map, map2;
         //public static Dictionary<Point, Mob> entities, currentLevel.o_entities, currentLevel.allies;
         //        public static Dictionary<Point, int> highlightedCells = new Dictionary<Point, int>(), highlightedTargetCells = new Dictionary<Point, int>(), nonHighlightedFreeCells = new Dictionary<Point, int>();
@@ -195,8 +331,8 @@ namespace AgateDemo
         static int tileHeight = 64;
         static int tileHIncrease = 16;
         static int tileVIncrease = 32;*/
-        public static int mapWidth;
-        public static int mapHeight;
+//        public static int mapWidth;
+  //      public static int mapHeight;
         public static int cursorX = 3;
         public static int cursorY = 3;
         static FontSurface mandrillFont;
@@ -278,7 +414,11 @@ namespace AgateDemo
                     Display.BeginFrame();
                     Show();
                     Display.EndFrame();
-                    Core.KeepAlive();
+                    try
+                    {
+                        Core.KeepAlive();
+                    }
+                    catch (Exception) { };
                 }
 
                 cursorX = pt.X;
@@ -293,7 +433,11 @@ namespace AgateDemo
                 Display.BeginFrame();
                 Show();
                 Display.EndFrame();
-                Core.KeepAlive();
+                try
+                {
+                    Core.KeepAlive();
+                }
+                catch (Exception) { }
             }
             cursorX = x;
             cursorY = y;
@@ -384,20 +528,6 @@ namespace AgateDemo
         public static void MoveMob(Mob ent, IEnumerable<Direction> movepath)
         {
             Dictionary<Point, Mob> displaced = new Dictionary<Point, Mob>();
-            /*
-            minVisibleY = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20;
-            maxVisibleY = minVisibleY;
-            for (int row = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20; row <= mapHeight && row <= cursorY + 20; row++)
-            {
-                maxVisibleY++;
-
-            }
-            minVisibleX = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10;
-            maxVisibleX = minVisibleX;
-            for (var col = (cursorX <= 10) ? 0 : (cursorX > mapWidth - 10) ? mapWidth - 19 : cursorX - 10; col <= mapWidth && (col < cursorX + 10 || col < 20); col++)
-            {
-                maxVisibleX++;
-            }*/
             if (currentLevel.visibleCells[ent.y, ent.x] > 0)
             {
                 MoveCursor(ent.x, ent.y);
@@ -436,7 +566,11 @@ namespace AgateDemo
                         Display.BeginFrame();
                         Show();
                         Display.EndFrame();
-                        Core.KeepAlive();
+                        try
+                        {
+                            Core.KeepAlive();
+                        }
+                        catch (Exception) { };
                     }
                 }
                 startingTime = Timing.TotalMilliseconds;
@@ -483,18 +617,18 @@ namespace AgateDemo
                             ent.y--;
                         }
                         break;
-                    case Direction.East: if (ent.x < mapWidth && (currentLevel.map[ent.y, ent.x + 1] == 1194) && checkPos(ent.x + 1, ent.y) == null) //entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y)
+                    case Direction.East: if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && checkPos(ent.x + 1, ent.y) == null) //entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y)
                         {
                             if (displaced.ContainsKey(ent.pos))
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
                             ent.x++;
                         }
-                        else if (ent.x < mapWidth && (currentLevel.map[ent.y, ent.x + 1] == 1187) && checkFixture(ent.x + 1, ent.y, 1190) != null)
+                        else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1187) && checkFixture(ent.x + 1, ent.y, 1190) != null)
                         {
                             currentLevel.map[ent.y, ent.x + 1] = 1194;
                             currentLevel.fixtures[new Point() { X = ent.x + 1, Y = ent.y }].tile = 1188;
                         }
-                        else if (ent.x < mapWidth && (currentLevel.map[ent.y, ent.x + 1] == 1194) && checkPos(ent.x + 1, ent.y) != null && checkPos(ent.x + 1, ent.y).friendly == ent.friendly)
+                        else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && checkPos(ent.x + 1, ent.y) != null && checkPos(ent.x + 1, ent.y).friendly == ent.friendly)
                         {
                             if (displaced.ContainsKey(ent.pos))
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
@@ -502,18 +636,18 @@ namespace AgateDemo
                             ent.x++;
                         }
                         break;
-                    case Direction.South: if (ent.y < mapHeight && (currentLevel.map[ent.y + 1, ent.x] == 1194) && checkPos(ent.x, ent.y + 1) == null)
+                    case Direction.South: if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && checkPos(ent.x, ent.y + 1) == null)
                         {
                             if (displaced.ContainsKey(ent.pos))
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
                             ent.y++;
                         }
-                        else if (ent.y < mapHeight && (currentLevel.map[ent.y + 1, ent.x] == 1187) && checkFixture(ent.x, ent.y + 1, 1191) != null)
+                        else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1187) && checkFixture(ent.x, ent.y + 1, 1191) != null)
                         {
                             currentLevel.map[ent.y + 1, ent.x] = 1194;
                             currentLevel.fixtures[new Point() { X = ent.x, Y = ent.y + 1 }].tile = 1189;
                         }
-                        else if (ent.y < mapHeight && (currentLevel.map[ent.y + 1, ent.x] == 1194) && checkPos(ent.x, ent.y + 1) != null && checkPos(ent.x, ent.y + 1).friendly == ent.friendly)
+                        else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && checkPos(ent.x, ent.y + 1) != null && checkPos(ent.x, ent.y + 1).friendly == ent.friendly)
                         {
                             if (displaced.ContainsKey(ent.pos))
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
@@ -901,6 +1035,267 @@ namespace AgateDemo
              */
 
         }
+        public static void MoveMobAndAttack(Mob ent, IEnumerable<Direction> movepath)
+        {
+            Dictionary<Point, Mob> displaced = new Dictionary<Point, Mob>();
+            if (currentLevel.visibleCells[ent.y, ent.x] > 0)
+            {
+                MoveCursor(ent.x, ent.y);
+            }
+            double startingTime = Timing.TotalMilliseconds;
+            if (currentLevel.visibleCells[ent.y, ent.x] > 0)
+            {
+                currentActor = ent;
+                lockForAnimation = true;
+                while (Timing.TotalMilliseconds - startingTime < 300)
+                {
+                    System.Threading.Thread.Sleep(25);
+                    if (Display.CurrentWindow.IsClosed)
+                        return;
+                    Display.BeginFrame();
+                    Show();
+                    Display.EndFrame();
+                    Core.KeepAlive();
+                }
+            }
+            startingTime = Timing.TotalMilliseconds;
+            foreach (Direction currMove in movepath)
+            {
+
+                //while (Timing.TotalMilliseconds - startingTime < 200 && (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)) ;
+                //if (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)
+                if (ent.actionCount >= 2)
+                    break;
+                if (currentLevel.visibleCells[ent.y, ent.x] > 0)
+                {
+                    currentActor = ent;
+                    lockForAnimation = true;
+                    while (Timing.TotalMilliseconds - startingTime < 200)
+                    {
+                        System.Threading.Thread.Sleep(25);
+                        if (Display.CurrentWindow.IsClosed)
+                            return;
+                        Display.BeginFrame();
+                        Show();
+                        Display.EndFrame();
+                        Core.KeepAlive();
+                    }
+                }
+                startingTime = Timing.TotalMilliseconds;
+                currentLevel.entities.Remove(ent.pos);
+
+                switch (currMove)
+                {
+                    case Direction.West: if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1194) && checkPos(ent.x - 1, ent.y) == null) //entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y)
+                        {
+                            if (displaced.ContainsKey(ent.pos))
+                                currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
+                            ent.x--;
+                            currentLevel.entities[ent.pos] = ent;
+                        }
+                        else if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1187) && checkFixture(ent.x - 1, ent.y, 1190) != null)
+                        {
+                            currentLevel.map[ent.y, ent.x - 1] = 1194;
+                            currentLevel.fixtures[new Point(ent.x - 1, ent.y)].tile = 1188;
+                            currentLevel.entities[ent.pos] = ent;
+                        }
+                        else if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1194) && checkPos(ent.x - 1, ent.y) != null && checkPos(ent.x - 1, ent.y).friendly == ent.friendly)
+                        {
+                            if (displaced.ContainsKey(ent.pos))
+                                currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
+                            displaced.Add(checkPos(ent.x - 1, ent.y).pos, checkPos(ent.x - 1, ent.y));
+                            ent.x--;
+                            currentLevel.entities[ent.pos] = ent;
+                        }
+                        //else if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1194) && checkPos(ent.x - 1, ent.y) != null && checkPos(ent.x - 1, ent.y).friendly != ent.friendly)
+                        //{
+                        //    currentLevel.entities[ent.pos] = ent;
+                        //    ent.currentSkill.targetSquare = new Point(ent.x - 1, ent.y);
+                        //    AnimateResults(ent.currentSkill.ApplySkill(ent));
+                        //    ent.actionCount = 2;
+                        //}
+                        break;
+                    case Direction.North: if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1194) && checkPos(ent.x, ent.y - 1) == null)
+                        {
+                            if (displaced.ContainsKey(ent.pos))
+                                currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
+                            ent.y--;
+                            currentLevel.entities[ent.pos] = ent;
+                        }
+                        else if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1187) && checkFixture(ent.x, ent.y - 1, 1191) != null)
+                        {
+                            currentLevel.map[ent.y - 1, ent.x] = 1194;
+                            currentLevel.fixtures[new Point() { X = ent.x, Y = ent.y - 1 }].tile = 1189;
+                            currentLevel.entities[ent.pos] = ent;
+                            //                        fixtures.FirstOrDefault(e => e.x == ent.x && e.y == ent.y - 1 && e.tile == 1191).tile = 1189;
+                        }
+                        else if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1194) && checkPos(ent.x, ent.y - 1) != null && checkPos(ent.x, ent.y - 1).friendly == ent.friendly)
+                        {
+                            if (displaced.ContainsKey(ent.pos))
+                                currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
+                            displaced.Add(checkPos(ent.x, ent.y - 1).pos, checkPos(ent.x, ent.y - 1));
+                            ent.y--;
+                            currentLevel.entities[ent.pos] = ent;
+                        }
+                        //else if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1194) && checkPos(ent.x, ent.y - 1) != null && checkPos(ent.x, ent.y - 1).friendly != ent.friendly)
+                        //{
+                        //    currentLevel.entities[ent.pos] = ent;
+                        //    ent.currentSkill.targetSquare = new Point(ent.x, ent.y - 1);
+                        //    AnimateResults(ent.currentSkill.ApplySkill(ent));
+                        //    ent.actionCount = 2;
+                        //}
+                        break;
+                    case Direction.East: if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && checkPos(ent.x + 1, ent.y) == null) //entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y)
+                        {
+                            if (displaced.ContainsKey(ent.pos))
+                                currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
+                            ent.x++;
+                            currentLevel.entities[ent.pos] = ent;
+                        }
+                        else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1187) && checkFixture(ent.x + 1, ent.y, 1190) != null)
+                        {
+                            currentLevel.map[ent.y, ent.x + 1] = 1194;
+                            currentLevel.fixtures[new Point() { X = ent.x + 1, Y = ent.y }].tile = 1188;
+                            currentLevel.entities[ent.pos] = ent;
+                        }
+                        else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && checkPos(ent.x + 1, ent.y) != null && checkPos(ent.x + 1, ent.y).friendly == ent.friendly)
+                        {
+                            if (displaced.ContainsKey(ent.pos))
+                                currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
+                            displaced.Add(checkPos(ent.x + 1, ent.y).pos, checkPos(ent.x + 1, ent.y));
+                            ent.x++;
+                            currentLevel.entities[ent.pos] = ent;
+                        }
+                        //else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && checkPos(ent.x + 1, ent.y) != null && checkPos(ent.x + 1, ent.y).friendly != ent.friendly)
+                        //{
+                        //    currentLevel.entities[ent.pos] = ent;
+                        //    ent.currentSkill.targetSquare = new Point(ent.x + 1, ent.y);
+                        //    AnimateResults(ent.currentSkill.ApplySkill(ent));
+                        //    ent.actionCount = 2;
+                        //}
+                        break;
+                    case Direction.South: if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && checkPos(ent.x, ent.y + 1) == null)
+                        {
+                            if (displaced.ContainsKey(ent.pos))
+                                currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
+                            ent.y++;
+                            currentLevel.entities[ent.pos] = ent;
+                        }
+                        else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1187) && checkFixture(ent.x, ent.y + 1, 1191) != null)
+                        {
+                            currentLevel.map[ent.y + 1, ent.x] = 1194;
+                            currentLevel.fixtures[new Point() { X = ent.x, Y = ent.y + 1 }].tile = 1189;
+                            currentLevel.entities[ent.pos] = ent;
+                        }
+                        else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && checkPos(ent.x, ent.y + 1) != null && checkPos(ent.x, ent.y + 1).friendly == ent.friendly)
+                        {
+                            if (displaced.ContainsKey(ent.pos))
+                                currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
+                            displaced.Add(checkPos(ent.x, ent.y + 1).pos, checkPos(ent.x, ent.y + 1));
+                            ent.y++;
+                            currentLevel.entities[ent.pos] = ent;
+                        }
+                        //else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && checkPos(ent.x, ent.y + 1) != null && checkPos(ent.x, ent.y + 1).friendly != ent.friendly)
+                        //{
+                        //    currentLevel.entities[ent.pos] = ent;
+                        //    ent.currentSkill.targetSquare = new Point(ent.x, ent.y + 1);
+                        //    AnimateResults(ent.currentSkill.ApplySkill(ent));
+                        //    ent.actionCount = 2;
+                        //}
+                        break;
+                    default:
+                        {
+                            currentLevel.entities[ent.pos] = ent;
+                            break;
+                        }
+                }
+
+                ent.fov.calculateSight();
+                Point c = ent.pos;
+                Point[] dCells = { new Point(c.X + 1, c.Y), new Point(c.X - 1, c.Y), new Point(c.X, c.Y - 1), new Point(c.X, c.Y + 1) };
+                Shuffle(dCells);
+                if (currentLevel.entities.ContainsKey(dCells[0]) && currentLevel.entities[dCells[0]].friendly)
+                {
+                    ent.currentSkill.targetSquare = dCells[0];
+                    AnimateResults(ent.currentSkill.ApplySkill(ent));
+                    ent.actionCount = 2;
+                }
+                else if (currentLevel.entities.ContainsKey(dCells[1]) && currentLevel.entities[dCells[1]].friendly)
+                {
+                    ent.currentSkill.targetSquare = dCells[1];
+                    AnimateResults(ent.currentSkill.ApplySkill(ent));
+                    ent.actionCount = 2;
+                }
+                else if (currentLevel.entities.ContainsKey(dCells[2]) && currentLevel.entities[dCells[2]].friendly)
+                {
+                    ent.currentSkill.targetSquare = dCells[2];
+                    AnimateResults(ent.currentSkill.ApplySkill(ent));
+                    ent.actionCount = 2;
+                }
+                else if (currentLevel.entities.ContainsKey(dCells[3]) && currentLevel.entities[dCells[3]].friendly)
+                {
+                    ent.currentSkill.targetSquare = dCells[3];
+                    AnimateResults(ent.currentSkill.ApplySkill(ent));
+                    ent.actionCount = 2;
+                }
+                if (currentLevel.visibleCells[ent.y, ent.x] > 0)
+                {
+                    MoveCursor(ent.x, ent.y);
+                }
+                if (ent.friendly)
+                {
+                    currentLevel.recalculateVision();
+                }
+                requestingMove.X = ent.o_pos.X;
+                requestingMove.Y = ent.o_pos.Y;
+                if (Display.CurrentWindow.IsClosed)
+                    return;
+                Display.BeginFrame();
+                Show();
+                Display.EndFrame();
+            }
+            //cursorX = ent.x;
+            //cursorY = ent.y;
+
+            lockForAnimation = false;
+
+        }
+
+        public static void MoveSmart(Mob ent)
+        {
+            ent.fov.calculateSight();
+            ent.intel.Evaluate();
+            MoveMobAndAttack(ent, ent.moveList);
+            //Point c = ent.pos;
+            //Point[] dCells = { new Point(c.X + 1, c.Y), new Point(c.X - 1, c.Y), new Point(c.X, c.Y - 1), new Point(c.X, c.Y + 1) };
+            //Shuffle(dCells);
+            //if (currentLevel.entities.ContainsKey(dCells[0]))
+            //{
+            //    ent.currentSkill.targetSquare = dCells[0];
+            //    AnimateResults(ent.currentSkill.ApplySkill(ent));
+            //}
+            //else if (currentLevel.entities.ContainsKey(dCells[1]))
+            //{
+            //    ent.currentSkill.targetSquare = dCells[1];
+            //    AnimateResults(ent.currentSkill.ApplySkill(ent));
+            //}
+            //else if (currentLevel.entities.ContainsKey(dCells[2]))
+            //{
+            //    ent.currentSkill.targetSquare = dCells[2];
+            //    AnimateResults(ent.currentSkill.ApplySkill(ent));
+            //}
+            //else if (currentLevel.entities.ContainsKey(dCells[3]))
+            //{
+            //    ent.currentSkill.targetSquare = dCells[3];
+            //    AnimateResults(ent.currentSkill.ApplySkill(ent));
+            //}
+            ent.moveList.Clear();
+            /*                entities[ent.pos] = ent;
+                            requestingMove.x = ent.o_pos.x;
+                            requestingMove.y = ent.o_pos.y;
+             */
+
+        }
         /*
         static Mob Spawn(int tileNo, int width, int height)
         {
@@ -921,18 +1316,17 @@ namespace AgateDemo
             }
             return Spawn(tileNo, width, height);
         }*/
-        static void Init()
+        public static void Init()
         {
-            mode = InputMode.Dialog;
 
             fullDungeon = new List<Level>();
             for (int i = 0; i < 5; i++)
             {
                 Level.safeStart = (i == 2);
-                fullDungeon.Add(new Level());
+                fullDungeon.Add(new Level() { floor = i});
                 fullDungeon[i].Init(false);
             }
-            fullDungeon.Add(new Level());
+            fullDungeon.Add(new Level() { floor = 5});
             fullDungeon[5].Init(true);
             levelIndex = 2;
             currentLevel = fullDungeon[2];
@@ -961,7 +1355,7 @@ namespace AgateDemo
             };
             */
             Mob nt;
-            nt = new Mob(541, 6, 7, true, currentLevel); //beholder
+            nt = new Mob(541, 6, 7, true, levelIndex); //beholder
             nt.skillList.Add(new Skill("Eye Beam", 3, 8));
             nt.skillList.Add(new Skill("Disintegrate", 10, 2));
             nt.skillList.Add(new Skill("Horrid Glare", 2, 0, 1, SkillAreaKind.Spray, 5, false));
@@ -969,7 +1363,7 @@ namespace AgateDemo
             nt.ui.addSkills(nt);
             currentLevel.entities[nt.pos] = nt;
             currentLevel.o_entities[nt.o_pos] = nt;
-            nt = new Mob(541, 6, 8, true, currentLevel); //beholder
+            nt = new Mob(541, 6, 8, true, levelIndex); //beholder
             nt.skillList.Add(new Skill("Eye Beam", 3, 8));
             nt.skillList.Add(new Skill("Disintegrate", 10, 2));
             nt.skillList.Add(new Skill("Horrid Glare", 2, 0, 1, SkillAreaKind.Spray, 5, false));
@@ -977,7 +1371,7 @@ namespace AgateDemo
             nt.ui.addSkills(nt);
             currentLevel.entities[nt.pos] = nt;
             currentLevel.o_entities[nt.o_pos] = nt;
-            nt = new Mob(541, 6, 9, true, currentLevel); //beholder
+            nt = new Mob(541, 6, 9, true, levelIndex); //beholder
             nt.skillList.Add(new Skill("Eye Beam", 3, 8));
             nt.skillList.Add(new Skill("Disintegrate", 10, 2));
             nt.skillList.Add(new Skill("Horrid Glare", 2, 0, 1, SkillAreaKind.Spray, 5, false));
@@ -985,7 +1379,7 @@ namespace AgateDemo
             nt.ui.addSkills(nt);
             currentLevel.entities[nt.pos] = nt;
             currentLevel.o_entities[nt.o_pos] = nt;
-            nt = new Mob(503, 15, 4, true, currentLevel); //demogorgon
+            nt = new Mob(503, 15, 4, true, levelIndex); //demogorgon
             nt.skillList.Add(new Skill("Tentacle Flail", 3, 0, 0, SkillAreaKind.Ring, 2, true));
             nt.skillList.Add(new Skill("Vicious Bites", 10, 1));
             nt.skillList.Add(new Skill("Dark Magic", 2, 3, 6, SkillAreaKind.Burst, 1, true));
@@ -995,14 +1389,14 @@ namespace AgateDemo
             nt.ui.addSkills(nt);
             currentLevel.entities[nt.pos] = nt;
             currentLevel.o_entities[nt.o_pos] = nt;
-            nt = new Mob(1409, 4, 18, true, currentLevel); //drow
+            nt = new Mob(1409, 4, 18, true, levelIndex); //drow
             nt.skillList.Add(new Skill("Sword Slash", 5, 0, 0, SkillAreaKind.Ring, 1, false));
             nt.skillList.Add(new Skill("Crossbow", 3, 6));
             nt.skillList.Add(new Skill("Choking Bomb", 3, 2, 4, SkillAreaKind.Burst, 2, true));
             nt.ui.addSkills(nt);
             currentLevel.entities[nt.pos] = nt;
             currentLevel.o_entities[nt.o_pos] = nt;
-            nt = new Mob(1406, 4, 3, true, currentLevel); //baku
+            nt = new Mob(1406, 4, 3, true, levelIndex); //baku
             nt.skillList.Add(new Skill("Tusk Attack", 6, 1));
             nt.skillList.Add(new Skill("Trunk Slap", 2, 0, 0, SkillAreaKind.Ring, 3, true));
             Skill heal = new Skill("Rapid Healing", -5, 0);
@@ -1011,7 +1405,7 @@ namespace AgateDemo
             nt.ui.addSkills(nt);
             currentLevel.entities[nt.pos] = nt;
             currentLevel.o_entities[nt.o_pos] = nt;
-            nt = new Mob(102, 15, 15, true, currentLevel); //Tengu
+            nt = new Mob(102, 15, 15, true, levelIndex); //Tengu
             nt.skillList.Add(new Skill("Leaf Chop", 6, 1));
             nt.skillList.Add(new Skill("Fan Blast", 3, 0, 1, SkillAreaKind.Spray, 4, true));
             nt.skillList.Add(new Skill("Tornado", 5, 3, 6, SkillAreaKind.Burst, 1, true));
@@ -1084,8 +1478,8 @@ namespace AgateDemo
             tileHeight = 64;
             tileHIncrease = 16;
             tileVIncrease = 32;*/
-            mapWidth = currentLevel.map.GetUpperBound(1);
-            mapHeight = currentLevel.map.GetUpperBound(0);
+            currentLevel.mapWidthBound = currentLevel.map.GetUpperBound(1);
+            currentLevel.mapHeightBound = currentLevel.map.GetUpperBound(0);
             /*var alphaMatrix = new ColorMatrix();
             alphaMatrix.Matrix33 = 0.5f;
             alphaAttributes = new ImageAttributes();
@@ -1095,29 +1489,18 @@ namespace AgateDemo
 
             //wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", ((mapWidth + 1) * 32) + (tileHIncrease * (1 + mapHeight)), (mapHeight * tileVIncrease) + tileHeight);
 
-            Display.RenderState.WaitForVerticalBlank = true;
-            wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", mapDisplayWidth, mapDisplayHeight + 32, false);      //(19 * tileVIncrease) + tileHeight); //((20) * 32) + (tileHIncrease * (20))
+            //Display.RenderState.WaitForVerticalBlank = true;
+            //wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", mapDisplayWidth, mapDisplayHeight + 32, false);      //(19 * tileVIncrease) + tileHeight); //((20) * 32) + (tileHIncrease * (20))
 
-            tileset = new Surface("Resources" + "/" + "slashem-revised.png"); //System.IO.Path.DirectorySeparatorChar
+            //tileset = new Surface("Resources" + "/" + "slashem-revised.png"); //System.IO.Path.DirectorySeparatorChar
 
-            mandrillFont = FontSurface.BitmapMonospace("Resources" + "/" + "monkey_x2.png", new Size(12, 28));
-            mandrillFont.Color = Color.LightSkyBlue;
-            ScreenBrowser.Init();
-            //ScreenBrowser.currentUI.currentScreen.title = "Mobs with Jobs!";
-            ScreenBrowser.isHidden = true;
-            //ScreenBrowser.Show();
-            //            basicUI = new SimpleUI(new Screen("Mobs with Jobs!", new List<MenuItem>() { }), mandrillFont);
-            Keyboard.KeyUp += new InputEventHandler(onKeyUp);
 
-            MessageBrowser.font = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
-            MessageBrowser.x = 100;
-            MessageBrowser.y = mapDisplayHeight + 4;
-
-            Keyboard.KeyDown += OnKeyDown_ActionMenu;
+            /*
             DialogBrowser.currentUI = new DialogUI(new Dialog("The Narrator", new List<string>() {"Welcome to the Unpleasant Dungeon!", "Navigate through menus with the arrow keys.",
                 "Confirm a selection with the Z key.", "Do you understand?"}, new List<DialogItem>() { new DialogItem("Yes", null, null, DialogBrowser.Hide) }),
                 FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14)));
-            DialogBrowser.currentUI = DialogUI.InitUI();
+            */
+            //DialogBrowser.currentUI = DialogUI.InitUI();
         }
 
         public static void Update()
@@ -1136,7 +1519,7 @@ namespace AgateDemo
                         continue;
                     if (ent.friendly == false)
                     {
-                        MoveRandom(ent);
+                        MoveSmart (ent);
                         ent.actionCount = 2;
                         //requestingMove.x = -1;
                         lockState = false;
@@ -1192,7 +1575,8 @@ namespace AgateDemo
             // (cursorY <= 10) (cursorY > mapHeight - 10)    if cursorY <= 10, (vals < 20); 
             //minVisibleY = (cursorY < 20) ? 0 : (cursorY > mapHeight - 10) ? mapHeight - 20 : cursorY - 20;
             //maxVisibleY = minVisibleY;
-            currentLevel.Show();
+            if (mode != InputMode.Dialog)
+                currentLevel.Show();
             ScreenBrowser.Show();
             if (hoverActor != null)
                 UnitInfo.ShowMobInfo(hoverActor);
@@ -1220,31 +1604,91 @@ namespace AgateDemo
 
                 if (setup.WasCanceled)
                     return;
-                Init();
+
+                mode = InputMode.Dialog;
+                DialogBrowser.currentUI = DialogUI.InitLoadUI();
+                currentLevel = new Level() { floor = 0};
+                currentLevel.map = new int[40, 40];
+                currentLevel.map.Fill(indices => DungeonMap.da);
+
+
+                Display.RenderState.WaitForVerticalBlank = true;
+                wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", mapDisplayWidth, mapDisplayHeight + 32, false);      //(19 * tileVIncrease) + tileHeight); //((20) * 32) + (tileHIncrease * (20))
+                wind.Closed += new EventHandler((obj, e) => Quit());
+                tileset = new Surface("Resources" + "/" + "slashem-revised.png"); //System.IO.Path.DirectorySeparatorChar
+
+
+                mandrillFont = FontSurface.BitmapMonospace("Resources" + "/" + "monkey_x2.png", new Size(12, 28));
+                mandrillFont.Color = Color.LightSkyBlue;
+                ScreenBrowser.Init();
+                //ScreenBrowser.currentUI.currentScreen.title = "Mobs with Jobs!";
+                ScreenBrowser.isHidden = true;
+                //ScreenBrowser.Show();
+                //            basicUI = new SimpleUI(new Screen("Mobs with Jobs!", new List<MenuItem>() { }), mandrillFont);
+                Keyboard.KeyUp += new InputEventHandler(onKeyUp);
+
+                MessageBrowser.font = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
+                MessageBrowser.x = 100;
+                MessageBrowser.y = mapDisplayHeight + 4;
+
+                Keyboard.KeyDown += OnKeyDown_ActionMenu;
 
                 Keyboard.KeyDown += new InputEventHandler(OnKeyDown);
                 Keyboard.KeyDown += new InputEventHandler(DialogBrowser.OnKeyDown_Dialog);
-                Update();
+                // Update();
                 while (!Display.CurrentWindow.IsClosed)
                 {
                     Display.BeginFrame();
                     Show();
                     Display.EndFrame();
                     Update();
-                    Core.KeepAlive();
+                    try
+                    {
+                        Core.KeepAlive();
+                    }
+                    catch(Exception)
+                    {
+                    }
                 }
             }
         }
         public static void Quit()
         {
-            Display.CurrentWindow.Dispose();
-            while (!Display.CurrentWindow.IsClosed) ;
+            /*
+            JsonSerializerSettings sett = new JsonSerializerSettings();
+            sett.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;*/
+            /*var jsonSerializerSettings = new JsonSerializerSettings
+            {
+                PreserveReferencesHandling = PreserveReferencesHandling.All
+            };*/
+            /*
+            RuntimeTypeModel rttm = RuntimeTypeModel.Create();
+            rttm.Add(typeof(GameState), true);
+            System.IO.File.WriteAllText("debuggery.txt", rttm.GetTypes().ToString());
+            
+            rttm.AutoAddMissingTypes = true;*/
+            foreach (Level l in fullDungeon)
+            {
+                l.map1D = new int[(l.mapWidthBound + 1) * (1 + l.mapHeightBound)];
+                for (int i = 0; i <= l.mapHeightBound; i++)
+                {
+                    for (int j = 0; j <= l.mapWidthBound; j++)
+                    {
+                        l.map1D[i * (l.mapWidthBound + 1) + j] = l.map[i, j];
+                    }
+                }
+            }
+            SortedDictionary<DateTime, GameState> gs = getState();
+            Serializer.model.Serialize(new System.IO.FileStream("save.mobsav", System.IO.FileMode.Truncate), gs);
+//            System.IO.File.WriteAllText("save.mobsav", JsonConvert.SerializeObject(getState(), jsonSerializerSettings));
         }
         static void OnKeyDown(InputEventArgs e)
         {
             if (e.KeyCode == KeyCode.Q)
             {
-                Quit();
+                Display.CurrentWindow.Dispose();
+                while (!Display.CurrentWindow.IsClosed) ;
+//                Quit();
             }
             if (e.KeyCode == KeyCode.S)
             {
@@ -1403,6 +1847,64 @@ namespace AgateDemo
                  */
             }
         }
+        public static void calculateAllMoves(Level lvl, int startX, int startY, int numMoves, int overreach, bool performEntCheck, Dictionary<Point, int> cellStore, Dictionary<Point, bool> invalidCells, List<Point> specialTargetCells, bool moverIsFriendly)
+        {
+            if (numMoves == -1 * overreach)
+                return;
+            else
+            {
+                Point c = Geometry.normalizeCell(new Point(startX, startY), lvl);
+                startX = c.X;
+                startY = c.Y;
+                if (lvl.map[startY, startX] != DungeonMap.gr)
+                    return;
+                if (cellStore.Count == 0)
+                    cellStore.Add(c, numMoves);
+                foreach (Point cl in cellStore.Keys.ToList())
+                {
+                    if (cellStore[cl] != numMoves)
+                        continue;
+                    Point[] pts = { new Point(cl.X + 1, cl.Y), new Point(cl.X - 1, cl.Y), new Point(cl.X, cl.Y + 1), new Point(cl.X, cl.Y - 1) };
+                    foreach (Point p in pts)
+                    {
+                        if (cellStore.ContainsKey(p))
+                            continue;
+                        if (p.X < 0 || p.Y < 0 || p.X > lvl.map.GetUpperBound(1) || p.Y > lvl.map.GetUpperBound(0))
+                            continue;
+                        if (performEntCheck && checkPos(p.X, p.Y) != null)
+                        {
+                            if (checkPos(p.X, p.Y).friendly == moverIsFriendly || specialTargetCells.Contains(p))
+                            {
+                                cellStore.Add(p, numMoves - 1);
+                                invalidCells.Add(p, true);
+                            }
+                            
+                        }
+                        else if (lvl.map[p.Y, p.X] == DungeonMap.gr)
+                            cellStore.Add(p, numMoves - 1);
+                    }
+                }
+                calculateAllMoves(lvl, startX, startY, numMoves - 1, overreach, performEntCheck, cellStore, invalidCells, specialTargetCells, moverIsFriendly);
+                /*
+                        if (cellStore.ContainsKey(c) == true && cellStore[c] < numMoves)
+                        {
+                            cellStore.Remove(c);
+                            cellStore.Add(c, numMoves);
+                        }
+                        else if (cellStore.ContainsKey(c) == false)*/
+                /*
+                calculateAllMoves(lvl, startX + 1, startY, numMoves - 1, performEntCheck, cellStore, invalidCells, moverIsFriendly);
+                calculateAllMoves(lvl, startX, startY - 1, numMoves - 1, performEntCheck, cellStore, invalidCells, moverIsFriendly);
+                calculateAllMoves(lvl, startX, startY + 1, numMoves - 1, performEntCheck, cellStore, invalidCells, moverIsFriendly);
+
+                calculateAllMoves(lvl, startX - 1, startY, numMoves - 1, performEntCheck, cellStore, invalidCells, moverIsFriendly);
+                calculateAllMoves(lvl, startX + 1, startY, numMoves - 1, performEntCheck, cellStore, invalidCells, moverIsFriendly);
+                calculateAllMoves(lvl, startX, startY - 1, numMoves - 1, performEntCheck, cellStore, invalidCells, moverIsFriendly);
+                calculateAllMoves(lvl, startX, startY + 1, numMoves - 1, performEntCheck, cellStore, invalidCells, moverIsFriendly);
+                 */
+            }
+        }
+        
         public static void removeMovesUnderMinimum(Level lvl, int startX, int startY, int numMoves, bool performEntCheck)
         {
             if (numMoves == 0)
@@ -1516,10 +2018,10 @@ namespace AgateDemo
                         int minY = startY - (radius - 1); // 9
                         if (minY < 0)
                             minY = 0;
-                        int maxX = startX + (radius - 1); // 12
+                        int maxX = startX + (radius); // 12
                         if (maxX > Demo.currentLevel.map.GetUpperBound(1))
                             maxX = Demo.currentLevel.map.GetUpperBound(1);
-                        int maxY = startY + (radius - 1); // 13
+                        int maxY = startY + (radius); // 13
                         if (maxY > Demo.currentLevel.map.GetUpperBound(0))
                             maxY = Demo.currentLevel.map.GetUpperBound(0);
 
@@ -1663,7 +2165,7 @@ namespace AgateDemo
                         currentLevel.o_entities[requestingMove].moveList.Add(Direction.West);
                     }
                 }
-                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (currentLevel.map[cursorY, cursorX + 1] == 1194) &&
+                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < currentLevel.mapWidthBound && (currentLevel.map[cursorY, cursorX + 1] == 1194) &&
                     (checkPos(cursorX + 1, cursorY) == null || currentLevel.doNotStopCells.ContainsKey(new Point(cursorX + 1, cursorY))))
                 {
                     if (currentLevel.highlightedCells.ContainsKey(new Point(cursorX + 1, cursorY)))
@@ -1681,7 +2183,7 @@ namespace AgateDemo
                         currentLevel.o_entities[requestingMove].moveList.Add(Direction.North);
                     }
                 }
-                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (currentLevel.map[cursorY + 1, cursorX] == 1194) &&
+                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < currentLevel.mapHeightBound && (currentLevel.map[cursorY + 1, cursorX] == 1194) &&
                     (checkPos(cursorX, cursorY + 1) == null || currentLevel.doNotStopCells.ContainsKey(new Point(cursorX, cursorY + 1))))
                 {
                     if (currentLevel.highlightedCells.ContainsKey(new Point(cursorX, cursorY + 1)))
@@ -1698,7 +2200,7 @@ namespace AgateDemo
                     currentLevel.recalculateVision();
                     HighlightMove();
                 }
-                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (currentLevel.map[cursorY, cursorX + 1] == 1187) && checkPos(cursorX + 1, cursorY) == null && checkFixture(cursorX + 1, cursorY, 1190) != null)
+                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < currentLevel.mapWidthBound && (currentLevel.map[cursorY, cursorX + 1] == 1187) && checkPos(cursorX + 1, cursorY) == null && checkFixture(cursorX + 1, cursorY, 1190) != null)
                 {
                     currentLevel.map[cursorY, cursorX + 1] = 1194;
                     currentLevel.fixtures[new Point() { X = cursorX + 1, Y = cursorY }].tile = 1188;
@@ -1714,7 +2216,7 @@ namespace AgateDemo
                     currentLevel.recalculateVision();
                     HighlightMove();
                 }
-                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (currentLevel.map[cursorY + 1, cursorX] == 1187) && checkPos(cursorX, cursorY + 1) == null && checkFixture(cursorX, cursorY + 1, 1191) != null)
+                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < currentLevel.mapHeightBound && (currentLevel.map[cursorY + 1, cursorX] == 1187) && checkPos(cursorX, cursorY + 1) == null && checkFixture(cursorX, cursorY + 1, 1191) != null)
                 {
                     currentLevel.map[cursorY + 1, cursorX] = 1194;
                     currentLevel.fixtures[new Point() { X = cursorX, Y = cursorY + 1 }].tile = 1189;
@@ -1799,7 +2301,7 @@ namespace AgateDemo
                     cursorX--;
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (currentLevel.map[cursorY, cursorX + 1] == 1194 || currentLevel.map[cursorY, cursorX + 1] == 1187)
+                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < currentLevel.mapWidthBound && (currentLevel.map[cursorY, cursorX + 1] == 1194 || currentLevel.map[cursorY, cursorX + 1] == 1187)
                      )//&& visibleCells.Contains(new Point(cursorX + 1, cursorY)))
                 {
                     cursorX++;
@@ -1812,7 +2314,7 @@ namespace AgateDemo
                     cursorY--;
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (currentLevel.map[cursorY + 1, cursorX] == 1194 || currentLevel.map[cursorY + 1, cursorX] == 1187)
+                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < currentLevel.mapHeightBound && (currentLevel.map[cursorY + 1, cursorX] == 1194 || currentLevel.map[cursorY + 1, cursorX] == 1187)
                      )//&& visibleCells.Contains(new Point(cursorX, cursorY + 1)))
                 {
                     cursorY++;
@@ -1902,7 +2404,7 @@ namespace AgateDemo
                     }
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < mapWidth && (currentLevel.map[cursorY, cursorX + 1] == 1194))
+                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < currentLevel.mapWidthBound && (currentLevel.map[cursorY, cursorX + 1] == 1194))
                 {
                     if (currentLevel.highlightedCells.ContainsKey(new Point(cursorX + 1, cursorY)) || currentLevel.nonHighlightedFreeCells.ContainsKey(new Point(cursorX + 1, cursorY)))
                     {
@@ -1922,7 +2424,7 @@ namespace AgateDemo
                     }
                     hoverActor = checkPos(cursorX, cursorY);
                 }
-                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < mapHeight && (currentLevel.map[cursorY + 1, cursorX] == 1194))
+                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < currentLevel.mapHeightBound && (currentLevel.map[cursorY + 1, cursorX] == 1194))
                 {
                     if (currentLevel.highlightedCells.ContainsKey(new Point(cursorX, cursorY + 1)) || currentLevel.nonHighlightedFreeCells.ContainsKey(new Point(cursorX, cursorY + 1)))
                     {

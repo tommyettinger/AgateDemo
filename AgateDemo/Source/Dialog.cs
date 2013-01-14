@@ -445,5 +445,34 @@ namespace AgateDemo
             return dui;
         }
 
+
+        public static DialogUI InitLoadUI()
+        {
+            FontSurface fnt = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
+            Dialog initialDialog = new Dialog("The Narrator", new List<String>() {"Welcome to the Unpleasant Dungeon!", "Navigate through menus with the arrow keys.",
+                "Confirm a selection with the Z key.", "You can press X to go back in menus and dialogs.", "Do you want to start a new game, or load the previous game?"}, new List<DialogItem>()),
+                finishedLoadDialog = new Dialog("The Narrator", new List<String>() { "Are you ready to start?" }, new List<DialogItem>()),
+                cannotLoadDialog = new Dialog("The Narrator", new List<String>() { "Play a little first, then you will have a game to load." }, new List<DialogItem>());
+            DialogItem newGameItem = new DialogItem("New Game", finishedLoadDialog, null, Demo.Init),
+                loadItem = new DialogItem("Load Previous Game", finishedLoadDialog, null, Demo.LoadGame),
+                endOKItem = new DialogItem("OK!", null, null, DialogBrowser.Hide);
+            if (!System.IO.File.Exists("save.mobsav"))
+                loadItem = new DialogItem("[No Previous Game]", cannotLoadDialog, null);
+            initialDialog.options.Add(newGameItem);
+            initialDialog.options.Add(loadItem);
+            initialDialog.setSize();
+            initialDialog.previousDialog = null;
+            finishedLoadDialog.options.Add(endOKItem);
+            finishedLoadDialog.setSize();
+            finishedLoadDialog.previousDialog = null;
+            cannotLoadDialog.options.Add(newGameItem);
+            cannotLoadDialog.setSize();
+            cannotLoadDialog.previousDialog = null;
+            //attackChoices.menu.Add(new DialogItem("Scorch", null, Demo.OnKeyDown_SelectSkill));
+            DialogUI dui = new DialogUI(initialDialog, fnt);
+            dui.allDialogItems.Add(newGameItem);
+            dui.allDialogItems.Add(loadItem);
+            return dui;   
+        }
     }
 }

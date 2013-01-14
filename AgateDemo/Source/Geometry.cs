@@ -24,7 +24,7 @@ namespace AgateDemo
                 {
                     for (int i = begin.X; i <= end.X; i++)
                     {
-                        if (i > Demo.mapWidth - 10)
+                        if (i > Demo.currentLevel.mapWidthBound - 10)
                             continue;
                         ret.Add(new Point(i, begin.Y));
                     }
@@ -33,7 +33,7 @@ namespace AgateDemo
                     {
                         for (int i = begin.Y + 1; i <= end.Y; i++)
                         {
-                            if (i > Demo.mapHeight - 10)
+                            if (i > Demo.currentLevel.mapHeightBound - 10)
                                 continue;
                             ret.Add(new Point(end.X, i));
                         }
@@ -62,7 +62,7 @@ namespace AgateDemo
                     {
                         for (int i = begin.Y + 1; i <= end.Y; i++)
                         {
-                            if (i > Demo.mapHeight - 10)
+                            if (i > Demo.currentLevel.mapHeightBound - 10)
                                 continue;
                             ret.Add(new Point(end.X, i));
                         }
@@ -84,7 +84,7 @@ namespace AgateDemo
                 {
                     for (int i = begin.Y; i <= end.Y; i++)
                     {
-                        if (i > Demo.mapHeight - 10)
+                        if (i > Demo.currentLevel.mapHeightBound - 10)
                             continue;
                         ret.Add(new Point(begin.X, i));
                     }
@@ -93,7 +93,7 @@ namespace AgateDemo
                     {
                         for (int i = begin.X + 1; i <= end.X; i++)
                         {
-                            if (i > Demo.mapWidth - 10)
+                            if (i > Demo.currentLevel.mapWidthBound - 10)
                                 continue;
 
                             ret.Add(new Point(i, end.Y));
@@ -122,7 +122,7 @@ namespace AgateDemo
                     {
                         for (int i = begin.X + 1; i <= end.X; i++)
                         {
-                            if (i > Demo.mapWidth - 10)
+                            if (i > Demo.currentLevel.mapWidthBound - 10)
                                 continue;
 
                             ret.Add(new Point(i, end.Y));

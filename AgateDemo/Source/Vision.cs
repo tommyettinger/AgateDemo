@@ -65,24 +65,14 @@ namespace AgateDemo
         public Demo.Mob viewer;
         public Boolean vision = true;
 
-        public HashSet<Point> sightSet;
+        //public HashSet<Point> sightSet;
         public double[,] sight;
+        public double force;
         public int visualRange = 10;
         public Vision(Demo.Mob viewer)
         {
             this.viewer = viewer;
             //sightSet = new HashSet<Point>() { this.viewer.pos };
-        }
-        public void calculateSightOld()
-        {
-            sightSet = new HashSet<Point>() { viewer.pos };
-            //start at the left
-            /*foreach (Demo.Direction d in new Demo.Direction[] {Demo.Direction.East, Demo.Direction.West, Demo.Direction.North, Demo.Direction.South})
-            {
-                scanVisionOld(d, viewer.pos, visualRange);
-            }*/
-            computeFov(ref Demo.currentLevel.map, viewer.x, viewer.y, visualRange, true);
-            //scanVision(viewer.pos, visualRange);
         }
         public Point normalizeCell(Point pt)
         {
@@ -99,7 +89,19 @@ namespace AgateDemo
             }
             return pt;
         }
-
+        /*
+        
+        public void calculateSightOld()
+        {
+            sightSet = new HashSet<Point>() { viewer.pos };
+            //start at the left
+            foreach (Demo.Direction d in new Demo.Direction[] {Demo.Direction.East, Demo.Direction.West, Demo.Direction.North, Demo.Direction.South})
+            {
+                scanVisionOld(d, viewer.pos, visualRange);
+            }
+            computeFov(ref Demo.currentLevel.map, viewer.x, viewer.y, visualRange, true);
+            //scanVision(viewer.pos, visualRange);
+        }
         private void computeQuadrant(ref int[,] m, int playerX, int playerY, int maxRadius, bool lightWalls, int maxObstacles, int dx, int dy)
         {
             double[] startAngle, endAngle;
@@ -278,7 +280,7 @@ namespace AgateDemo
             /*for (c = m.Length - 1; c >= 0; c--)
             {
                 m.cells[c].fov = false;
-            }*/
+            }* /
 
             //calculate an approximated (excessive, just in case) maximum number of obstacles per octant
             maxObstacles = m.Length / 7;
@@ -292,114 +294,9 @@ namespace AgateDemo
             computeQuadrant(ref m, playerX, playerY, maxRadius, lightWalls, maxObstacles, -1, 1);
             computeQuadrant(ref m, playerX, playerY, maxRadius, lightWalls, maxObstacles, -1, -1);
         }
-
-        /**
- * Performs FOV by pushing values outwards from the source location.
- *
- * This algorithm does perform bounds checking.
- *
- * @author Eben Howard - http://squidpony.com - eben@squidpony.com
- */
-
-        public void calculateSight()
-        {
-        //    sight = new HashSet<Point>() { viewer.pos };
-            //start at the left
-            /*foreach (Demo.Direction d in new Demo.Direction[] {Demo.Direction.East, Demo.Direction.West, Demo.Direction.North, Demo.Direction.South})
-            {
-                scanVisionOld(d, viewer.pos, visualRange);
-            }*/
-
-            sight = calculateFOV(calculateVisionMap(viewer.dlevel.map), viewer.x, viewer.y, visualRange);
-            //scanVision(viewer.pos, visualRange);
-        }
-        private double[,] calculateVisionMap(int[,] dungeon)
-        {
-            double[,] vmap = new double[dungeon.GetLength(0), dungeon.GetLength(1)];
-            for (int j = 0; j < dungeon.GetLength(0); j++)
-            {
-                for (int i = 0; i < dungeon.GetLength(1); i++)
-                {
-                    switch (dungeon[j, i])
-                    {
-                        case 1194: { vmap[j, i] = 0.0; break; }
-                        default: { vmap[j, i] = 1.0; break; }
-                    }
-                }
-            }
-            return vmap;
-        }
-        private double[,] lightMap;
-    private double[,] map;
-    private double radius, decay;
-    private int startx, starty, width, height;
-    private bool simplified;
-
-    /**
-     * Find the light let through by the nearest square.
-     *
-     * @param x
-     * @param y
-     * @return
-     */
-    private double getNearLight(int x, int y)
-    {
-        int x2 = x - (int)Math.Sign(x - startx);
-        int y2 = y - (int)Math.Sign(y - starty);
-
-        //clamp x2 and y2 to bound within map
-        x2 = Math.Max(0, x2);
-        x2 = Math.Min(width - 1, x2);
-        y2 = Math.Max(0, y2);
-        y2 = Math.Min(height - 1, y2);
-
-        //find largest emmitted light in direction of source
-        double light = 0 ;
-        int xDominant = Math.Abs(x - startx) - Math.Abs(y - starty);
-
-        int lit = 0;
-        if (map[y2, x2] < 1 && lightMap[y2, x2] > 0)
-        {
-            light = Math.Max(light, lightMap[y2, x2] * (1 - map[y2, x2]));
-            lit++;
-            if (xDominant == 0)
-            {
-                lit++;
-            }
-        }
-        if (map[y2, x] < 1 && lightMap[y2, x] > 0)
-        {
-            light = Math.Max(light, lightMap[y2, x] * (1 - map[y2, x]));
-            lit++;
-            if (xDominant < 0)
-            {
-                lit++;
-            }
-        }
-        if (map[y, x2] < 1 && lightMap[y, x2] > 0)
-        {
-            light = Math.Max(light, lightMap[y, x2] * (1 - map[y, x2]));
-            lit++;
-            if (xDominant > 0)
-            {
-                lit++;
-            }
-        }
-        if (lit < 2 && !(map[y2, x2] < 1 && map[y, x2] >= 1 && map[y2, x] >= 1))
-        {
-            light = 0;
-        }
-
-        double distance = 1;
-        if (!simplified && x2 != x && y2 != y)
-        {//it's a diagonal
-            distance = Math.Sqrt(2);
-        }
-
-        distance = Math.Max(0, distance);
-        light = light - decay * distance;
-        return light;
-    }
+         * 
+         * 
+        
     private double getNearLightOld(int x, int y) {
         int x2 = x - (int) Math.Sign(x - startx);
         int y2 = y - (int) Math.Sign(y - starty);
@@ -447,62 +344,298 @@ namespace AgateDemo
         if (!simplified && x2 != x && y2 != y) {//it's a diagonal
             distance = Math.Sqrt(2);
         }
-        */
+        * /
         distance = Math.Max(0, distance);
         light = light - decay * distance;
         return light;
     }
-        
-    public double[,] calculateFOV(double[,] map, int startx, int starty, double force, double decay, bool simplifiedDiagonals) {
-        this.map = map;
-        this.decay = decay;
-        this.startx = startx;
-        this.starty = starty;
-        this.simplified = simplifiedDiagonals;
-        radius = force / decay;//assume worst case of no resistance in tiles
-        width = map.GetLength(1);
-        height = map.GetLength(0);
-        lightMap = new double[height,width];
+        */
+        /**
+ * Performs FOV by pushing values outwards from the source location.
+ *
+ * This algorithm does perform bounds checking.
+ *
+ * @author Eben Howard - http://squidpony.com - eben@squidpony.com
+ */
 
-        lightMap[starty,startx] = force;//make the starting space full power
+        private static int[,] MULT = {{1, 0, 0, -1, -1, 0, 0, 1},
+        {0, 1, -1, 0, 0, -1, 1, 0}, {0, 1, 1, 0, 0, -1, -1, 0},
+        {1, 0, 0, 1, -1, 0, 0, -1}};
+        public double[,] calculateFOV(double[,] map, int startx, int starty, double force, double decay)
+        {
+            width = map.GetLength(1);
+            height = map.GetLength(0);
+            this.force = force;
+            this.decay = decay;
+            //        this.rStrat = rStrat;
+            this.lightMap = new double[height, width];
+            this.map = map;
 
-        lightSurroundings(startx, starty);
+            radius = (force / decay);
 
-        return lightMap;
-    }
+            // shadow casting each octant
+            for (int oct = 0; oct < 8; oct++)
+            {
+                castLight(startx, starty, 1, 1.0f, 0.0f,
+                        MULT[0, oct], MULT[1, oct], MULT[2, oct], MULT[3, oct], 0);
+            }
+            lightMap[starty, startx] = force;
 
-    private void lightSurroundings(int x, int y) {
-        if (lightMap[y, x] <= 0) {
-            return;//no light to spread
+            return lightMap;
         }
 
-        for (int dx = x - 1; dx <= x + 1; dx++) {
-            for (int dy = y - 1; dy <= y + 1; dy++) {
-                //ensure in bounds
-                if (dx < 0 || dx >= width || dy < 0 || dy >= height) {
-                    continue;
-                }
 
-                double r2;
-                if (simplified) {
-                    r2 = Math.Sqrt((dx - startx) * (dx - startx) + (dy - starty) * (dy - starty));
-                } else {
-                    r2 = Math.Abs(dx - startx) + Math.Abs(dy - starty);
+        private void castLight(int cx, int cy, int row, double start, double end,
+        int xx, int xy, int yx, int yy, int id)
+        {
+            double new_start = 0.0;
+            if (start < end)
+            {
+                return;
+            }
+            for (int distance = row; distance <= radius; distance++)
+            {
+                int dx = -distance - 1;
+                int dy = -distance;
+                bool blocked = false;
+                while (dx <= 0)
+                {
+                    int currentX, currentY;
+                    dx++;
+                    currentX = cx + dx * xx + dy * xy;
+                    currentY = cy + dx * yx + dy * yy;
+                    if (currentX >= 0 && currentY >= 0 && currentX < this.width && currentY < this.height)
+                    {
+                        double l_slope, r_slope;
+                        l_slope = (dx - 0.5f) / (dy + 0.5f);
+                        r_slope = (dx + 0.5f) / (dy - 0.5f);
+                        if (start < r_slope)
+                        {
+                            continue;
+                        }
+                        else if (end > l_slope)
+                        {
+                            break;
+                        }
+                        if (Math.Abs(dx) + Math.Abs(dy) <= radius)
+                        {
+                            double bright = (1 - (decay * (Math.Abs(dx) + Math.Abs(dy)) / force));
+                            lightMap[currentY,currentX] = bright;
+                        }
+                        if (blocked)
+                        {
+                            if (map[currentY,currentX] >= 1)
+                            {
+                                new_start = r_slope;
+                                continue;
+                            }
+                            else
+                            {
+                                blocked = false;
+                                start = new_start;
+                            }
+                        }
+                        else
+                        {
+                            if (map[currentY,currentX] >= 1 && distance < radius)
+                            {
+                                blocked = true;
+                                castLight(cx, cy, distance + 1, start, l_slope,
+                                        xx, xy, yx, yy, id + 1);
+                                new_start = r_slope;
+                            }
+                        }
+                    }
                 }
-                if (r2 <= radius) {
-                    double surroundingLight = getNearLight(dx, dy);
-                    if (lightMap[dy,dx] < surroundingLight) {
-                        lightMap[dy,dx] = surroundingLight;
-                        lightSurroundings(dx, dy);//redo neighbors since this one's light changed
+                if (blocked)
+                {
+                    break;
+                }
+            }
+        }
+
+        public double[,] calculateFOV(double[,] map, int startx, int starty, double radius)
+        {
+            return calculateFOV(map, startx, starty, 1, 1 / radius);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public void calculateSight()
+        {
+            //    sight = new HashSet<Point>() { viewer.pos };
+            //start at the left
+            /*foreach (Demo.Direction d in new Demo.Direction[] {Demo.Direction.East, Demo.Direction.West, Demo.Direction.North, Demo.Direction.South})
+            {
+                scanVisionOld(d, viewer.pos, visualRange);
+            }*/
+
+            sight = calculateFOV(calculateVisionMap(viewer.dlevel.map), viewer.x, viewer.y, visualRange);
+            //scanVision(viewer.pos, visualRange);
+        }
+        private double[,] calculateVisionMap(int[,] dungeon)
+        {
+            double[,] vmap = new double[dungeon.GetLength(0), dungeon.GetLength(1)];
+            for (int j = 0; j < dungeon.GetLength(0); j++)
+            {
+                for (int i = 0; i < dungeon.GetLength(1); i++)
+                {
+                    switch (dungeon[j, i])
+                    {
+                        case 1194: { vmap[j, i] = 0.0; break; }
+                        default: { vmap[j, i] = 1.0; break; }
+                    }
+                }
+            }
+            return vmap;
+        }
+        private double[,] lightMap;
+        private double[,] map;
+        private double radius, decay;
+        private int startx, starty, width, height;
+        private bool simplified;
+        /**
+         * Find the light let through by the nearest square.
+         *
+         * @param x
+         * @param y
+         * @return
+         */
+        private double getNearLightOld(int x, int y)
+        {
+            int x2 = x - (int)Math.Sign(x - startx);
+            int y2 = y - (int)Math.Sign(y - starty);
+
+            //clamp x2 and y2 to bound within map
+            x2 = Math.Max(0, x2);
+            x2 = Math.Min(width - 1, x2);
+            y2 = Math.Max(0, y2);
+            y2 = Math.Min(height - 1, y2);
+
+            //find largest emmitted light in direction of source
+            double light = 0;
+            int xDominant = Math.Abs(x - startx) - Math.Abs(y - starty);
+
+            int lit = 0;
+            if (map[y2, x2] < 1 && lightMap[y2, x2] > 0)
+            {
+                light = Math.Max(light, lightMap[y2, x2] * (1 - map[y2, x2]));
+                lit++;
+                if (xDominant == 0)
+                {
+                    lit++;
+                }
+            }
+            if (map[y2, x] < 1 && lightMap[y2, x] > 0)
+            {
+                light = Math.Max(light, lightMap[y2, x] * (1 - map[y2, x]));
+                lit++;
+                if (xDominant < 0)
+                {
+                    lit++;
+                }
+            }
+            if (map[y, x2] < 1 && lightMap[y, x2] > 0)
+            {
+                light = Math.Max(light, lightMap[y, x2] * (1 - map[y, x2]));
+                lit++;
+                if (xDominant > 0)
+                {
+                    lit++;
+                }
+            }
+            if (lit < 2 && !(map[y2, x2] < 1 && map[y, x2] >= 1 && map[y2, x] >= 1))
+            {
+                light = 0;
+            }
+
+            double distance = 1;
+            if (!simplified && x2 != x && y2 != y)
+            {//it's a diagonal
+                distance = Math.Sqrt(2);
+            }
+
+            distance = Math.Max(0, distance);
+            light = light - decay * distance;
+            return light;
+        }
+
+        public double[,] calculateFOVOld(double[,] map, int startx, int starty, double force, double decay, bool simplifiedDiagonals)
+        {
+            this.map = map;
+            this.decay = decay;
+            this.startx = startx;
+            this.starty = starty;
+            this.simplified = simplifiedDiagonals;
+            radius = force / decay;//assume worst case of no resistance in tiles
+            width = map.GetLength(1);
+            height = map.GetLength(0);
+            lightMap = new double[height, width];
+
+            lightMap[starty, startx] = force;//make the starting space full power
+
+            lightSurroundings(startx, starty);
+
+            return lightMap;
+        }
+
+        private void lightSurroundings(int x, int y)
+        {
+            if (lightMap[y, x] <= 0)
+            {
+                return;//no light to spread
+            }
+
+            for (int dx = x - 1; dx <= x + 1; dx++)
+            {
+                for (int dy = y - 1; dy <= y + 1; dy++)
+                {
+                    //ensure in bounds
+                    if (dx < 0 || dx >= width || dy < 0 || dy >= height)
+                    {
+                        continue;
+                    }
+
+                    double r2;
+                    if (simplified)
+                    {
+                        r2 = Math.Sqrt((dx - startx) * (dx - startx) + (dy - starty) * (dy - starty));
+                    }
+                    else
+                    {
+                        r2 = Math.Abs(dx - startx) + Math.Abs(dy - starty);
+                    }
+                    if (r2 <= radius)
+                    {
+                        double surroundingLight = getNearLightOld(dx, dy);
+                        if (lightMap[dy, dx] < surroundingLight)
+                        {
+                            lightMap[dy, dx] = surroundingLight;
+                            lightSurroundings(dx, dy);//redo neighbors since this one's light changed
+                        }
                     }
                 }
             }
         }
-    }
 
-    
-    public double[,] calculateFOV(double[,] map, int startx, int starty, double radius) {
-        return calculateFOV(map, startx, starty, 1, 1 / radius, true);
-    }
+
+        public double[,] calculateFOVOld(double[,] map, int startx, int starty, double radius)
+        {
+            return calculateFOVOld(map, startx, starty, 1, 1 / radius, true);
+        }
     }
 }
