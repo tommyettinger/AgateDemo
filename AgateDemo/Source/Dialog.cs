@@ -46,6 +46,17 @@ namespace AgateDemo
         {
             contentHeight = lines.Count + options.Count;
             renderY = (Demo.mapDisplayHeight / 2) + 7 - (contentHeight + 4) * 7;
+            foreach (String s in lines)
+            {
+                if (s.Length > contentWidth)
+                    contentWidth = s.Length;
+            }
+            foreach (DialogItem s in options)
+            {
+                if (s.text.Length > contentWidth)
+                    contentWidth = s.text.Length;
+            }
+            renderX = ((Demo.mapDisplayWidth / 2) - 6) - (contentWidth * 3);
         }
     }
 
@@ -451,10 +462,10 @@ namespace AgateDemo
             FontSurface fnt = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
             Dialog initialDialog = new Dialog("The Narrator", new List<String>() {"Welcome to the Unpleasant Dungeon!", "Navigate through menus with the arrow keys.",
                 "Confirm a selection with the Z key.", "You can press X to go back in menus and dialogs.", "Do you want to start a new game, or load the previous game?"}, new List<DialogItem>()),
-                finishedLoadDialog = new Dialog("The Narrator", new List<String>() { "Are you ready to start?" }, new List<DialogItem>()),
+                finishedLoadDialog = new Dialog("The Narrator", new List<String>() { "Choose a saved game:" }, new List<DialogItem>()),
                 cannotLoadDialog = new Dialog("The Narrator", new List<String>() { "Play a little first, then you will have a game to load." }, new List<DialogItem>());
             DialogItem newGameItem = new DialogItem("New Game", finishedLoadDialog, null, Demo.Init),
-                loadItem = new DialogItem("Load Previous Game", finishedLoadDialog, null, Demo.LoadGame),
+                loadItem = new DialogItem("Load Previous Game", null, null, Demo.LoadStates),
                 endOKItem = new DialogItem("OK!", null, null, DialogBrowser.Hide);
             if (!System.IO.File.Exists("save.mobsav"))
                 loadItem = new DialogItem("[No Previous Game]", cannotLoadDialog, null);
@@ -462,7 +473,7 @@ namespace AgateDemo
             initialDialog.options.Add(loadItem);
             initialDialog.setSize();
             initialDialog.previousDialog = null;
-            finishedLoadDialog.options.Add(endOKItem);
+//            finishedLoadDialog.options.Add(endOKItem);
             finishedLoadDialog.setSize();
             finishedLoadDialog.previousDialog = null;
             cannotLoadDialog.options.Add(newGameItem);
@@ -472,6 +483,39 @@ namespace AgateDemo
             DialogUI dui = new DialogUI(initialDialog, fnt);
             dui.allDialogItems.Add(newGameItem);
             dui.allDialogItems.Add(loadItem);
+            return dui;   
+        }
+
+        public static DialogUI CreateLoadGameDialog(SortedDictionary<DateTime, Demo.GameState> allSavedStates)
+        {
+            FontSurface fnt = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
+            Dialog chooseDialog = new Dialog("The Narrator", new List<String>() { "Choose a saved game:" }, new List<DialogItem>()),
+                finishedLoadDialog = new Dialog("The Narrator", new List<String>() { "Are you ready?" }, new List<DialogItem>()),
+                cannotLoadDialog = new Dialog("The Narrator", new List<String>() { "Play a little first, then you will have a game to load." }, new List<DialogItem>());
+            DialogItem newGameItem = new DialogItem("New Game", chooseDialog, null, Demo.Init),
+                endOKItem = new DialogItem("OK!", null, null, DialogBrowser.Hide);
+            if (!System.IO.File.Exists("save.mobsav"))
+            {
+                chooseDialog.options = new List<DialogItem>(){ new DialogItem("[No Previous Game]", cannotLoadDialog, null)};
+            }
+            finishedLoadDialog.options.Add(endOKItem);
+            finishedLoadDialog.setSize();
+            finishedLoadDialog.previousDialog = null;
+            //            finishedLoadDialog.options.Add(endOKItem);
+            DialogUI dui = new DialogUI(chooseDialog, fnt);
+            foreach (DateTime dt in Demo.allSavedStates.Keys)
+            {
+                chooseDialog.options.Add(new DialogItem("Saved on " + dt.ToShortDateString() + " at " + dt.ToShortTimeString(), finishedLoadDialog, null, Demo.LoadGame));
+
+            }
+            chooseDialog.setSize();
+            dui.allDialogItems.AddRange(chooseDialog.options);
+            chooseDialog.previousDialog = null;
+            cannotLoadDialog.options.Add(newGameItem);
+            cannotLoadDialog.setSize();
+            cannotLoadDialog.previousDialog = null;
+            //attackChoices.menu.Add(new DialogItem("Scorch", null, Demo.OnKeyDown_SelectSkill));
+            dui.allDialogItems.Add(newGameItem);
             return dui;   
         }
     }

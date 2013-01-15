@@ -89,7 +89,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Linux\AgateSDL.dll.config" />
     <None Include="OldDemo.cs" />
     <Compile Include="Source\Chroma.cs" />
     <Compile Include="Source\Demo.cs" />
@@ -130,22 +129,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="LICENSE.txt" />
-    <Content Include="Linux\AgateDrawing.dll" />
-    <Content Include="Linux\AgateLib.dll" />
-    <Content Include="Linux\AgateLib.WinForms.dll" />
-    <Content Include="Linux\AgateLib.WinForms.xml" />
-    <Content Include="Linux\AgateLib.xml" />
-    <Content Include="Linux\AgateOTK.dll" />
-    <Content Include="Linux\AgateSDL.dll" />
-    <Content Include="Linux\Drivers\AgateFMOD.dll" />
-    <Content Include="Linux\Drivers\AgateLib.dll" />
-    <Content Include="Linux\Drivers\AgateLib.xml" />
-    <Content Include="Linux\libogg-0.dll" />
-    <Content Include="Linux\libvorbis-0.dll" />
-    <Content Include="Linux\libvorbisfile-3.dll" />
-    <Content Include="Linux\Readme-SDL.txt" />
-    <Content Include="Linux\SDL.dll" />
-    <Content Include="Linux\SDL_mixer.dll" />
     <Content Include="mandrill.png" />
     <Content Include="mandrill_trimmed.bmp" />
     <Content Include="mandrill_white.png" />
@@ -165,8 +148,6 @@
     <Content Include="Resources\monkey_x2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Compatibility\OpenTKBackup\OpenTK.dll" />
-    <Content Include="Compatibility\OpenTKBackup\OpenTK.xml" />
     <Content Include="Resources\slashem-revised.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -185,7 +166,6 @@
     <None Include="Compatibility\AgateSDL.dll.config" />
     <None Include="app.config" />
     <None Include="Compatibility\OpenTK.dll.config" />
-    <None Include="Compatibility\OpenTKBackup\OpenTK.dll.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

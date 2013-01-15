@@ -367,12 +367,12 @@ namespace AgateDemo
                     {
                         // maxVisibleX++;
                         /*
-                        if (!visibleCells.Contains(new Point(col, row)) && !seenCells.Contains(new Point(col, row)))
+                        if (visibleCells[col, row] <= 0 && seenCells[col, row] <= 0)
                         {
                             pX += tileVIncrease;
                             continue;
                         }
-                        else if (!visibleCells.Contains(new Point(col, row)) && seenCells.Contains(new Point(col, row)))
+                        else if (visibleCells[col, row] <= 0 && seenCells[col, row] > 0)
                         {
                             var tile = map[row, col];
                             Rectangle src;
@@ -417,8 +417,8 @@ namespace AgateDemo
                     }
                     pX = tileHIncrease * (20 - 1 - ((Demo.cursorY <= 10) ? row : (Demo.cursorY > mapHeightBound - 10) ? row - (mapHeightBound - 19) : row - (Demo.cursorY - 10)));
                     for (var col = (Demo.cursorX <= 10) ? 0 : (Demo.cursorX > mapWidthBound - 10) ? mapWidthBound - 19 : Demo.cursorX - 10; col <= mapWidthBound && (col < Demo.cursorX + 10 || col < 20); col++)
-                    {/*
-                    if (!visibleCells.Contains(new Point(col, row)))
+                    {
+                    /*if (visibleCells[col, row] <= 0)
                     {
                         pX += tileVIncrease;
                         continue;
@@ -455,7 +455,7 @@ namespace AgateDemo
                             tileset.Color = Color.White;
 
                         }
-                        if (entity != null)
+                        if (entity != null && visibleCells[row, col] > 0)
                         {
                             tile = entity.tile;
                             src = new Rectangle((tile % 38) * tileWidth, (tile / 38) * tileHeight, tileWidth, tileHeight);

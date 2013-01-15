@@ -218,7 +218,7 @@ namespace AgateDemo
             public int cursorX;
             public int cursorY;
         }
-
+        public static SortedDictionary<DateTime, GameState> allSavedStates = null;
         public static SortedDictionary<DateTime, GameState> getState()
         {
             SortedDictionary<DateTime, GameState> ds;
@@ -246,7 +246,7 @@ namespace AgateDemo
             });
             return ds;
         }
-        public static void LoadGame()
+        public static void LoadStates()
         {/*
             var jsonSerializerSettings = new JsonSerializerSettings
             {
@@ -257,9 +257,16 @@ namespace AgateDemo
             rttm.AutoAddMissingTypes = true;
             rttm.Add(typeof(GameState), true);*/
             //GameState s = null;
-            SortedDictionary<DateTime, GameState> ds = (SortedDictionary<DateTime, GameState>)Serializer.model.Deserialize(new System.IO.FileStream("save.mobsav", System.IO.FileMode.Open), null, typeof(SortedDictionary<DateTime, GameState>));
+            allSavedStates = (SortedDictionary<DateTime, GameState>)Serializer.model.Deserialize(new System.IO.FileStream("save.mobsav", System.IO.FileMode.Open), null, typeof(SortedDictionary<DateTime, GameState>));
            // GameState s = //JsonConvert.DeserializeObject<GameState>(System.IO.File.ReadAllText("save.mobsav"), jsonSerializerSettings);
-            GameState s = ds.Last().Value;
+
+            mode = InputMode.Dialog;
+            DialogBrowser.currentUI = DialogUI.CreateLoadGameDialog(allSavedStates);
+            DialogBrowser.UnHide();
+        }
+        public static void LoadGame()
+        {
+            GameState s = allSavedStates.ToList()[DialogBrowser.currentUI.currentDialog.currentOption].Value;
             initiative = s.initiative;
             currentInitiative = s.currentInitiative;
 
@@ -1055,7 +1062,11 @@ namespace AgateDemo
                     Display.BeginFrame();
                     Show();
                     Display.EndFrame();
-                    Core.KeepAlive();
+                    try
+                    {
+                        Core.KeepAlive();
+                    }
+                    catch (Exception) { };
                 }
             }
             startingTime = Timing.TotalMilliseconds;
