@@ -396,11 +396,11 @@ namespace AgateDemo
                             {
                                 if (highlightedTargetCells.ContainsKey(new Point(col, row)))
                                 {
-                                    tileset.Color = Color.FromHsv(10.0, 0.5, 0.60 + (((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 3000 : (2000 - (Timing.TotalMilliseconds % 2000)) / 3000));
+                                    tileset.Color = Color.FromHsv(10.0, 0.7, 0.60 + (((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 3000 : (2000 - (Timing.TotalMilliseconds % 2000)) / 3000));
                                 }
                                 else if (highlightedCells.ContainsKey(new Point(col, row)) && !doNotStopCells.ContainsKey(new Point(col, row)))
                                 {
-                                    tileset.Color = Color.FromHsv(190.0, 0.5, 0.75 + (((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 4000 : (2000 - (Timing.TotalMilliseconds % 2000)) / 4000));
+                                    tileset.Color = Color.FromHsv(230.0, 0.7, 0.80 + (((Timing.TotalMilliseconds % 2000) < 1000) ? (Timing.TotalMilliseconds % 2000) / 6000 : (2000 - (Timing.TotalMilliseconds % 2000)) / 6000));
                                 }
                                 else if (o_entities.ContainsKey(requestingMove))// && o_entities[requestingMove].fov.sight[col, row] == 0)
                                 {

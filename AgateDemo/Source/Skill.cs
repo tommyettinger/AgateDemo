@@ -76,7 +76,7 @@ namespace AgateDemo
                                     (i == targetSquare.X && j == targetSquare.Y))
                                     continue;
 
-                                Demo.Mob tgt = Demo.checkPos(i, j);
+                                Demo.Mob tgt = Demo.currentLevel.checkPos(i, j);
                                 if (tgt != null && user.fov.sight[j,i] > 0)
                                 {
                                     if (hitsAllies == false && tgt.friendly == user.friendly)
@@ -176,7 +176,7 @@ namespace AgateDemo
                                     j - targetSquare.Y < -1 * (i - targetSquare.X) - radius)   // 10 - 10 < -10 + 11 - 1
                                     continue;
 
-                                Demo.Mob tgt = Demo.checkPos(i, j);
+                                Demo.Mob tgt = Demo.currentLevel.checkPos(i, j);
                                 if (tgt != null && user.fov.sight[j, i] > 0)
                                 {
                                     if (hitsAllies == false && tgt.friendly == user.friendly)
@@ -261,7 +261,7 @@ namespace AgateDemo
 //                                        (i == targetSquare.x && j == targetSquare.y))
                                         continue;
                                 }
-                                Demo.Mob tgt = Demo.checkPos(i, j);
+                                Demo.Mob tgt = Demo.currentLevel.checkPos(i, j);
                                 if (tgt != null && user.fov.sight[j, i] > 0)
                                 {
                                     if (hitsAllies == false && tgt.friendly == user.friendly)
@@ -283,7 +283,7 @@ namespace AgateDemo
                 case SkillAreaKind.SingleTarget:
                 default:
                     {
-                        Demo.Mob tgt = Demo.checkPos(targetSquare.X, targetSquare.Y);
+                        Demo.Mob tgt = Demo.currentLevel.checkPos(targetSquare.X, targetSquare.Y);
                         if (tgt == null)
                             return new SkillResult();
                         if (hitsAllies == false && tgt.friendly == user.friendly)

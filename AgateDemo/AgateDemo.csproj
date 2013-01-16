@@ -72,14 +72,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\AgateOTK.dll</HintPath>
     </Reference>
-    <Reference Include="AgateSDL, Version=0.3.2.0, Culture=neutral, PublicKeyToken=f581e76c8cef411b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\AgateSDL.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="OpenTK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <HintPath>.\OpenTK.dll</HintPath>
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK.GLControl, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\OpenTK.GLControl.dll</HintPath>
     </Reference>
     <Reference Include="protobuf-net">
       <HintPath>..\packages\protobuf-net.2.0.0.614\lib\net40\protobuf-net.dll</HintPath>
@@ -96,6 +96,7 @@
     <Compile Include="Source\Dungeon.cs" />
     <Compile Include="Source\DungeonMap.cs" />
     <Compile Include="Source\Geometry.cs" />
+    <None Include="OpenTK.Compatibility.dll.config" />
     <None Include="OpenTK.dll.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -125,23 +126,22 @@
     <Content Include="AgateOTK.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="AgateSDL.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="AgateSDL.dll" />
     <Content Include="LICENSE.txt" />
     <Content Include="mandrill.png" />
     <Content Include="mandrill_trimmed.bmp" />
     <Content Include="mandrill_white.png" />
     <Content Include="mandrill_white_alt.png" />
     <Content Include="mandrill_white_small.png" />
+    <Content Include="OpenTK.Compatibility.dll" />
+    <Content Include="OpenTK.Compatibility.xml" />
     <Content Include="OpenTK.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="OpenTK.GLControl.dll" />
-    <Content Include="OpenTK.GLControl.xml" />
-    <Content Include="OpenTK.xml">
+    <Content Include="OpenTK.GLControl.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="OpenTK.GLControl.xml" />
     <Content Include="Resources\monkey.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -164,7 +164,6 @@
     </Compile>
     <None Include="AgateSDL.dll.config" />
     <None Include="Compatibility\AgateSDL.dll.config" />
-    <None Include="app.config" />
     <None Include="Compatibility\OpenTK.dll.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

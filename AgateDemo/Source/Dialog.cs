@@ -45,6 +45,8 @@ namespace AgateDemo
         public void setSize()
         {
             contentHeight = lines.Count + options.Count;
+            if (options.Count > 15)
+                contentHeight = lines.Count + 15;
             renderY = (Demo.mapDisplayHeight / 2) + 7 - (contentHeight + 4) * 7;
             foreach (String s in lines)
             {
@@ -248,13 +250,18 @@ namespace AgateDemo
             else
             {
                 if ((e.KeyCode == KeyCode.Up || (Demo.hjkl && e.KeyCode == KeyCode.K)) && currentUI.currentDialog.options.Count > 1 && currentUI.currentDialog.currentOption > 0)
+                {
                     currentUI.currentDialog.currentOption--;
+                    
+                }
                 else if ((e.KeyCode == KeyCode.Down || (Demo.hjkl && e.KeyCode == KeyCode.J)) && currentUI.currentDialog.options.Count > 1 && currentUI.currentDialog.currentOption < currentUI.currentDialog.options.Count - 1)
+                {
                     currentUI.currentDialog.currentOption++;
+                }
                 else if (e.KeyCode == DialogBrowser.confirmKey && //currentUI.currentDialog.options[currentUI.currentDialog.currentOption].enabled &&
-                         (currentUI.currentDialog.options[currentUI.currentDialog.currentOption].linksTo != null ||
-                          currentUI.currentDialog.options[currentUI.currentDialog.currentOption].eventLink != null
-                       || currentUI.currentDialog.options[currentUI.currentDialog.currentOption].actionLink != null))
+                        (currentUI.currentDialog.options[currentUI.currentDialog.currentOption].linksTo != null ||
+                         currentUI.currentDialog.options[currentUI.currentDialog.currentOption].eventLink != null
+                      || currentUI.currentDialog.options[currentUI.currentDialog.currentOption].actionLink != null))
                 {
                     dialogItemForFinish = currentUI.currentDialog.options[currentUI.currentDialog.currentOption];
                     dialogItemsForRecall.Add(currentUI.currentDialog.options[currentUI.currentDialog.currentOption]);
@@ -355,13 +362,39 @@ namespace AgateDemo
             tx += mandrillDict['┤'];*/
             currentLine++;
             font.DrawText(currentDialog.renderX, currentDialog.renderY + (14 * currentLine), mandrillDict['├'] + "".PadRight(currentDialog.contentWidth, mandrillDict['─']) + mandrillDict['┤']);
-            for (int i = 0; i < currentDialog.options.Count; i++)
+
+
+
+            //            if(currentDialog.options.Count > 15)
+            List<DialogItem> shownItems = new List<DialogItem>();
+            //(Math.Abs((currentDialog.currentOption - 8) * currentDialog.options.Count) + (currentDialog.currentOption - 8)) % currentDialog.options.Count;
+            if (currentDialog.options.Count > 15)
+            {
+                shownItems.AddRange(currentDialog.options.GetRange((currentDialog.currentOption >= 15) ? currentDialog.currentOption - 14 : 0, 15));
+                /*
+                for (int i = (Math.Abs((currentDialog.currentOption) * currentDialog.options.Count) + (currentDialog.currentOption)) % currentDialog.options.Count
+                    , t = 0; t < 15 && t < currentDialog.options.Count; i = (i + 1) % currentDialog.options.Count, t++)
+                {
+                    shownItems.Add(currentDialog.options[i]);
+                }*/
+            }
+            else
+                shownItems = currentDialog.options;
+            /*
+             
+            if (counter + 4 > mb.skillList.Count)
+            {
+                counter = 0;
+                sw.Reset();
+            }
+             */
+            for (int i = 0; i < shownItems.Count; i++)
             {
                 currentLine++;
                 font.DrawText(currentDialog.renderX, currentDialog.renderY + (14 * currentLine), "" + mandrillDict['│']);
-                if (i == currentDialog.currentOption)
+                if (shownItems[i] == currentDialog.options[currentDialog.currentOption])
                     font.Color = Color.Red;
-                font.DrawText(currentDialog.renderX + 6, currentDialog.renderY + (14 * currentLine), currentDialog.options[i].text.PadRight(currentDialog.contentWidth, ' '));
+                font.DrawText(currentDialog.renderX + 6, currentDialog.renderY + (14 * currentLine), shownItems[i].text.PadRight(currentDialog.contentWidth, ' '));
                 font.Color = Color.White;
                 font.DrawText(currentDialog.renderX + 6 + (6 * currentDialog.contentWidth), currentDialog.renderY + (14 * currentLine), "" + mandrillDict['│']);
             }
@@ -505,7 +538,7 @@ namespace AgateDemo
             DialogUI dui = new DialogUI(chooseDialog, fnt);
             foreach (DateTime dt in Demo.allSavedStates.Keys)
             {
-                chooseDialog.options.Add(new DialogItem("Saved on " + dt.ToShortDateString() + " at " + dt.ToShortTimeString(), finishedLoadDialog, null, Demo.LoadGame));
+                chooseDialog.options.Add(new DialogItem("Saved on " + dt.ToShortDateString() + " at " + dt.ToShortTimeString(), null, null, Demo.LoadGame));
 
             }
             chooseDialog.setSize();

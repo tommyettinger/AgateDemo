@@ -187,7 +187,7 @@ namespace AgateDemo
             paths = validMoves;
        //     thinker.moveList.Clear();
             int howMany = (moveList.Count > thinker.moveSpeed) ? thinker.moveSpeed : moveList.Count;
-            if (moveList.Count > 1 && isDisplacedList[(moveList.Count > thinker.moveSpeed) ? thinker.moveSpeed : moveList.Count - 1])
+            if (moveList.Count >= 1 && isDisplacedList[(moveList.Count > thinker.moveSpeed) ? thinker.moveSpeed : moveList.Count - 1])
                 howMany = isDisplacedList.FindLastIndex((moveList.Count > thinker.moveSpeed) ? thinker.moveSpeed : moveList.Count - 1
                                                       , (moveList.Count > thinker.moveSpeed) ? thinker.moveSpeed : moveList.Count - 1, e => !e);
             thinker.moveList = moveList.Take(howMany).ToList();

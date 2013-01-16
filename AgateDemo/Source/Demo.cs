@@ -321,7 +321,8 @@ namespace AgateDemo
             currentLevel = fullDungeon[levelIndex];
             cursorX = s.cursorX;
             cursorY = s.cursorY;
-            
+            DialogBrowser.Hide();
+            mode = InputMode.None;
         }
         //public static int[,] map, map2;
         //public static Dictionary<Point, Mob> entities, currentLevel.o_entities, currentLevel.allies;
@@ -585,80 +586,80 @@ namespace AgateDemo
 
                 switch (currMove)
                 {
-                    case Direction.West: if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1194) && checkPos(ent.x - 1, ent.y) == null) //entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y)
+                    case Direction.West: if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1194) && currentLevel.checkPos(ent.x - 1, ent.y) == null) //entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y)
                         {
                             if (displaced.ContainsKey(ent.pos))
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
                             ent.x--;
                         }
-                        else if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1187) && checkFixture(ent.x - 1, ent.y, 1190) != null)
+                        else if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1187) && currentLevel.checkFixture(ent.x - 1, ent.y, 1190) != null)
                         {
                             currentLevel.map[ent.y, ent.x - 1] = 1194;
                             currentLevel.fixtures[new Point() { X = ent.x - 1, Y = ent.y }].tile = 1188;
                         }
-                        else if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1194) && checkPos(ent.x - 1, ent.y) != null && checkPos(ent.x - 1, ent.y).friendly == ent.friendly)
+                        else if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1194) && currentLevel.checkPos(ent.x - 1, ent.y) != null && currentLevel.checkPos(ent.x - 1, ent.y).friendly == ent.friendly)
                         {
                             if (displaced.ContainsKey(ent.pos))
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
-                            displaced.Add(checkPos(ent.x - 1, ent.y).pos, checkPos(ent.x - 1, ent.y));
+                            displaced.Add(currentLevel.checkPos(ent.x - 1, ent.y).pos, currentLevel.checkPos(ent.x - 1, ent.y));
                             ent.x--;
                         }
                         break;
-                    case Direction.North: if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1194) && checkPos(ent.x, ent.y - 1) == null)
+                    case Direction.North: if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1194) && currentLevel.checkPos(ent.x, ent.y - 1) == null)
                         {
                             if (displaced.ContainsKey(ent.pos))
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
                             ent.y--;
                         }
-                        else if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1187) && checkFixture(ent.x, ent.y - 1, 1191) != null)
+                        else if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1187) && currentLevel.checkFixture(ent.x, ent.y - 1, 1191) != null)
                         {
                             currentLevel.map[ent.y - 1, ent.x] = 1194;
                             currentLevel.fixtures[new Point() { X = ent.x, Y = ent.y - 1 }].tile = 1189;
                             //                        fixtures.FirstOrDefault(e => e.x == ent.x && e.y == ent.y - 1 && e.tile == 1191).tile = 1189;
                         }
-                        else if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1194) && checkPos(ent.x, ent.y - 1) != null && checkPos(ent.x, ent.y - 1).friendly == ent.friendly)
+                        else if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1194) && currentLevel.checkPos(ent.x, ent.y - 1) != null && currentLevel.checkPos(ent.x, ent.y - 1).friendly == ent.friendly)
                         {
                             if (displaced.ContainsKey(ent.pos))
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
-                            displaced.Add(checkPos(ent.x, ent.y - 1).pos, checkPos(ent.x, ent.y - 1));
+                            displaced.Add(currentLevel.checkPos(ent.x, ent.y - 1).pos, currentLevel.checkPos(ent.x, ent.y - 1));
                             ent.y--;
                         }
                         break;
-                    case Direction.East: if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && checkPos(ent.x + 1, ent.y) == null) //entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y)
+                    case Direction.East: if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && currentLevel.checkPos(ent.x + 1, ent.y) == null) //entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y)
                         {
                             if (displaced.ContainsKey(ent.pos))
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
                             ent.x++;
                         }
-                        else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1187) && checkFixture(ent.x + 1, ent.y, 1190) != null)
+                        else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1187) && currentLevel.checkFixture(ent.x + 1, ent.y, 1190) != null)
                         {
                             currentLevel.map[ent.y, ent.x + 1] = 1194;
                             currentLevel.fixtures[new Point() { X = ent.x + 1, Y = ent.y }].tile = 1188;
                         }
-                        else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && checkPos(ent.x + 1, ent.y) != null && checkPos(ent.x + 1, ent.y).friendly == ent.friendly)
+                        else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && currentLevel.checkPos(ent.x + 1, ent.y) != null && currentLevel.checkPos(ent.x + 1, ent.y).friendly == ent.friendly)
                         {
                             if (displaced.ContainsKey(ent.pos))
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
-                            displaced.Add(checkPos(ent.x + 1, ent.y).pos, checkPos(ent.x + 1, ent.y));
+                            displaced.Add(currentLevel.checkPos(ent.x + 1, ent.y).pos, currentLevel.checkPos(ent.x + 1, ent.y));
                             ent.x++;
                         }
                         break;
-                    case Direction.South: if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && checkPos(ent.x, ent.y + 1) == null)
+                    case Direction.South: if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && currentLevel.checkPos(ent.x, ent.y + 1) == null)
                         {
                             if (displaced.ContainsKey(ent.pos))
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
                             ent.y++;
                         }
-                        else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1187) && checkFixture(ent.x, ent.y + 1, 1191) != null)
+                        else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1187) && currentLevel.checkFixture(ent.x, ent.y + 1, 1191) != null)
                         {
                             currentLevel.map[ent.y + 1, ent.x] = 1194;
                             currentLevel.fixtures[new Point() { X = ent.x, Y = ent.y + 1 }].tile = 1189;
                         }
-                        else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && checkPos(ent.x, ent.y + 1) != null && checkPos(ent.x, ent.y + 1).friendly == ent.friendly)
+                        else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && currentLevel.checkPos(ent.x, ent.y + 1) != null && currentLevel.checkPos(ent.x, ent.y + 1).friendly == ent.friendly)
                         {
                             if (displaced.ContainsKey(ent.pos))
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
-                            displaced.Add(checkPos(ent.x, ent.y + 1).pos, checkPos(ent.x, ent.y + 1));
+                            displaced.Add(currentLevel.checkPos(ent.x, ent.y + 1).pos, currentLevel.checkPos(ent.x, ent.y + 1));
                             ent.y++;
                         }
                         break;
@@ -696,7 +697,7 @@ namespace AgateDemo
             else if (ent.friendly && currentLevel.checkFixture(ent.x, ent.y, 1197) != null && levelIndex == 0)
             {
                 mode = InputMode.Dialog;
-                DialogBrowser.currentUI = DialogUI.CreateYesNoDialog("The Narrator", new List<string>() { "Leave the dungeon?", "This will end your dungeon adventure." }, Quit, DialogBrowser.Hide);
+                DialogBrowser.currentUI = DialogUI.CreateYesNoDialog("The Narrator", new List<string>() { "Leave the dungeon?", "This will end your dungeon adventure." }, QuitWithoutSaving, DialogBrowser.Hide);
                 DialogBrowser.UnHide();
             }
             else if (ent.friendly && currentLevel.checkFixture(ent.x, ent.y, 1197) != null && levelIndex != 0)
@@ -1075,8 +1076,43 @@ namespace AgateDemo
 
                 //while (Timing.TotalMilliseconds - startingTime < 200 && (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)) ;
                 //if (ent.x >= minVisibleX && ent.x <= maxVisibleX && ent.y >= minVisibleY && ent.y <= maxVisibleY)
-                if (ent.actionCount >= 2)
+                ent.fov.calculateSight();
+                Point c = ent.pos;
+                Point[] dCells = { new Point(c.X + 1, c.Y), new Point(c.X - 1, c.Y), new Point(c.X, c.Y - 1), new Point(c.X, c.Y + 1) };
+                Shuffle(dCells);
+                if (currentLevel.entities.ContainsKey(dCells[0]) && currentLevel.entities[dCells[0]].friendly)
+                {
+                    ent.currentSkill.targetSquare = dCells[0];
+                    AnimateResults(ent.currentSkill.ApplySkill(ent));
+                    ent.actionCount = 2;
                     break;
+                }
+                else if (currentLevel.entities.ContainsKey(dCells[1]) && currentLevel.entities[dCells[1]].friendly)
+                {
+                    ent.currentSkill.targetSquare = dCells[1];
+                    AnimateResults(ent.currentSkill.ApplySkill(ent));
+                    ent.actionCount = 2;
+                    break;
+                }
+                else if (currentLevel.entities.ContainsKey(dCells[2]) && currentLevel.entities[dCells[2]].friendly)
+                {
+                    ent.currentSkill.targetSquare = dCells[2];
+                    AnimateResults(ent.currentSkill.ApplySkill(ent));
+                    ent.actionCount = 2;
+                    break;
+                }
+                else if (currentLevel.entities.ContainsKey(dCells[3]) && currentLevel.entities[dCells[3]].friendly)
+                {
+                    ent.currentSkill.targetSquare = dCells[3];
+                    AnimateResults(ent.currentSkill.ApplySkill(ent));
+                    ent.actionCount = 2;
+                    break;
+                }
+
+                if (ent.actionCount >= 2)
+                {
+                    break;
+                }
                 if (currentLevel.visibleCells[ent.y, ent.x] > 0)
                 {
                     currentActor = ent;
@@ -1097,24 +1133,24 @@ namespace AgateDemo
 
                 switch (currMove)
                 {
-                    case Direction.West: if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1194) && checkPos(ent.x - 1, ent.y) == null) //entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y)
+                    case Direction.West: if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1194) && currentLevel.checkPos(ent.x - 1, ent.y) == null) //entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y)
                         {
-                            if (displaced.ContainsKey(ent.pos))
+                            if (displaced.ContainsKey(ent.pos) && displaced[ent.pos] != null)
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
                             ent.x--;
                             currentLevel.entities[ent.pos] = ent;
                         }
-                        else if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1187) && checkFixture(ent.x - 1, ent.y, 1190) != null)
+                        else if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1187) && currentLevel.checkFixture(ent.x - 1, ent.y, 1190) != null)
                         {
                             currentLevel.map[ent.y, ent.x - 1] = 1194;
                             currentLevel.fixtures[new Point(ent.x - 1, ent.y)].tile = 1188;
                             currentLevel.entities[ent.pos] = ent;
                         }
-                        else if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1194) && checkPos(ent.x - 1, ent.y) != null && checkPos(ent.x - 1, ent.y).friendly == ent.friendly)
+                        else if (ent.x > 0 && (currentLevel.map[ent.y, ent.x - 1] == 1194) && currentLevel.checkPos(ent.x - 1, ent.y) != null && currentLevel.checkPos(ent.x - 1, ent.y).friendly == ent.friendly)
                         {
-                            if (displaced.ContainsKey(ent.pos))
+                            if (displaced.ContainsKey(ent.pos) && displaced[ent.pos] != null)
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
-                            displaced.Add(checkPos(ent.x - 1, ent.y).pos, checkPos(ent.x - 1, ent.y));
+                            displaced.Add(currentLevel.checkPos(ent.x - 1, ent.y).pos, currentLevel.checkPos(ent.x - 1, ent.y));
                             ent.x--;
                             currentLevel.entities[ent.pos] = ent;
                         }
@@ -1126,25 +1162,25 @@ namespace AgateDemo
                         //    ent.actionCount = 2;
                         //}
                         break;
-                    case Direction.North: if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1194) && checkPos(ent.x, ent.y - 1) == null)
+                    case Direction.North: if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1194) && currentLevel.checkPos(ent.x, ent.y - 1) == null)
                         {
-                            if (displaced.ContainsKey(ent.pos))
+                            if (displaced.ContainsKey(ent.pos) && displaced[ent.pos] != null)
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
                             ent.y--;
                             currentLevel.entities[ent.pos] = ent;
                         }
-                        else if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1187) && checkFixture(ent.x, ent.y - 1, 1191) != null)
+                        else if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1187) && currentLevel.checkFixture(ent.x, ent.y - 1, 1191) != null)
                         {
                             currentLevel.map[ent.y - 1, ent.x] = 1194;
                             currentLevel.fixtures[new Point() { X = ent.x, Y = ent.y - 1 }].tile = 1189;
                             currentLevel.entities[ent.pos] = ent;
                             //                        fixtures.FirstOrDefault(e => e.x == ent.x && e.y == ent.y - 1 && e.tile == 1191).tile = 1189;
                         }
-                        else if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1194) && checkPos(ent.x, ent.y - 1) != null && checkPos(ent.x, ent.y - 1).friendly == ent.friendly)
+                        else if (ent.y > 0 && (currentLevel.map[ent.y - 1, ent.x] == 1194) && currentLevel.checkPos(ent.x, ent.y - 1) != null && currentLevel.checkPos(ent.x, ent.y - 1).friendly == ent.friendly)
                         {
-                            if (displaced.ContainsKey(ent.pos))
+                            if (displaced.ContainsKey(ent.pos) && displaced[ent.pos] != null)
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
-                            displaced.Add(checkPos(ent.x, ent.y - 1).pos, checkPos(ent.x, ent.y - 1));
+                            displaced.Add(currentLevel.checkPos(ent.x, ent.y - 1).pos, currentLevel.checkPos(ent.x, ent.y - 1));
                             ent.y--;
                             currentLevel.entities[ent.pos] = ent;
                         }
@@ -1156,24 +1192,24 @@ namespace AgateDemo
                         //    ent.actionCount = 2;
                         //}
                         break;
-                    case Direction.East: if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && checkPos(ent.x + 1, ent.y) == null) //entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y)
+                    case Direction.East: if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && currentLevel.checkPos(ent.x + 1, ent.y) == null) //entities.FirstOrDefault(e => e.x == ent.x - 1 && e.y == ent.y)
                         {
-                            if (displaced.ContainsKey(ent.pos))
+                            if (displaced.ContainsKey(ent.pos) && displaced[ent.pos] != null)
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
                             ent.x++;
                             currentLevel.entities[ent.pos] = ent;
                         }
-                        else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1187) && checkFixture(ent.x + 1, ent.y, 1190) != null)
+                        else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1187) && currentLevel.checkFixture(ent.x + 1, ent.y, 1190) != null)
                         {
                             currentLevel.map[ent.y, ent.x + 1] = 1194;
                             currentLevel.fixtures[new Point() { X = ent.x + 1, Y = ent.y }].tile = 1188;
                             currentLevel.entities[ent.pos] = ent;
                         }
-                        else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && checkPos(ent.x + 1, ent.y) != null && checkPos(ent.x + 1, ent.y).friendly == ent.friendly)
+                        else if (ent.x < currentLevel.mapWidthBound && (currentLevel.map[ent.y, ent.x + 1] == 1194) && currentLevel.checkPos(ent.x + 1, ent.y) != null && currentLevel.checkPos(ent.x + 1, ent.y).friendly == ent.friendly)
                         {
-                            if (displaced.ContainsKey(ent.pos))
+                            if (displaced.ContainsKey(ent.pos) && displaced[ent.pos] != null)
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
-                            displaced.Add(checkPos(ent.x + 1, ent.y).pos, checkPos(ent.x + 1, ent.y));
+                            displaced.Add(currentLevel.checkPos(ent.x + 1, ent.y).pos, currentLevel.checkPos(ent.x + 1, ent.y));
                             ent.x++;
                             currentLevel.entities[ent.pos] = ent;
                         }
@@ -1185,24 +1221,24 @@ namespace AgateDemo
                         //    ent.actionCount = 2;
                         //}
                         break;
-                    case Direction.South: if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && checkPos(ent.x, ent.y + 1) == null)
+                    case Direction.South: if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && currentLevel.checkPos(ent.x, ent.y + 1) == null)
                         {
-                            if (displaced.ContainsKey(ent.pos))
+                            if (displaced.ContainsKey(ent.pos) && displaced[ent.pos] != null)
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
                             ent.y++;
                             currentLevel.entities[ent.pos] = ent;
                         }
-                        else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1187) && checkFixture(ent.x, ent.y + 1, 1191) != null)
+                        else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1187) && currentLevel.checkFixture(ent.x, ent.y + 1, 1191) != null)
                         {
                             currentLevel.map[ent.y + 1, ent.x] = 1194;
                             currentLevel.fixtures[new Point() { X = ent.x, Y = ent.y + 1 }].tile = 1189;
                             currentLevel.entities[ent.pos] = ent;
                         }
-                        else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && checkPos(ent.x, ent.y + 1) != null && checkPos(ent.x, ent.y + 1).friendly == ent.friendly)
+                        else if (ent.y < currentLevel.mapHeightBound && (currentLevel.map[ent.y + 1, ent.x] == 1194) && currentLevel.checkPos(ent.x, ent.y + 1) != null && currentLevel.checkPos(ent.x, ent.y + 1).friendly == ent.friendly)
                         {
-                            if (displaced.ContainsKey(ent.pos))
+                            if (displaced.ContainsKey(ent.pos) && displaced[ent.pos] != null)
                                 currentLevel.entities.Add(ent.pos, displaced[ent.pos]);
-                            displaced.Add(checkPos(ent.x, ent.y + 1).pos, checkPos(ent.x, ent.y + 1));
+                            displaced.Add(currentLevel.checkPos(ent.x, ent.y + 1).pos, currentLevel.checkPos(ent.x, ent.y + 1));
                             ent.y++;
                             currentLevel.entities[ent.pos] = ent;
                         }
@@ -1222,32 +1258,36 @@ namespace AgateDemo
                 }
 
                 ent.fov.calculateSight();
-                Point c = ent.pos;
-                Point[] dCells = { new Point(c.X + 1, c.Y), new Point(c.X - 1, c.Y), new Point(c.X, c.Y - 1), new Point(c.X, c.Y + 1) };
+                c = ent.pos;
+                dCells = new Point[] { new Point(c.X + 1, c.Y), new Point(c.X - 1, c.Y), new Point(c.X, c.Y - 1), new Point(c.X, c.Y + 1) };
                 Shuffle(dCells);
                 if (currentLevel.entities.ContainsKey(dCells[0]) && currentLevel.entities[dCells[0]].friendly)
                 {
                     ent.currentSkill.targetSquare = dCells[0];
                     AnimateResults(ent.currentSkill.ApplySkill(ent));
                     ent.actionCount = 2;
+                    break;
                 }
                 else if (currentLevel.entities.ContainsKey(dCells[1]) && currentLevel.entities[dCells[1]].friendly)
                 {
                     ent.currentSkill.targetSquare = dCells[1];
                     AnimateResults(ent.currentSkill.ApplySkill(ent));
                     ent.actionCount = 2;
+                    break;
                 }
                 else if (currentLevel.entities.ContainsKey(dCells[2]) && currentLevel.entities[dCells[2]].friendly)
                 {
                     ent.currentSkill.targetSquare = dCells[2];
                     AnimateResults(ent.currentSkill.ApplySkill(ent));
                     ent.actionCount = 2;
+                    break;
                 }
                 else if (currentLevel.entities.ContainsKey(dCells[3]) && currentLevel.entities[dCells[3]].friendly)
                 {
                     ent.currentSkill.targetSquare = dCells[3];
                     AnimateResults(ent.currentSkill.ApplySkill(ent));
                     ent.actionCount = 2;
+                    break;
                 }
                 if (currentLevel.visibleCells[ent.y, ent.x] > 0)
                 {
@@ -1560,16 +1600,16 @@ namespace AgateDemo
             }
             if (currentInitiative < initiative.Keys.Min())
             {
-                initiative.Clear();
+             //   initiative.Clear();
                 foreach (Point cl in currentLevel.o_entities.Keys)
                 {
                     currentLevel.o_entities[cl].actionCount = 0;
-                    int curr = rnd.Next(10000);
+                    /*int curr = rnd.Next(10000);
                     while (initiative.ContainsKey(curr))
                     {
                         curr = rnd.Next(10000);
                     }
-                    initiative[curr] = cl;
+                    initiative[curr] = cl;*/
 
                 }
                 currentInitiative = initiative.Keys.Max();
@@ -1611,7 +1651,12 @@ namespace AgateDemo
             {
                 setup.ApplicationName = "Vicious Agate Demo";
                 setup.CompanyName = "The RGRD Agenda";
-                setup.InitializeAll();
+                //List<AgateLib.Drivers.AgateDriverInfo> dvrs = AgateLib.Drivers.Registrar.DisplayDrivers;
+                //foreach (AgateLib.Drivers.AgateDriverInfo adi in dvrs)
+                //{
+                //    Console.WriteLine(adi.AssemblyName);
+                //}
+                setup.InitializeDisplay(AgateLib.Drivers.DisplayTypeID.AutoSelect);
 
                 if (setup.WasCanceled)
                     return;
@@ -1625,7 +1670,7 @@ namespace AgateDemo
 
                 Display.RenderState.WaitForVerticalBlank = true;
                 wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", mapDisplayWidth, mapDisplayHeight + 32, false);      //(19 * tileVIncrease) + tileHeight); //((20) * 32) + (tileHIncrease * (20))
-                wind.Closed += new EventHandler((obj, e) => Quit());
+                //wind.Closed += new EventHandler((obj, e) => Quit());
                 tileset = new Surface("Resources" + "/" + "slashem-revised.png"); //System.IO.Path.DirectorySeparatorChar
 
 
@@ -1691,15 +1736,22 @@ namespace AgateDemo
             }
             SortedDictionary<DateTime, GameState> gs = getState();
             Serializer.model.Serialize(new System.IO.FileStream("save.mobsav", System.IO.FileMode.Truncate), gs);
-//            System.IO.File.WriteAllText("save.mobsav", JsonConvert.SerializeObject(getState(), jsonSerializerSettings));
+            Display.CurrentWindow.Dispose();
+            while (!Display.CurrentWindow.IsClosed) ;
+            //            System.IO.File.WriteAllText("save.mobsav", JsonConvert.SerializeObject(getState(), jsonSerializerSettings));
+        }
+        public static void QuitWithoutSaving()
+        {
+            Display.CurrentWindow.Dispose();
+            while (!Display.CurrentWindow.IsClosed) ;
         }
         static void OnKeyDown(InputEventArgs e)
         {
             if (e.KeyCode == KeyCode.Q)
             {
-                Display.CurrentWindow.Dispose();
-                while (!Display.CurrentWindow.IsClosed) ;
-//                Quit();
+                DialogBrowser.currentUI = DialogUI.CreateYesNoDialog("The Narrator", new List<string>() { "Save your game?" }, Quit, QuitWithoutSaving);
+                mode = InputMode.Dialog;
+                DialogBrowser.UnHide();
             }
             if (e.KeyCode == KeyCode.S)
             {
@@ -1770,9 +1822,9 @@ namespace AgateDemo
                 startY = c.Y;
                 if (lvl.map[startY, startX] != DungeonMap.gr)
                     return;
-                if (cellStore.Count != 0 && performEntCheck && checkPos(startX, startY) != null)
+                if (cellStore.Count != 0 && performEntCheck && currentLevel.checkPos(startX, startY) != null)
                 {
-                    if (checkPos(startX, startY).friendly == moverIsFriendly)
+                    if (currentLevel.checkPos(startX, startY).friendly == moverIsFriendly)
                     {
 
                         if (!cellStore.ContainsKey(c))
@@ -1826,9 +1878,9 @@ namespace AgateDemo
                             continue;
                         if (p.X < 0 || p.Y < 0 || p.X > lvl.map.GetUpperBound(1) || p.Y > lvl.map.GetUpperBound(0))
                             continue;
-                        if (performEntCheck && checkPos(p.X, p.Y) != null)
+                        if (performEntCheck && currentLevel.checkPos(p.X, p.Y) != null)
                         {
-                            if (checkPos(p.X, p.Y).friendly == moverIsFriendly)
+                            if (currentLevel.checkPos(p.X, p.Y).friendly == moverIsFriendly)
                             {
                                 cellStore.Add(p, numMoves - 1);
                                 invalidCells.Add(p, true);
@@ -1882,9 +1934,9 @@ namespace AgateDemo
                             continue;
                         if (p.X < 0 || p.Y < 0 || p.X > lvl.map.GetUpperBound(1) || p.Y > lvl.map.GetUpperBound(0))
                             continue;
-                        if (performEntCheck && checkPos(p.X, p.Y) != null)
+                        if (performEntCheck && currentLevel.checkPos(p.X, p.Y) != null)
                         {
-                            if (checkPos(p.X, p.Y).friendly == moverIsFriendly || specialTargetCells.Contains(p))
+                            if (currentLevel.checkPos(p.X, p.Y).friendly == moverIsFriendly || specialTargetCells.Contains(p))
                             {
                                 cellStore.Add(p, numMoves - 1);
                                 invalidCells.Add(p, true);
@@ -1973,7 +2025,7 @@ namespace AgateDemo
                                     j - startY < -1 * (i - startX) - radius || // 10 - 10 < -10 + 11 - 1
                                     (i == startX && j == startY))
                                     continue;
-                                if (sk.hitsAllies == false && checkPos(i, j) != null && checkPos(i, j).friendly == user.friendly)
+                                if (sk.hitsAllies == false && currentLevel.checkPos(i, j) != null && currentLevel.checkPos(i, j).friendly == user.friendly)
                                     continue;
                                 if (currentLevel.map[j, i] == DungeonMap.gr && user.fov.sight[j, i] > 0)
                                     currentLevel.highlightedTargetCells.Add(new Point(i, j), 1);
@@ -2009,7 +2061,7 @@ namespace AgateDemo
                                     j - startY < -1 * (i - startX) - radius)   // 10 - 10 < -10 + 11 - 1
                                     continue;
 
-                                if (sk.hitsAllies == false && checkPos(i, j) != null && checkPos(i, j).friendly == user.friendly)
+                                if (sk.hitsAllies == false && currentLevel.checkPos(i, j) != null && currentLevel.checkPos(i, j).friendly == user.friendly)
                                     continue;
                                 if (currentLevel.map[j, i] == DungeonMap.gr && user.fov.sight[j, i] > 0)
                                     currentLevel.highlightedTargetCells.Add(new Point(i, j), 1);
@@ -2086,7 +2138,7 @@ namespace AgateDemo
                                         continue;
                                 }
 
-                                if (sk.hitsAllies == false && checkPos(i, j) != null && checkPos(i, j).friendly == user.friendly)
+                                if (sk.hitsAllies == false && currentLevel.checkPos(i, j) != null && currentLevel.checkPos(i, j).friendly == user.friendly)
                                     continue;
                                 if (currentLevel.map[j, i] == DungeonMap.gr && user.fov.sight[j, i] > 0)
                                     currentLevel.highlightedTargetCells.Add(new Point(i, j), 1);
@@ -2097,7 +2149,7 @@ namespace AgateDemo
                     break;
                 case SkillAreaKind.SingleTarget:
                     {
-                        if (sk.hitsAllies == false && checkPos(startX, startY) != null && checkPos(startX, startY).friendly == user.friendly)
+                        if (sk.hitsAllies == false && currentLevel.checkPos(startX, startY) != null && currentLevel.checkPos(startX, startY).friendly == user.friendly)
                             break;
                         if (user.fov.sight[startY, startX] <= 0)
                             break;
@@ -2168,7 +2220,7 @@ namespace AgateDemo
                     // o_entities[requestingMove].moveList.Add(Direction.None);
                 }
                 else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (currentLevel.map[cursorY, cursorX - 1] == 1194) &&
-                    (checkPos(cursorX - 1, cursorY) == null || currentLevel.doNotStopCells.ContainsKey(new Point(cursorX - 1, cursorY))))
+                    (currentLevel.checkPos(cursorX - 1, cursorY) == null || currentLevel.doNotStopCells.ContainsKey(new Point(cursorX - 1, cursorY))))
                 {
                     if (currentLevel.highlightedCells.ContainsKey(new Point(cursorX - 1, cursorY)))
                     {
@@ -2177,7 +2229,7 @@ namespace AgateDemo
                     }
                 }
                 else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < currentLevel.mapWidthBound && (currentLevel.map[cursorY, cursorX + 1] == 1194) &&
-                    (checkPos(cursorX + 1, cursorY) == null || currentLevel.doNotStopCells.ContainsKey(new Point(cursorX + 1, cursorY))))
+                    (currentLevel.checkPos(cursorX + 1, cursorY) == null || currentLevel.doNotStopCells.ContainsKey(new Point(cursorX + 1, cursorY))))
                 {
                     if (currentLevel.highlightedCells.ContainsKey(new Point(cursorX + 1, cursorY)))
                     {
@@ -2186,7 +2238,7 @@ namespace AgateDemo
                     }
                 }
                 else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (currentLevel.map[cursorY - 1, cursorX] == 1194) &&
-                    (checkPos(cursorX, cursorY - 1) == null || currentLevel.doNotStopCells.ContainsKey(new Point(cursorX, cursorY - 1))))
+                    (currentLevel.checkPos(cursorX, cursorY - 1) == null || currentLevel.doNotStopCells.ContainsKey(new Point(cursorX, cursorY - 1))))
                 {
                     if (currentLevel.highlightedCells.ContainsKey(new Point(cursorX, cursorY - 1)))
                     {
@@ -2195,7 +2247,7 @@ namespace AgateDemo
                     }
                 }
                 else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < currentLevel.mapHeightBound && (currentLevel.map[cursorY + 1, cursorX] == 1194) &&
-                    (checkPos(cursorX, cursorY + 1) == null || currentLevel.doNotStopCells.ContainsKey(new Point(cursorX, cursorY + 1))))
+                    (currentLevel.checkPos(cursorX, cursorY + 1) == null || currentLevel.doNotStopCells.ContainsKey(new Point(cursorX, cursorY + 1))))
                 {
                     if (currentLevel.highlightedCells.ContainsKey(new Point(cursorX, cursorY + 1)))
                     {
@@ -2203,7 +2255,7 @@ namespace AgateDemo
                         currentLevel.o_entities[requestingMove].moveList.Add(Direction.South);
                     }
                 }
-                else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (currentLevel.map[cursorY, cursorX - 1] == 1187) && checkPos(cursorX - 1, cursorY) == null && checkFixture(cursorX - 1, cursorY, 1190) != null)
+                else if ((e.KeyCode == KeyCode.Left || (hjkl && e.KeyCode == KeyCode.H)) && cursorX > 0 && (currentLevel.map[cursorY, cursorX - 1] == 1187) && currentLevel.checkPos(cursorX - 1, cursorY) == null && currentLevel.checkFixture(cursorX - 1, cursorY, 1190) != null)
                 {
                     currentLevel.map[cursorY, cursorX - 1] = 1194;
                     currentLevel.fixtures[new Point() { X = cursorX - 1, Y = cursorY }].tile = 1188;
@@ -2211,7 +2263,7 @@ namespace AgateDemo
                     currentLevel.recalculateVision();
                     HighlightMove();
                 }
-                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < currentLevel.mapWidthBound && (currentLevel.map[cursorY, cursorX + 1] == 1187) && checkPos(cursorX + 1, cursorY) == null && checkFixture(cursorX + 1, cursorY, 1190) != null)
+                else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < currentLevel.mapWidthBound && (currentLevel.map[cursorY, cursorX + 1] == 1187) && currentLevel.checkPos(cursorX + 1, cursorY) == null && currentLevel.checkFixture(cursorX + 1, cursorY, 1190) != null)
                 {
                     currentLevel.map[cursorY, cursorX + 1] = 1194;
                     currentLevel.fixtures[new Point() { X = cursorX + 1, Y = cursorY }].tile = 1188;
@@ -2219,7 +2271,7 @@ namespace AgateDemo
                     currentLevel.recalculateVision();
                     HighlightMove();
                 }
-                else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (currentLevel.map[cursorY - 1, cursorX] == 1187) && checkPos(cursorX, cursorY - 1) == null && checkFixture(cursorX, cursorY - 1, 1191) != null)
+                else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (currentLevel.map[cursorY - 1, cursorX] == 1187) && currentLevel.checkPos(cursorX, cursorY - 1) == null && currentLevel.checkFixture(cursorX, cursorY - 1, 1191) != null)
                 {
                     currentLevel.map[cursorY - 1, cursorX] = 1194;
                     currentLevel.fixtures[new Point() { X = cursorX, Y = cursorY - 1 }].tile = 1189;
@@ -2227,7 +2279,7 @@ namespace AgateDemo
                     currentLevel.recalculateVision();
                     HighlightMove();
                 }
-                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < currentLevel.mapHeightBound && (currentLevel.map[cursorY + 1, cursorX] == 1187) && checkPos(cursorX, cursorY + 1) == null && checkFixture(cursorX, cursorY + 1, 1191) != null)
+                else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < currentLevel.mapHeightBound && (currentLevel.map[cursorY + 1, cursorX] == 1187) && currentLevel.checkPos(cursorX, cursorY + 1) == null && currentLevel.checkFixture(cursorX, cursorY + 1, 1191) != null)
                 {
                     currentLevel.map[cursorY + 1, cursorX] = 1194;
                     currentLevel.fixtures[new Point() { X = cursorX, Y = cursorY + 1 }].tile = 1189;
@@ -2310,26 +2362,26 @@ namespace AgateDemo
                     )//&& visibleCells.Contains(new Point(cursorX - 1, cursorY)))   // && checkPos(cursorX - 1, cursorY) == null)
                 {
                     cursorX--;
-                    hoverActor = checkPos(cursorX, cursorY);
+                    hoverActor = currentLevel.checkPos(cursorX, cursorY);
                 }
                 else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < currentLevel.mapWidthBound && (currentLevel.map[cursorY, cursorX + 1] == 1194 || currentLevel.map[cursorY, cursorX + 1] == 1187)
                      )//&& visibleCells.Contains(new Point(cursorX + 1, cursorY)))
                 {
                     cursorX++;
-                    hoverActor = checkPos(cursorX, cursorY);
+                    hoverActor = currentLevel.checkPos(cursorX, cursorY);
                 }
                 else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (currentLevel.map[cursorY - 1, cursorX] == 1194 || currentLevel.map[cursorY - 1, cursorX] == 1187)
                      )//&& visibleCells.Contains(new Point(cursorX, cursorY - 1)))
                 {
 
                     cursorY--;
-                    hoverActor = checkPos(cursorX, cursorY);
+                    hoverActor = currentLevel.checkPos(cursorX, cursorY);
                 }
                 else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < currentLevel.mapHeightBound && (currentLevel.map[cursorY + 1, cursorX] == 1194 || currentLevel.map[cursorY + 1, cursorX] == 1187)
                      )//&& visibleCells.Contains(new Point(cursorX, cursorY + 1)))
                 {
                     cursorY++;
-                    hoverActor = checkPos(cursorX, cursorY);
+                    hoverActor = currentLevel.checkPos(cursorX, cursorY);
                 }
                 else if (e.KeyCode == ScreenBrowser.backKey || e.KeyCode == ScreenBrowser.confirmKey)
                 {
@@ -2413,7 +2465,7 @@ namespace AgateDemo
                         currentLevel.o_entities[requestingMove].moveList.Add(Direction.West);
                         HighlightSkillArea();
                     }
-                    hoverActor = checkPos(cursorX, cursorY);
+                    hoverActor = currentLevel.checkPos(cursorX, cursorY);
                 }
                 else if ((e.KeyCode == KeyCode.Right || (hjkl && e.KeyCode == KeyCode.L)) && cursorX < currentLevel.mapWidthBound && (currentLevel.map[cursorY, cursorX + 1] == 1194))
                 {
@@ -2423,7 +2475,7 @@ namespace AgateDemo
                         currentLevel.o_entities[requestingMove].moveList.Add(Direction.East);
                         HighlightSkillArea();
                     }
-                    hoverActor = checkPos(cursorX, cursorY);
+                    hoverActor = currentLevel.checkPos(cursorX, cursorY);
                 }
                 else if ((e.KeyCode == KeyCode.Up || (hjkl && e.KeyCode == KeyCode.K)) && cursorY > 0 && (currentLevel.map[cursorY - 1, cursorX] == 1194))
                 {
@@ -2433,7 +2485,7 @@ namespace AgateDemo
                         currentLevel.o_entities[requestingMove].moveList.Add(Direction.North);
                         HighlightSkillArea();
                     }
-                    hoverActor = checkPos(cursorX, cursorY);
+                    hoverActor = currentLevel.checkPos(cursorX, cursorY);
                 }
                 else if ((e.KeyCode == KeyCode.Down || (hjkl && e.KeyCode == KeyCode.J)) && cursorY < currentLevel.mapHeightBound && (currentLevel.map[cursorY + 1, cursorX] == 1194))
                 {
@@ -2443,7 +2495,7 @@ namespace AgateDemo
                         currentLevel.o_entities[requestingMove].moveList.Add(Direction.South);
                         HighlightSkillArea();
                     }
-                    hoverActor = checkPos(cursorX, cursorY);
+                    hoverActor = currentLevel.checkPos(cursorX, cursorY);
                 }
 
 
