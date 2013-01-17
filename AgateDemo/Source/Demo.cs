@@ -217,6 +217,8 @@ namespace AgateDemo
             public int levelIndex;
             public int cursorX;
             public int cursorY;
+            public int confirmKey;
+            public int backKey;
         }
         public static SortedDictionary<DateTime, GameState> allSavedStates = null;
         public static SortedDictionary<DateTime, GameState> getState()
@@ -242,7 +244,9 @@ namespace AgateDemo
                 fullDungeon = fullDungeon,
                 levelIndex = levelIndex,
                 cursorX = cursorX,
-                cursorY = cursorY
+                cursorY = cursorY,
+                confirmKey = (int) ScreenBrowser.confirmKey,
+                backKey = (int) ScreenBrowser.backKey
             });
             return ds;
         }
@@ -321,6 +325,8 @@ namespace AgateDemo
             currentLevel = fullDungeon[levelIndex];
             cursorX = s.cursorX;
             cursorY = s.cursorY;
+            ScreenBrowser.confirmKey = (KeyCode) s.confirmKey;
+            ScreenBrowser.backKey = (KeyCode) s.backKey;
             DialogBrowser.Hide();
             mode = InputMode.None;
         }
@@ -1656,7 +1662,8 @@ namespace AgateDemo
                 //{
                 //    Console.WriteLine(adi.AssemblyName);
                 //}
-                setup.InitializeDisplay(AgateLib.Drivers.DisplayTypeID.AutoSelect);
+                
+                setup.InitializeAll();
 
                 if (setup.WasCanceled)
                     return;
@@ -2161,7 +2168,7 @@ namespace AgateDemo
         public static void HighlightMove()
         {
             MessageBrowser.AddHint("Move the cursor (which surrounds the corners of a floor tile, changing color) with the arrow keys.", 10000.0);
-            MessageBrowser.AddHint("After moving the cursor to a place within the green area, press Z to move your creature.", 10000.0);
+            MessageBrowser.AddHint("After moving the cursor to a place within the green area, press "+ ScreenBrowser.confirmKey.ToString() + " to move your creature.", 10000.0);
             if (currentLevel.highlightedCells.Count == 0 && currentLevel.o_entities.ContainsKey(requestingMove))
             {
                 highlightingOn = true;
@@ -2180,7 +2187,7 @@ namespace AgateDemo
         public static void HighlightSkill()
         {
             MessageBrowser.AddHint("Move the cursor (which surrounds the corners of a floor tile, changing color) with the arrow keys. ", 10000.0);
-            MessageBrowser.AddHint("After moving the red area with the cursor, press Z to attack everything with a red tile under it.", 10000.0);
+            MessageBrowser.AddHint("After moving the red area with the cursor, press " + ScreenBrowser.confirmKey.ToString() + " to attack everything with a red tile under it.", 10000.0);
             currentLevel.o_entities[requestingMove].currentSkill = currentLevel.o_entities[requestingMove].skillList[currentLevel.o_entities[requestingMove].ui.currentScreen.currentMenuItem];
             if (currentLevel.highlightedCells.Count == 0 && currentLevel.o_entities.ContainsKey(requestingMove))
             {

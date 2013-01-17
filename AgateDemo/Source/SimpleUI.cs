@@ -405,8 +405,8 @@ namespace AgateDemo
     {
         public static int maxWidth = 30;
         public static int maxHeight = 15;
-        public static int renderX = 770;
-        public static int renderY = 400;
+        public static double renderX = 770;
+        public static double renderY = 400;
         public static Timing.StopWatch sw = new Timing.StopWatch(false);
         public static void ShowMobInfo(Demo.Mob mb)
         {
@@ -481,10 +481,12 @@ namespace AgateDemo
     {
         public static double x, y;
         public static FontSurface font;
-        public static List<string> messages = new List<string>() { "Welcome to the Demo!", "Use the arrow keys to move through the menu, and Z to confirm.", "Pressing X goes back in menus." },
-                                   log = new List<string>() { "Welcome to the Demo!", "Use the arrow keys to move through the menu, and Z to confirm.", "Pressing X goes back in menus." },
+        public static List<string> messages = new List<string>() { "Welcome to the Demo!", "Use the arrow keys to move through the menu, and " + ScreenBrowser.confirmKey.ToString() + " to confirm.",
+            "Pressing "+ ScreenBrowser.backKey.ToString() + " goes back in menus." },
+                                   log = new List<string>() { "Welcome to the Demo!", "Use the arrow keys to move through the menu, and " + ScreenBrowser.confirmKey.ToString() + " to confirm.",
+                                       "Pressing "+ ScreenBrowser.backKey.ToString() + " goes back in menus." },
                                    hints = new List<string>();
-        public static Dictionary<string, bool> hintsShown = new Dictionary<string, bool>() { { "Use the arrow keys to move through the menu, and Z to confirm.", true }, { "Pressing X goes back in menus.", false } };
+        public static Dictionary<string, bool> hintsShown = new Dictionary<string, bool>() { { "Use the arrow keys to move through the menu, and " + ScreenBrowser.confirmKey.ToString() + " to confirm.", true }, { "Pressing X goes back in menus.", false } };
         public static List<double> durations = new List<double>() { 5000.0, 6000.0, 6000.0},
                                    hintDurations = new List<double>();
 

@@ -34,7 +34,7 @@ namespace AgateDemo
             mb.UseConstructor = false;
             model.Add(typeof(Level), true).Add("floor", "entities", "o_entities", "allies", "map1D",
                 "mapWidthBound", "mapHeightBound", "fixtures", "safeUpCells", "safeDownCells", "enemyBlockedCells");
-            model.Add(typeof(Demo.GameState), true).Add("initiative", "currentInitiative", "fullDungeon", "levelIndex", "cursorX", "cursorY");
+            model.Add(typeof(Demo.GameState), true).Add("initiative", "currentInitiative", "fullDungeon", "levelIndex", "cursorX", "cursorY", "confirmKey", "backKey");
 //            System.IO.File.WriteAllText("debuggery2.txt", model.GetTypes().ToString());
         }
     }

@@ -10,7 +10,8 @@ namespace AgateDemo
 {
     public class Dialog
     {
-        public int contentWidth = 0, contentHeight = 1, renderX = (Demo.mapDisplayWidth / 2) - 6, renderY = (Demo.mapDisplayHeight / 2) - 20;
+        public int contentWidth = 0, contentHeight = 1;
+        public double renderX = (Demo.mapDisplayWidth / 2) - 6, renderY = (Demo.mapDisplayHeight / 2) - 20;
         public string speaker;
         public List<string> lines = new List<string>();
         public List<DialogItem> options = new List<DialogItem>() ;
@@ -160,7 +161,7 @@ namespace AgateDemo
     {
         //        public static Dialog endDialog;
         public static DialogUI currentUI;
-        public static KeyCode confirmKey = KeyCode.Z, backKey = KeyCode.X;
+       // public static KeyCode confirmKey = KeyCode.Z, backKey = KeyCode.X;
         public static DialogItem dialogItemForFinish = null;
         public static List<DialogItem> dialogItemsForRecall = new List<DialogItem>();
         public static bool isHidden = false;
@@ -258,7 +259,7 @@ namespace AgateDemo
                 {
                     currentUI.currentDialog.currentOption++;
                 }
-                else if (e.KeyCode == DialogBrowser.confirmKey && //currentUI.currentDialog.options[currentUI.currentDialog.currentOption].enabled &&
+                else if (e.KeyCode == ScreenBrowser.confirmKey && //currentUI.currentDialog.options[currentUI.currentDialog.currentOption].enabled &&
                         (currentUI.currentDialog.options[currentUI.currentDialog.currentOption].linksTo != null ||
                          currentUI.currentDialog.options[currentUI.currentDialog.currentOption].eventLink != null
                       || currentUI.currentDialog.options[currentUI.currentDialog.currentOption].actionLink != null))
@@ -268,7 +269,7 @@ namespace AgateDemo
                     //currentUI.currentDialog.options[currentUI.currentDialog.currentOption].enabled = false;
                     currentUI.currentDialog.options[currentUI.currentDialog.currentOption].handleAction(e);
                 }
-                else if (e.KeyCode == backKey && currentUI.currentDialog.previousDialog != null && currentUI.currentDialog != currentUI.initialDialog)
+                else if (e.KeyCode == ScreenBrowser.backKey && currentUI.currentDialog.previousDialog != null && currentUI.currentDialog != currentUI.initialDialog)
                 {
                     //currentUI.currentDialog.options[currentUI.currentDialog.currentOption].enabled = true;
                     NavigateBackward(currentUI.currentDialog);
@@ -339,7 +340,7 @@ namespace AgateDemo
             tx += mandrillDict['┐'];*/
             //            for (int i = 1; i < maxWidth - 1; i++)
             //              tx += mandrillDict['─'];
-            Display.FillRect(new Rectangle(currentDialog.renderX, currentDialog.renderY + 14, 12 + (currentDialog.contentWidth * 6), (currentDialog.contentHeight + 5) * 14), Color.Black);
+            Display.FillRect(new Rectangle((int)currentDialog.renderX, (int)currentDialog.renderY + 14, 12 + (currentDialog.contentWidth * 6), (currentDialog.contentHeight + 5) * 14), Color.Black);
             int currentLine = 1;
             font.DrawText(currentDialog.renderX, currentDialog.renderY + (14 * currentLine), mandrillDict['┌'] + "".PadRight(currentDialog.contentWidth, mandrillDict['─']) + mandrillDict['┐']);
 
@@ -451,8 +452,8 @@ namespace AgateDemo
         {
             FontSurface fnt = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
             Dialog initialDialog = new Dialog("The Narrator", new List<String>() {"Welcome to the Unpleasant Dungeon!", "Navigate through menus with the arrow keys.",
-                "Confirm a selection with the Z key.", "Do you understand?"}, new List<DialogItem>()),
-                yesDialog = new Dialog("The Narrator", new List<String>() { "Great!", "You can press X to go back in menus and dialogs.", "Are you ready to start?" }, new List<DialogItem>()),
+                "Confirm a selection with the "+ ScreenBrowser.confirmKey.ToString() + " key.", "Do you understand?"}, new List<DialogItem>()),
+                yesDialog = new Dialog("The Narrator", new List<String>() { "Great!", "You can press " + ScreenBrowser.backKey.ToString() + " to go back in menus and dialogs.", "Are you ready to start?" }, new List<DialogItem>()),
                 noDialog = new Dialog("The Narrator", new List<String>() { "Then how did you get here?" }, new List<DialogItem>());
             DialogItem yesItem = new DialogItem("Yes", yesDialog, null),
                 noItem = new DialogItem("No", noDialog, null),
@@ -489,26 +490,77 @@ namespace AgateDemo
             return dui;
         }
 
-
+        public static void ListenConfirmKey(InputEventArgs e)
+        {
+            if (ScreenBrowser.backKey != e.KeyCode && KeyCode.Q != e.KeyCode && KeyCode.S != e.KeyCode)
+            {
+                if (ScreenBrowser.confirmKey != e.KeyCode)
+                {
+                    DialogBrowser.currentUI.currentDialog.lines[1] = "Confirm is currently " + e.KeyCode.ToString() + ".";
+                    DialogBrowser.currentUI.currentDialog.setSize();
+                }
+                
+                ScreenBrowser.confirmKey = e.KeyCode;
+                Keyboard.KeyDown -= ListenConfirmKey;
+            }
+        }
+        public static void RegisterConfirmKey()
+        {
+            Keyboard.KeyDown += ListenConfirmKey;
+        }
+        public static void ListenBackKey(InputEventArgs e)
+        {
+            if (ScreenBrowser.confirmKey != e.KeyCode && KeyCode.Q != e.KeyCode && KeyCode.S != e.KeyCode)
+            {
+                ScreenBrowser.backKey = e.KeyCode;
+                DialogBrowser.currentUI.currentDialog.lines[1] = "Back is currently " + ScreenBrowser.backKey.ToString() + ".";
+                DialogBrowser.currentUI.currentDialog.setSize();
+                Keyboard.KeyDown -= ListenBackKey;
+            }
+        }
+        private static void AssignInitialDialog()
+        {
+            DialogBrowser.currentUI = InitLoadUI();   
+        }
+        public static void RegisterBackKey()
+        {
+            Keyboard.KeyDown += ListenBackKey;
+        }
         public static DialogUI InitLoadUI()
         {
             FontSurface fnt = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
             Dialog initialDialog = new Dialog("The Narrator", new List<String>() {"Welcome to the Unpleasant Dungeon!", "Navigate through menus with the arrow keys.",
-                "Confirm a selection with the Z key.", "You can press X to go back in menus and dialogs.", "Do you want to start a new game, or load the previous game?"}, new List<DialogItem>()),
+                "Confirm a selection with the "+ ScreenBrowser.confirmKey.ToString() + " key.", "You can press "+ ScreenBrowser.backKey.ToString() + " to go back in menus and dialogs.", 
+                "You can quit this game by pressing Q, which will also give you the option to Save.",
+                "Do you want to start a new game, or load a previous game?"}, new List<DialogItem>()),
                 finishedLoadDialog = new Dialog("The Narrator", new List<String>() { "Choose a saved game:" }, new List<DialogItem>()),
+                remapConfirmDialog = new Dialog("The Narrator", new List<String>() { "Remap the Confirm Key.", "Confirm is currently " + ScreenBrowser.confirmKey.ToString() + ".",
+                    "Back is currently " + ScreenBrowser.backKey.ToString() + "." }, new List<DialogItem>()),
+                remapBackDialog = new Dialog("The Narrator", new List<String>() { "Remap the Back Key:", "Confirm is currently " + ScreenBrowser.confirmKey.ToString() + "." ,
+                    "Back is currently " + ScreenBrowser.backKey.ToString() + "." }, new List<DialogItem>()),
                 cannotLoadDialog = new Dialog("The Narrator", new List<String>() { "Play a little first, then you will have a game to load." }, new List<DialogItem>());
             DialogItem newGameItem = new DialogItem("New Game", finishedLoadDialog, null, Demo.Init),
                 loadItem = new DialogItem("Load Previous Game", null, null, Demo.LoadStates),
+                remapItem = new DialogItem("Use Different Keys", remapConfirmDialog, null, RegisterConfirmKey),
+                remapConfirmOKItem = new DialogItem("OK", remapBackDialog, null, RegisterBackKey),
+                remapBackOKItem = new DialogItem("OK", initialDialog, null, AssignInitialDialog),
                 endOKItem = new DialogItem("OK!", null, null, DialogBrowser.Hide);
             if (!System.IO.File.Exists("save.mobsav"))
                 loadItem = new DialogItem("[No Previous Game]", cannotLoadDialog, null);
             initialDialog.options.Add(newGameItem);
             initialDialog.options.Add(loadItem);
+            initialDialog.options.Add(remapItem);
             initialDialog.setSize();
             initialDialog.previousDialog = null;
 //            finishedLoadDialog.options.Add(endOKItem);
             finishedLoadDialog.setSize();
             finishedLoadDialog.previousDialog = null;
+            remapConfirmDialog.options.Add(remapConfirmOKItem);
+            remapConfirmDialog.setSize();
+            remapConfirmDialog.previousDialog = initialDialog;
+            remapBackDialog.options.Add(remapBackOKItem);
+            remapBackDialog.setSize();
+            remapBackDialog.previousDialog = remapConfirmDialog;
             cannotLoadDialog.options.Add(newGameItem);
             cannotLoadDialog.setSize();
             cannotLoadDialog.previousDialog = null;
