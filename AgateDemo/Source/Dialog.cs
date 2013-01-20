@@ -450,7 +450,7 @@ namespace AgateDemo
         }*/
         public static DialogUI InitUI()
         {
-            FontSurface fnt = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
+            FontSurface fnt = FontSurface.BitmapMonospace("monkey.png", new Size(6, 14));//"Resources" + "/" +
             Dialog initialDialog = new Dialog("The Narrator", new List<String>() {"Welcome to the Unpleasant Dungeon!", "Navigate through menus with the arrow keys.",
                 "Confirm a selection with the "+ ScreenBrowser.confirmKey.ToString() + " key.", "Do you understand?"}, new List<DialogItem>()),
                 yesDialog = new Dialog("The Narrator", new List<String>() { "Great!", "You can press " + ScreenBrowser.backKey.ToString() + " to go back in menus and dialogs.", "Are you ready to start?" }, new List<DialogItem>()),
@@ -476,7 +476,7 @@ namespace AgateDemo
         }
         public static DialogUI CreateYesNoDialog(string speaker, List<string> startText, LinkedAction yesAction, LinkedAction noAction)
         {
-            FontSurface fnt = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
+            FontSurface fnt = FontSurface.BitmapMonospace("monkey.png", new Size(6, 14));//"Resources" + "/" + 
             Dialog initialDialog = new Dialog(speaker, startText, new List<DialogItem>());
             DialogItem yesItem = new DialogItem("Yes", null, null, yesAction),
                 noItem = new DialogItem("No", null, null, noAction);
@@ -528,7 +528,7 @@ namespace AgateDemo
         }
         public static DialogUI InitLoadUI()
         {
-            FontSurface fnt = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
+            FontSurface fnt = FontSurface.BitmapMonospace("monkey.png", new Size(6, 14)); //"Resources" + "/" + 
             Dialog initialDialog = new Dialog("The Narrator", new List<String>() {"Welcome to the Unpleasant Dungeon!", "Navigate through menus with the arrow keys.",
                 "Confirm a selection with the "+ ScreenBrowser.confirmKey.ToString() + " key.", "You can press "+ ScreenBrowser.backKey.ToString() + " to go back in menus and dialogs.", 
                 "You can quit this game by pressing Q, which will also give you the option to Save.",
@@ -539,7 +539,7 @@ namespace AgateDemo
                 remapBackDialog = new Dialog("The Narrator", new List<String>() { "Remap the Back Key:", "Confirm is currently " + ScreenBrowser.confirmKey.ToString() + "." ,
                     "Back is currently " + ScreenBrowser.backKey.ToString() + "." }, new List<DialogItem>()),
                 cannotLoadDialog = new Dialog("The Narrator", new List<String>() { "Play a little first, then you will have a game to load." }, new List<DialogItem>());
-            DialogItem newGameItem = new DialogItem("New Game", finishedLoadDialog, null, Demo.Init),
+            DialogItem newGameItem = new DialogItem("New Game", null, null, Demo.Init),
                 loadItem = new DialogItem("Load Previous Game", null, null, Demo.LoadStates),
                 remapItem = new DialogItem("Use Different Keys", remapConfirmDialog, null, RegisterConfirmKey),
                 remapConfirmOKItem = new DialogItem("OK", remapBackDialog, null, RegisterBackKey),
@@ -573,7 +573,7 @@ namespace AgateDemo
 
         public static DialogUI CreateLoadGameDialog(SortedDictionary<DateTime, Demo.GameState> allSavedStates)
         {
-            FontSurface fnt = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
+            FontSurface fnt = FontSurface.BitmapMonospace("monkey.png", new Size(6, 14));//"Resources" + "/" + 
             Dialog chooseDialog = new Dialog("The Narrator", new List<String>() { "Choose a saved game:" }, new List<DialogItem>()),
                 finishedLoadDialog = new Dialog("The Narrator", new List<String>() { "Are you ready?" }, new List<DialogItem>()),
                 cannotLoadDialog = new Dialog("The Narrator", new List<String>() { "Play a little first, then you will have a game to load." }, new List<DialogItem>());

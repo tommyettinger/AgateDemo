@@ -29,6 +29,7 @@ namespace AgateDemo
         public class Entity
         {
             public int tile;
+            public Color color;
             public Point pos;
             public int x
             {
@@ -40,16 +41,18 @@ namespace AgateDemo
                 get { return pos.Y; }
                 set { pos.Y = value; }
             }
-            public Entity(int tile, int x, int y)
+            public Entity(int tile, int x, int y, Color color)
             {
                 this.tile = tile;
                 this.pos = new Point(x, y);
                 this.x = x;
                 this.y = y;
+                this.color = color;
             }
             public Entity()
             {
                 pos = new Point();
+                this.color = Color.Black;
             }
         }
         public class Mob : Entity
@@ -87,6 +90,7 @@ namespace AgateDemo
             {
                 base.tile = tileNumber;
                 base.pos = new Point(xPos, yPos);
+                base.color = (isFriendly) ? Color.FromArgb(0, 100, 20) : Color.DarkRed;
                 tile = tileNumber;
                 name = TileData.tilesToNames[tileNumber];
                 x = xPos;
@@ -309,10 +313,12 @@ namespace AgateDemo
                     l.o_entities[mb.o_pos] = mb;
                     if (mb.friendly)
                     {
+                        mb.color = Color.FromArgb(0, 100, 20);
                         l.allies.Add(mb.pos, mb);
                     }
                     else
                     {
+                        mb.color = Color.DarkRed;
                         mb.intel = new Intellect(mb);
                     }
                 }
@@ -1446,14 +1452,14 @@ namespace AgateDemo
             nt.ui.addSkills(nt);
             currentLevel.entities[nt.pos] = nt;
             currentLevel.o_entities[nt.o_pos] = nt;
-            nt = new Mob(1409, 4, 18, true, levelIndex); //drow
+            nt = new Mob(450, 4, 18, true, levelIndex); //drow 1409
             nt.skillList.Add(new Skill("Sword Slash", 5, 0, 0, SkillAreaKind.Ring, 1, false));
             nt.skillList.Add(new Skill("Crossbow", 3, 6));
             nt.skillList.Add(new Skill("Choking Bomb", 3, 2, 4, SkillAreaKind.Burst, 2, true));
             nt.ui.addSkills(nt);
             currentLevel.entities[nt.pos] = nt;
             currentLevel.o_entities[nt.o_pos] = nt;
-            nt = new Mob(1406, 4, 3, true, levelIndex); //baku
+            nt = new Mob(243, 4, 3, true, levelIndex); //baku 1406
             nt.skillList.Add(new Skill("Tusk Attack", 6, 1));
             nt.skillList.Add(new Skill("Trunk Slap", 2, 0, 0, SkillAreaKind.Ring, 3, true));
             Skill heal = new Skill("Rapid Healing", -5, 0);
@@ -1639,7 +1645,7 @@ namespace AgateDemo
                 UnitInfo.ShowMobInfo(hoverActor);
             else if (currentActor != null)
                 UnitInfo.ShowMobInfo(currentActor);
-            Display.FillRect(new Rectangle(0, mapDisplayHeight, mapDisplayWidth, 32), (Color.Black));
+            Display.FillRect(new Rectangle(0, mapDisplayHeight, mapDisplayWidth, wind.Height - mapDisplayHeight + 32), (Color.Black));
             DialogBrowser.Show();
             MessageBrowser.Show();
             //mandrillFont.DrawText(32.0, 32.0, "FPS: " + (int)Display.FramesPerSecond);
@@ -1676,12 +1682,12 @@ namespace AgateDemo
 
 
                 Display.RenderState.WaitForVerticalBlank = true;
-                wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", mapDisplayWidth, mapDisplayHeight + 32, false);      //(19 * tileVIncrease) + tileHeight); //((20) * 32) + (tileHIncrease * (20))
+                wind = DisplayWindow.CreateWindowed("Vicious Demo with AgateLib", mapDisplayWidth, mapDisplayHeight + 32, true);      //(19 * tileVIncrease) + tileHeight); //((20) * 32) + (tileHIncrease * (20))
                 //wind.Closed += new EventHandler((obj, e) => Quit());
-                tileset = new Surface("Resources" + "/" + "slashem-revised.png"); //System.IO.Path.DirectorySeparatorChar
+                tileset = new Surface("cleandungeon3.png"); //System.IO.Path.DirectorySeparatorChar   //"Resources" + "/" + 
 
 
-                mandrillFont = FontSurface.BitmapMonospace("Resources" + "/" + "monkey_x2.png", new Size(12, 28));
+                mandrillFont = FontSurface.BitmapMonospace("monkey_x2.png", new Size(12, 28)); //"Resources" + "/" +
                 mandrillFont.Color = Color.LightSkyBlue;
                 ScreenBrowser.Init();
                 //ScreenBrowser.currentUI.currentScreen.title = "Mobs with Jobs!";
@@ -1690,7 +1696,7 @@ namespace AgateDemo
                 //            basicUI = new SimpleUI(new Screen("Mobs with Jobs!", new List<MenuItem>() { }), mandrillFont);
                 Keyboard.KeyUp += new InputEventHandler(onKeyUp);
 
-                MessageBrowser.font = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
+                MessageBrowser.font = FontSurface.BitmapMonospace("monkey.png", new Size(6, 14)); //"Resources" + "/" + 
                 MessageBrowser.x = 100;
                 MessageBrowser.y = mapDisplayHeight + 4;
 

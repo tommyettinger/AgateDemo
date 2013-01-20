@@ -179,7 +179,7 @@ namespace AgateDemo
                     Demo.calculateAllMoves(this, i, j, 7, false, grStore, ivStore, true);
                 if (grStore.Count > 8)
                 {
-                    fixtures.Add(new Point(i, j), new Demo.Entity(1197,i,j));
+                    fixtures.Add(new Point(i, j), new Demo.Entity(1197,i,j, Color.Black));
                     safeUpCells = grStore.Keys.Where((k, e) => grStore[k] == 6).ToList();
                     safeUpCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 5));
                     safeUpCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 4));
@@ -211,7 +211,7 @@ namespace AgateDemo
                 }
                 if (grStore.Count > 8)
                 {
-                    fixtures.Add(new Point(i, j), new Demo.Entity(1198, i, j));
+                    fixtures.Add(new Point(i, j), new Demo.Entity(1198, i, j, Color.Black));
                     safeDownCells = grStore.Keys.Where((k, e) => grStore[k] == 6).ToList();
                     safeDownCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 5));
                     safeDownCells.AddRange(grStore.Keys.Where((k, e) => grStore[k] == 4));
@@ -295,7 +295,7 @@ namespace AgateDemo
 
                 map = DungeonMap.cleanUp(map, this);
                 addStairs(isBottom);
-                //            map = DungeonMap.theme(map);
+                map = DungeonMap.theme(map);
                 mapColors = DungeonMap.recolor(map);
 
                 // map = DungeonMap.geomorph;
@@ -344,8 +344,8 @@ namespace AgateDemo
             }
             static Level()
             {
-                mandrillFont = FontSurface.BitmapMonospace("Resources" + "/" + "monkey_x2.png", new Size(12, 28));
-                tileset = new Surface("Resources" + "/" + "slashem-revised.png"); //System.IO.Path.DirectorySeparatorChar
+                mandrillFont = FontSurface.BitmapMonospace("monkey_x2.png", new Size(12, 28)); //"Resources" + "/" + 
+                tileset = new Surface("cleandungeon3.png"); //System.IO.Path.DirectorySeparatorChar //"Resources" + "/" + 
             }
             public void Show()
             {
@@ -460,14 +460,12 @@ namespace AgateDemo
                             tile = entity.tile;
                             src = new Rectangle((tile % 38) * tileWidth, (tile / 38) * tileHeight, tileWidth, tileHeight);
                             Color tsc;// = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 0.5, 1.0);
-                            if (Demo.lockState && entity.friendly && requestingMove.X == entity.o_pos.X && requestingMove.Y == entity.o_pos.Y)
-                            {
-                                //tileset.Color = Color.FromHsv((Timing.TotalMilliseconds % 1800) / 5.0, 0.5, 1.0);
+                            //if (Demo.lockState && entity.friendly && requestingMove.X == entity.o_pos.X && requestingMove.Y == entity.o_pos.Y)
+                           // {
+                                tileset.Color = entity.color;
                                 tileset.Draw(src, dest);
                                 tileset.Color = Color.White;
-                            }
-                            else
-                                tileset.Draw(src, dest);
+
 
                             if (Demo.cursorX == col && Demo.cursorY == row && Demo.lockState && !Demo.lockForAnimation)
                             {
@@ -522,7 +520,7 @@ namespace AgateDemo
                                 tileset.Draw(new Rectangle((backTile % 38) * tileWidth, (backTile / 38) * tileHeight, tileWidth, tileHeight), new Rectangle(pX, pY - offset, tileWidth, tileHeight));
                                 tileset.Color = Color.White;
                             }
-                            tileset.Color = Chroma.Blend(mapColors[row, col], Color.Gray, 1.0 - visibleCells[row, col]);
+                            tileset.Color = fixture.color;// Chroma.Blend(mapColors[row, col], Color.Black, 1.0 - visibleCells[row, col]);
                             tile = fixture.tile;
                             src = new Rectangle((tile % 38) * tileWidth, (tile / 38) * tileHeight, tileWidth, tileHeight);
                             tileset.Draw(src, dest);

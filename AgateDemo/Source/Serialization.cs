@@ -24,11 +24,14 @@ namespace AgateDemo
             model.AutoAddMissingTypes = true;
             //RuntimeTypeModel mdl = new RuntimeTypeModel();
             model.Add(typeof(Point), true).Add("X", "Y");
+            //model.Add(typeof(Color), true).Add("A", "R", "G", "B", "Intensity");
+            
             model.Add(typeof(Demo.Entity), true).Add("tile", "x", "y", "pos").AddSubType(40, typeof(Demo.Mob));
             model.Add(typeof(SkillAreaKind), true);
             MetaType sk = model.Add(typeof(Skill), true).Add("minSkillDistance", "maxSkillDistance", "radius",
                 "areaKind", "damage", "hitsAllies", "name", "targetSquare");
             sk.UseConstructor = false;
+            
             MetaType mb = model.Add(typeof(Demo.Mob), true).Add("hp_internal", "maxHP", "friendly",
                 "o_pos", "name", "moveSpeed", "actionCount", "skillList", "dlevelIndex");
             mb.UseConstructor = false;

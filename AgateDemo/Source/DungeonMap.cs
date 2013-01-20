@@ -218,16 +218,16 @@ new int[,] {
         public static int[,] theme(int[,] geo)
         {
             int[,] geolocal = (int[,])geo.Clone();
-            Random rn = new Random();
+            //Random rn = new Random();
             for (int t1 = 0; t1 < geolocal.GetLength(0) / 20; t1++)
             {
                 for (int t2 = 0; t2 < geolocal.GetLength(1) / 20; t2++)
                 {
-                    if (rn.Next(3) == 0)
+                    if (true)//(rn.Next(3) == 0)
                     {
-                        int currTheme = (rn.Next(3) * 11) + (rn.Next(2) * 38);
-                        if (currTheme == 2 * 11 || currTheme == 11 + 38)
-                            break;
+                        int currTheme = 11 + 38;// currTheme = (rn.Next(3) * 11) + (rn.Next(2) * 38);
+                        //if (currTheme == 2 * 11)
+                        //    break;
                         for (int i = 0; i < 20; i++)
                         {
                             for (int j = 0; j < 20; j++)
@@ -255,7 +255,7 @@ new int[,] {
                        // int currTheme = (rn.Next(3) * 11) + (rn.Next(2) * 38);
                        // if (currTheme == 2 * 11 || currTheme == 11 + 38)
                          //   break;
-                        double hue = rn.Next(60) - 15;
+                        double hue = rn.Next(60) + 120;
                         hue = (Math.Abs(hue * 360) + hue) % 360;
                         for (int i = 0; i < 20; i++)
                         {
@@ -263,11 +263,11 @@ new int[,] {
                             {
                                 if (geo[i + (t1 * 20), j + (t2 * 20)] == gr)
                                 {
-                                    geolocal[i + (t1 * 20), j + (t2 * 20)] = Chroma.RandomBlend(Color.White, Color.FromHsv(hue, rn.NextDouble() / 2.5 + 0.2, 0.8), 0.05, 0.2);
+                                    geolocal[i + (t1 * 20), j + (t2 * 20)] = Color.FromHsv(hue, rn.NextDouble() / 2.5 + 0.2, 0.8);//Chroma.RandomBlend(Color.Gray, , 0.05, 0.2);
                                 }
                                 else if (geo[i + (t1 * 20), j + (t2 * 20)] != da)// && geo[i + (t1 * 20), j + (t2 * 20)] != 1187)
                                 {
-                                    geolocal[i + (t1 * 20), j + (t2 * 20)] = Chroma.RandomBlend(Color.White, Color.FromHsv(hue, rn.NextDouble() / 2.5 + 0.2, 0.8), 0.15, 0.3);
+                                    geolocal[i + (t1 * 20), j + (t2 * 20)] = Color.FromHsv(hue, rn.NextDouble() / 2.5 + 0.2, 0.8);//Chroma.RandomBlend(Color.Gray, , 0.15, 0.3);
                                 }
                             }
                         }
@@ -311,13 +311,13 @@ new int[,] {
                         if (left && right && !top && !bottom)
                         {
                             geolocal[i, j] = 1187;
-                            Demo.Entity fx = new Demo.Entity(1191, j, i);
+                            Demo.Entity fx = new Demo.Entity(1191, j, i, Color.SaddleBrown);
                             lvl.fixtures.Add(fx.pos, fx);
                         }
                         else if (!left && !right && top && bottom)
                         {
                             geolocal[i, j] = 1187;
-                            Demo.Entity fx = new Demo.Entity(1190, j, i);
+                            Demo.Entity fx = new Demo.Entity(1190, j, i, Color.SaddleBrown);
                             lvl.fixtures.Add(fx.pos, fx);
                         }
 

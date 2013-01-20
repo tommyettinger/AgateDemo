@@ -316,7 +316,7 @@ namespace AgateDemo
         }
         public static SimpleUI InitUI()
         {
-            FontSurface fnt = FontSurface.BitmapMonospace("Resources" + "/" + "monkey.png", new Size(6, 14));
+            FontSurface fnt = FontSurface.BitmapMonospace("monkey.png", new Size(6, 14)); //"Resources" + "/" + 
             Screen initialActionChoices = new Screen("Act!", new List<MenuItem>()),
                 attackChoices = new Screen("Attack!", new List<MenuItem>());
             MenuItem moveItem = new MenuItem("Move", null, Demo.OnKeyDown_SelectMove, Demo.HighlightMove),

@@ -125,12 +125,21 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="AgateOTK.dll" />
+    <Content Include="cleandungeon3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="LICENSE.txt" />
     <Content Include="mandrill.png" />
     <Content Include="mandrill_trimmed.bmp" />
     <Content Include="mandrill_white.png" />
     <Content Include="mandrill_white_alt.png" />
     <Content Include="mandrill_white_small.png" />
+    <Content Include="monkey.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="monkey_x2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="OpenTK.Compatibility.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -142,15 +151,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="OpenTK.GLControl.xml" />
-    <Content Include="Resources\monkey.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\monkey_x2.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\slashem-revised.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Resources\cleandungeon2.png" />
+    <Content Include="Resources\cleandungeon3.png" />
+    <Content Include="Resources\monkey.png" />
+    <Content Include="Resources\monkey_x2.png" />
+    <Content Include="Resources\slashem-revised.png" />
     <Content Include="slashem-revised-opaque.png" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
